@@ -1,0 +1,32 @@
+{
+  "name": "react-native-shiki-engine-example",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "pods": "cd ios && bundle install && RCT_NEW_ARCH_ENABLED=1 bundle exec pod install",
+    "start": "react-native start",
+    "build:android": "react-native build-android --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
+    "build:ios": "react-native build-ios --scheme ShikiEngineExample --mode Debug --extra-params \"-sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO\""
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-native": "0.76.3",
+    "react-native-shiki-engine": "workspace:^",
+    "shiki": "^1.24.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/runtime": "^7.26.0",
+    "@react-native-community/cli": "15.1.2",
+    "@react-native-community/cli-platform-android": "15.1.2",
+    "@react-native-community/cli-platform-ios": "15.1.2",
+    "@react-native/babel-preset": "0.76.3",
+    "@react-native/metro-config": "0.76.3"
+  }
+}

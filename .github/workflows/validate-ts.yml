@@ -1,0 +1,56 @@
+name: Validate TypeScript
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**/tsconfig.json'
+      - package.json
+      - yarn.lock
+  pull_request:
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**/tsconfig.json'
+      - package.json
+      - yarn.lock
+
+jobs:
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Type Check
+        run: yarn typecheck
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint

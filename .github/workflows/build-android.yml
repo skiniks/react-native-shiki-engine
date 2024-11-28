@@ -1,0 +1,74 @@
+name: Build Android
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/build-android.yml
+      - 'cpp/**'
+      - 'android/**'
+      - 'example/android/**'
+  pull_request:
+    paths:
+      - .github/workflows/build-android.yml
+      - 'cpp/**'
+      - 'android/**'
+      - 'example/android/**'
+
+jobs:
+  build_example:
+    name: Build Android Example App
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/android
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install Dependencies
+        run: |
+          cd ../..
+          yarn install --frozen-lockfile
+          cd example
+          yarn install --frozen-lockfile
+
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle-wrapper.properties') }}
+
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-cache-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-cache-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Android App
+        run: |
+          ./gradlew assembleDebug --no-daemon --stacktrace

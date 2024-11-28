@@ -1,0 +1,14 @@
+BasedOnStyle: llvm
+Standard: c++14
+IndentWidth: 2
+ColumnLimit: 100
+SortIncludes: true
+SortUsingDeclarations: true
+PointerAlignment: Left
+ReferenceAlignment: Left
+ReflowComments: true
+BreakBeforeBraces: Attach
+BreakConstructorInitializers: BeforeColon
+AllowShortFunctionsOnASingleLine: Empty
+IndentCaseLabels: true
+NamespaceIndentation: Inner

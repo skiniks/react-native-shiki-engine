@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig",
+  "compilerOptions": {
+    "paths": {
+      "react-native-shiki-engine": ["../src/index"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

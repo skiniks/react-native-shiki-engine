@@ -1,0 +1,47 @@
+name: Validate C++
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/validate-cpp.yml
+      - 'android/**'
+      - 'cpp/**'
+      - 'ios/**'
+  pull_request:
+    paths:
+      - .github/workflows/validate-cpp.yml
+      - 'android/**'
+      - 'cpp/**'
+      - 'ios/**'
+
+jobs:
+  lint:
+    name: Check clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main"
+          sudo apt-get update
+          sudo apt-get install -y clang-format-16
+
+      - name: Check CPP formatting
+        run: |
+          find cpp -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) -exec clang-format-16 -n -Werror {} \;
+
+      - name: Check iOS formatting
+        run: |
+          find ios -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.mm" \) \
+          -not -path "*/Oniguruma.xcframework/*" \
+          -exec clang-format-16 -n -Werror {} \;
+
+      - name: Check Android formatting
+        run: |
+          find android -type f \( -name "*.h" -o -name "*.cpp" \) \
+          -not -path "*/jniLibs/*" \
+          -exec clang-format-16 -n -Werror {} \;

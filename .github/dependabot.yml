@@ -1,0 +1,63 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    versioning-strategy: increase
+    groups:
+      react:
+        patterns:
+          - 'react*'
+          - '@types/react*'
+      dev-dependencies:
+        patterns:
+          - '*eslint*'
+          - '@types/*'
+          - typescript
+    ignore:
+      - dependency-name: react-native
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(dev-deps)
+
+  - package-ecosystem: npm
+    directory: /example
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      react:
+        patterns:
+          - 'react*'
+          - '@types/react*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: ci
+
+  - package-ecosystem: bundler
+    directory: /example/ios
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore(ios)
+
+  - package-ecosystem: gradle
+    directory: /example/android
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore(android)
