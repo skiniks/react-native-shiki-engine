@@ -49,5 +49,5 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
     [],
   )
 
-  return <HighlighterContext value={value}>{children}</HighlighterContext>
+  return <HighlighterContext.Provider value={value}>{children}</HighlighterContext.Provider>
 }
