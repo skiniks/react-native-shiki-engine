@@ -79,7 +79,7 @@
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
-    "react": "^19.0.0",
+    "react": "^18.3.1",
     "react-native": "^0.76.5",
     "react-native-builder-bob": "^0.35.2",
     "release-it": "^17.11.0",
