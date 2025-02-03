@@ -2827,9 +2827,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@release-it/conventional-changelog@npm:^9.0.4":
-  version: 9.0.4
-  resolution: "@release-it/conventional-changelog@npm:9.0.4"
+"@release-it/conventional-changelog@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@release-it/conventional-changelog@npm:10.0.0"
   dependencies:
     concat-stream: "npm:^2.0.0"
     conventional-changelog: "npm:^6.0.0"
@@ -2837,8 +2837,8 @@ __metadata:
     git-semver-tags: "npm:^8.0.0"
     semver: "npm:^7.6.3"
   peerDependencies:
-    release-it: ^17.0.0
-  checksum: 10/0923c84a3036f2ce44cafc7574f897aed8c4e17fbcdc088eeba09ab43134a011d6536dd6cda2a9a8a44ca95b49d5d361fd074e3dcab594116be88f81b1f043f8
+    release-it: ^18.0.0
+  checksum: 10/900cff03a745a8baa9d8e63ab545b3dcef8eef9990f62ba6985880899565a17de85cd314a4d82317dd0a61ab742076e62bf092fb1411a07964b08e6c192b6888
   languageName: node
   linkType: hard
 
@@ -10228,7 +10228,7 @@ __metadata:
     "@antfu/eslint-config": "npm:^3.12.1"
     "@eslint-react/eslint-plugin": "npm:^1.22.2"
     "@react-native-community/cli": "npm:^15.1.3"
-    "@release-it/conventional-changelog": "npm:^9.0.4"
+    "@release-it/conventional-changelog": "npm:^10.0.0"
     "@shikijs/types": "npm:^1.24.4"
     "@shikijs/vscode-textmate": "npm:^9.3.1"
     "@types/react": "npm:^19.0.2"
