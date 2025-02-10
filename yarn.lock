@@ -2877,13 +2877,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shikijs/types@npm:1.24.4, @shikijs/types@npm:^1.24.4":
+"@shikijs/types@npm:1.24.4":
   version: 1.24.4
   resolution: "@shikijs/types@npm:1.24.4"
   dependencies:
     "@shikijs/vscode-textmate": "npm:^9.3.1"
     "@types/hast": "npm:^3.0.4"
   checksum: 10/e1a62924de179b08312d170cfe521a3f4f9d806faade937bb9294b1c186104e2856d06a11493d98d47b1b20c955b3cf1e98fa71fa550e8673204e100f101fe0e
+  languageName: node
+  linkType: hard
+
+"@shikijs/types@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "@shikijs/types@npm:2.3.2"
+  dependencies:
+    "@shikijs/vscode-textmate": "npm:^10.0.1"
+    "@types/hast": "npm:^3.0.4"
+  checksum: 10/d3a93b624237b3956ca8f8e28d7d0444df4da435fee2739e942144732106bb718857a93893e4178548ae61105431e4d59670157d118d8fb67cbdc168af67b621
+  languageName: node
+  linkType: hard
+
+"@shikijs/vscode-textmate@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "@shikijs/vscode-textmate@npm:10.0.1"
+  checksum: 10/8bb005efbf472a9cac19bb5fb0bb1a2b612e128122e5a9d7b2bb2af674c29912db0e59c547ec458e5333f8f7ac7a8f054a24cb653f11dc20951e299933b416e4
   languageName: node
   linkType: hard
 
@@ -10229,7 +10246,7 @@ __metadata:
     "@eslint-react/eslint-plugin": "npm:^1.22.2"
     "@react-native-community/cli": "npm:^15.1.3"
     "@release-it/conventional-changelog": "npm:^9.0.4"
-    "@shikijs/types": "npm:^1.24.4"
+    "@shikijs/types": "npm:^2.3.2"
     "@shikijs/vscode-textmate": "npm:^9.3.1"
     "@types/react": "npm:^19.0.2"
     del-cli: "npm:^6.0.0"
