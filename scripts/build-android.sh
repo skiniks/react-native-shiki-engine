@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
-ONIGURUMA_DIR="$PROJECT_DIR/oniguruma"
+ONIGURUMA_DIR="$PROJECT_DIR/thirdparty/oniguruma"
 BUILD_DIR="$PROJECT_DIR/build-onig-android"
 ANDROID_DIR="$PROJECT_DIR/android"
 
