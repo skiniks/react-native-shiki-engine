@@ -1,4 +1,5 @@
 #import "ShikiStyleManager.h"
+#include "../../cpp/highlighter/cache/StyleCache.h"
 #include "../../cpp/highlighter/error/HighlightError.h"
 #include "../../cpp/highlighter/grammar/Grammar.h"
 #include "../../cpp/highlighter/text/HighlightedText.h"
@@ -13,7 +14,6 @@ NSString* const ShikiThemeDidChangeNotification = @"ShikiThemeDidChange";
 NSString* const ShikiErrorDomain = @"com.shiki.highlighter";
 
 @interface ShikiStyleManager ()
-@property(nonatomic, strong) NSCache<NSString*, NSAttributedString*>* cache;
 @end
 
 @implementation ShikiStyleManager {
@@ -26,11 +26,7 @@ NSString* const ShikiErrorDomain = @"com.shiki.highlighter";
   BOOL _grammarValid;
   std::shared_ptr<shiki::Grammar> _currentGrammar;
   NSUInteger _maxTokenizationLength;
-  BOOL _shouldCacheResults;
-  NSCache<NSString*, NSArray<NSDictionary*>*>* _highlightCache;
 }
-
-static const NSUInteger kMaxColorCacheSize = 1000;
 
 + (instancetype)sharedInstance {
   static ShikiStyleManager* instance = nil;
@@ -49,19 +45,10 @@ static const NSUInteger kMaxColorCacheSize = 1000;
     _totalStyleApplicationTime = 0;
     _themeValid = NO;
     _grammarValid = NO;
-
     _maxTokenizationLength = 100000; // 100KB default
-    _shouldCacheResults = NO;        // Disable caching for debugging
-    _highlightCache = [[NSCache alloc] init];
-    _highlightCache.countLimit = 0; // Disable cache
-
-    _cache = [[NSCache alloc] init];
-    _cache.countLimit = 0; // Disable cache
 
     self.defaultTextColor = [UIColor blackColor];
     self.defaultBackgroundColor = [UIColor whiteColor];
-
-    NSLog(@"[ShikiDebug] Initialized ShikiStyleManager with caching disabled");
   }
   return self;
 }
@@ -117,25 +104,34 @@ static const NSUInteger kMaxColorCacheSize = 1000;
 }
 
 - (UIColor*)colorFromHexString:(NSString*)hexString {
-  NSLog(@"[ShikiDebug] colorFromHexString called with: %@", hexString);
-
-  if (!hexString || ![hexString isKindOfClass:[NSString class]]) {
-    NSLog(@"[ShikiDebug] Invalid hex string input");
-    return nil;
+  // Check color cache first
+  UIColor* cachedColor = _colorCache[hexString];
+  if (cachedColor) {
+    return cachedColor;
   }
 
-  // Clear color cache each time to ensure fresh colors
-  [_colorCache removeAllObjects];
+  // Parse and cache color
+  if (hexString.length > 0) {
+    unsigned int colorCode = 0;
+    NSScanner* scanner = [NSScanner scannerWithString:hexString];
+    if ([hexString hasPrefix:@"#"]) {
+      [scanner setScanLocation:1];
+    }
+    if ([scanner scanHexInt:&colorCode]) {
+      UIColor* color = [UIColor colorWithRed:((colorCode & 0xFF0000) >> 16) / 255.0
+                                      green:((colorCode & 0x00FF00) >> 8) / 255.0
+                                       blue:(colorCode & 0x0000FF) / 255.0
+                                      alpha:1.0];
 
-  ThemeColor themeColor = ThemeColor::fromHex(std::string([hexString UTF8String]));
-  if (themeColor.getHexColor().empty()) {
-    NSLog(@"[ShikiDebug] Invalid color conversion for hex: %@", hexString);
-    return nil;
+      // Cache the color
+      if (_colorCache.count >= 1000) {
+        [_colorCache removeAllObjects];
+      }
+      _colorCache[hexString] = color;
+      return color;
+    }
   }
-
-  UIColor* color = themeColor.toUIColor();
-  NSLog(@"[ShikiDebug] Converted %@ to UIColor: %@", hexString, color);
-  return color;
+  return nil;
 }
 
 - (void)clearStyleCache {
@@ -144,34 +140,19 @@ static const NSUInteger kMaxColorCacheSize = 1000;
 }
 
 - (UIFont*)getFontWithStyle:(const shiki::ThemeStyle&)style baseFont:(UIFont*)baseFont {
-  if (!baseFont) {
-    NSLog(@"[ShikiDebug] No base font provided");
-    return nil;
-  }
-
-  NSLog(@"[ShikiDebug] Processing font style - Bold: %d, Italic: %d", style.bold, style.italic);
   UIFontDescriptor* descriptor = baseFont.fontDescriptor;
-  UIFontDescriptorSymbolicTraits traits = descriptor.symbolicTraits;
+  NSMutableDictionary* traits = [NSMutableDictionary dictionaryWithDictionary:descriptor.fontAttributes];
 
   if (style.bold) {
-    NSLog(@"[ShikiDebug] Adding bold trait");
-    traits |= UIFontDescriptorTraitBold;
+    traits[UIFontDescriptorTraitsAttribute] = @{UIFontWeightTrait: @(UIFontWeightBold)};
   }
+
   if (style.italic) {
-    NSLog(@"[ShikiDebug] Adding italic trait");
-    traits |= UIFontDescriptorTraitItalic;
+    traits[UIFontDescriptorTraitsAttribute] = @{UIFontSlantTrait: @(1.0)};
   }
 
-  UIFontDescriptor* newDescriptor = [descriptor fontDescriptorWithSymbolicTraits:traits];
-  UIFont* newFont = [UIFont fontWithDescriptor:newDescriptor size:baseFont.pointSize];
-
-  if (!newFont) {
-    NSLog(@"[ShikiDebug] Failed to create font with traits - falling back to base font");
-  } else {
-    NSLog(@"[ShikiDebug] Successfully created styled font");
-  }
-
-  return newFont ?: baseFont;
+  UIFontDescriptor* newDescriptor = [UIFontDescriptor fontDescriptorWithFontAttributes:traits];
+  return [UIFont fontWithDescriptor:newDescriptor size:baseFont.pointSize];
 }
 
 // Helper method to convert HighlightError to NSError
@@ -181,8 +162,8 @@ static const NSUInteger kMaxColorCacheSize = 1000;
     ShikiErrorCode code = static_cast<ShikiErrorCode>(highlightError.code());
 
     *error = [NSError errorWithDomain:ShikiErrorDomain
-                                 code:code
-                             userInfo:@{NSLocalizedDescriptionKey : message}];
+                                code:code
+                            userInfo:@{NSLocalizedDescriptionKey : message}];
   }
 }
 
@@ -192,8 +173,8 @@ static const NSUInteger kMaxColorCacheSize = 1000;
   if (!newTheme) {
     if (error) {
       *error = [NSError errorWithDomain:ShikiErrorDomain
-                                   code:ShikiErrorCodeInvalidTheme
-                               userInfo:@{NSLocalizedDescriptionKey : @"Failed to parse theme"}];
+                                  code:ShikiErrorCodeInvalidTheme
+                              userInfo:@{NSLocalizedDescriptionKey : @"Failed to parse theme"}];
     }
     return NO;
   }
@@ -209,8 +190,8 @@ static const NSUInteger kMaxColorCacheSize = 1000;
   if (!content) {
     if (error) {
       *error = [NSError errorWithDomain:ShikiErrorDomain
-                                   code:ShikiErrorCodeInvalidInput
-                               userInfo:@{NSLocalizedDescriptionKey : @"Grammar content is nil"}];
+                                  code:ShikiErrorCodeInvalidInput
+                              userInfo:@{NSLocalizedDescriptionKey : @"Grammar content is nil"}];
     }
     return NO;
   }
@@ -249,16 +230,14 @@ static const NSUInteger kMaxColorCacheSize = 1000;
     return YES;
   } catch (const HighlightError& e) {
     if (error) {
-      *error = [NSError errorWithDomain:ShikiErrorDomain
-                                   code:static_cast<NSInteger>(e.code())
-                               userInfo:@{NSLocalizedDescriptionKey : @(e.what())}];
+      [self setError:error withHighlightError:e];
     }
     return NO;
   } catch (const std::exception& e) {
     if (error) {
       *error = [NSError errorWithDomain:ShikiErrorDomain
-                                   code:ShikiErrorCodeInvalidGrammar
-                               userInfo:@{NSLocalizedDescriptionKey : @(e.what())}];
+                                  code:ShikiErrorCodeInvalidGrammar
+                              userInfo:@{NSLocalizedDescriptionKey : @(e.what())}];
     }
     return NO;
   }
@@ -324,25 +303,13 @@ static const NSUInteger kMaxColorCacheSize = 1000;
 
 - (BOOL)highlightText:(NSString*)text
     toAttributedString:(NSMutableAttributedString*)attributedString
-                 range:(NSRange)range
-              baseFont:(UIFont*)baseFont
-                 error:(NSError**)error {
-
-  if (!text || !attributedString || !baseFont) {
-    if (error) {
-      *error = [NSError errorWithDomain:ShikiErrorDomain
-                                   code:ShikiErrorCodeInvalidInput
-                               userInfo:@{NSLocalizedDescriptionKey : @"Invalid input parameters"}];
-    }
-    return NO;
-  }
-
+                error:(NSError**)error {
   // Check if we have valid grammar and theme
   if (!_grammarValid || !_currentGrammar) {
     if (error) {
       *error = [NSError errorWithDomain:ShikiErrorDomain
-                                   code:ShikiErrorCodeInvalidGrammar
-                               userInfo:@{NSLocalizedDescriptionKey : @"No valid grammar set"}];
+                                  code:ShikiErrorCodeInvalidGrammar
+                              userInfo:@{NSLocalizedDescriptionKey : @"No valid grammar set"}];
     }
     return NO;
   }
@@ -350,79 +317,45 @@ static const NSUInteger kMaxColorCacheSize = 1000;
   // Check text length
   if (text.length > _maxTokenizationLength) {
     if (error) {
-      *error =
-          [NSError errorWithDomain:ShikiErrorDomain
-                              code:ShikiErrorCodeInputTooLarge
-                          userInfo:@{NSLocalizedDescriptionKey : @"Text too large to tokenize"}];
+      *error = [NSError errorWithDomain:ShikiErrorDomain
+                                  code:ShikiErrorCodeInputTooLarge
+                              userInfo:@{NSLocalizedDescriptionKey : @"Text too large to tokenize"}];
     }
     return NO;
   }
 
-  // Check cache if enabled
-  NSArray<NSDictionary*>* cachedTokens = nil;
-  if (_shouldCacheResults) {
-    cachedTokens = [_highlightCache objectForKey:text];
-  }
-
   try {
-    std::vector<Token> tokens;
+    std::string cppText = std::string(text.UTF8String);
+    auto& tokenizer = ShikiTokenizer::getInstance();
+    auto tokens = tokenizer.tokenize(cppText);
 
-    if (!cachedTokens) {
-      // Tokenize the text
-      std::string cppText([text UTF8String]);
-      tokens = ShikiTokenizer::getInstance().tokenize(cppText);
-
-      // Convert tokens to cached format if caching is enabled
-      if (_shouldCacheResults) {
-        NSMutableArray* tokenCache = [NSMutableArray new];
-        for (const auto& token : tokens) {
-          [tokenCache addObject:@{
-            @"start" : @(token.start),
-            @"length" : @(token.length),
-            @"scope" : @(token.getCombinedScope().c_str())
-          }];
-        }
-        [_highlightCache setObject:tokenCache forKey:text];
-      }
-    } else {
-      // Convert cached tokens back to C++ format
-      tokens.reserve(cachedTokens.count);
-      for (NSDictionary* token in cachedTokens) {
-        Token range([token[@"start"] unsignedIntegerValue],
-                    [token[@"length"] unsignedIntegerValue]);
-        range.addScope(std::string([token[@"scope"] UTF8String]));
-        tokens.push_back(range);
-      }
-    }
-
-    // Apply highlighting with token-specific styles
     for (const auto& token : tokens) {
-      NSRange tokenRange = NSMakeRange(token.start, token.length);
-      if (NSIntersectionRange(tokenRange, range).length > 0) {
-        // Get theme style for specific token scope
-        ThemeStyle tokenStyle;
-        if (self.currentTheme) {
-          // Use Theme's scope-based style resolution
-          tokenStyle = ShikiTokenizer::getInstance().resolveStyle(token.getCombinedScope());
-        } else {
-          // Fallback to base theme if no current theme
-          tokenStyle = *[self getCurrentTheme];
-        }
+      auto& styleCache = StyleCache::getInstance();
+      auto cachedStyle = styleCache.getCachedStyle(token.getCombinedScope());
+      ThemeStyle style;
 
-        // Apply the resolved style
-        [self applyStyle:tokenStyle toAttributedString:attributedString range:tokenRange];
+      if (cachedStyle) {
+        style = *cachedStyle;
+      } else {
+        style = tokenizer.resolveStyle(token.getCombinedScope());
+        styleCache.cacheStyle(token.getCombinedScope(), style);
       }
+
+      NSRange range = NSMakeRange(token.start, token.length);
+      [self applyStyle:style toAttributedString:attributedString range:range];
     }
 
     return YES;
   } catch (const HighlightError& e) {
-    [self setError:error withHighlightError:e];
+    if (error) {
+      [self setError:error withHighlightError:e];
+    }
     return NO;
   } catch (const std::exception& e) {
     if (error) {
       *error = [NSError errorWithDomain:ShikiErrorDomain
-                                   code:ShikiErrorCodeTokenizationFailed
-                               userInfo:@{NSLocalizedDescriptionKey : @(e.what())}];
+                                  code:ShikiErrorCodeNone
+                              userInfo:@{NSLocalizedDescriptionKey : @(e.what())}];
     }
     return NO;
   }
@@ -520,17 +453,6 @@ static const NSUInteger kMaxColorCacheSize = 1000;
 
 + (instancetype)sharedManager {
   return [self sharedInstance];
-}
-
-- (BOOL)highlightText:(NSString*)text
-    toAttributedString:(NSMutableAttributedString*)attributedString
-              baseFont:(UIFont*)baseFont
-                 error:(NSError**)error {
-  return [self highlightText:text
-          toAttributedString:attributedString
-                       range:NSMakeRange(0, [text length])
-                    baseFont:baseFont
-                       error:error];
 }
 
 @end

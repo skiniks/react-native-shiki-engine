@@ -1,11 +1,16 @@
 #pragma once
 #include "../core/Constants.h"
 #include "../utils/ScopedResource.h"
+#include "MemoryTracker.h"
 #include <atomic>
 #include <functional>
 #include <mutex>
 #include <string>
 #include <vector>
+
+#ifdef __APPLE__
+#include <dispatch/dispatch.h>
+#endif
 
 namespace shiki {
 
@@ -23,7 +28,16 @@ public:
     return instance;
   }
 
-  // Memory pressure handling
+  ~MemoryManager();
+
+  // Platform memory pressure handling
+  void initializePlatformSignals();
+
+#ifdef __ANDROID__
+  static void onTrimMemory(JNIEnv* env, jobject obj, jint level);
+#endif
+
+  // Memory pressure callbacks
   void setHighPressureCallback(std::function<void()> callback) {
     highPressureCallback_ = std::move(callback);
   }
@@ -32,18 +46,24 @@ public:
     criticalPressureCallback_ = std::move(callback);
   }
 
-  // Memory tracking
-  void trackAllocation(size_t size) {
+  // Enhanced memory tracking
+  void trackAllocation(size_t size, const std::string& category = "general") {
     currentUsage_ += size;
+    MemoryTracker::getInstance().trackAllocation(size, category);
     checkMemoryPressure();
   }
 
-  void trackDeallocation(size_t size) {
+  void trackDeallocation(size_t size, const std::string& category = "general") {
     currentUsage_ -= size;
+    MemoryTracker::getInstance().trackDeallocation(size, category);
   }
 
   size_t getCurrentUsage() const {
     return currentUsage_;
+  }
+
+  MemoryMetrics getMemoryMetrics() const {
+    return MemoryTracker::getInstance().getMetrics();
   }
 
   // Resource cleanup
@@ -54,7 +74,7 @@ public:
 
   void cleanup(bool force = false) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (force || currentUsage_ > LOW_MEMORY_THRESHOLD) {
+    if (force || MemoryTracker::getInstance().isUnderPressure()) {
       for (const auto& handler : cleanupHandlers_) {
         handler();
       }
@@ -73,7 +93,13 @@ public:
   }
 
 private:
-  MemoryManager() = default;
+  MemoryManager() {
+    initializePlatformSignals();
+  }
+
+  // Prevent copying
+  MemoryManager(const MemoryManager&) = delete;
+  MemoryManager& operator=(const MemoryManager&) = delete;
 
   std::atomic<size_t> currentUsage_{0};
   std::vector<std::function<void()>> cleanupHandlers_;
@@ -81,6 +107,10 @@ private:
 
   std::function<void()> highPressureCallback_;
   std::function<void()> criticalPressureCallback_;
+
+#ifdef __APPLE__
+  dispatch_source_t memoryPressureSource_{nullptr};
+#endif
 
   float getMemoryUsage();
   void checkMemoryPressure();

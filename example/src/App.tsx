@@ -136,12 +136,7 @@ function ShikiDemo() {
     }
 
     initializeApp()
-
-    return () => {
-      highlighter.dispose()
-    }
-  }, [highlighter])
-
+  }, [])
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>

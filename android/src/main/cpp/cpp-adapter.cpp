@@ -1,4 +1,4 @@
-#include "onig_regex.h"
+#include "../../../cpp/engine/OnigurumaRegex.h"
 #include <android/log.h>
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -30,7 +30,7 @@ extern "C" JNIEXPORT jdouble JNICALL Java_com_shikiengine_ShikiEngineModule_crea
       env->DeleteLocalRef(str);
     }
 
-    OnigContext* context =
+    OnigurumaContext* context =
         create_scanner(patternPtrs.data(), length, static_cast<size_t>(maxCacheSize));
     if (!context) {
       LOGE("Failed to create scanner");
@@ -50,14 +50,14 @@ extern "C" JNIEXPORT jobject JNICALL Java_com_shikiengine_ShikiEngineModule_find
     JNIEnv* env, jobject thiz, jdouble scannerId, jstring text, jdouble startPosition) {
   try {
     uint64_t ptr = static_cast<uint64_t>(scannerId);
-    OnigContext* context = reinterpret_cast<OnigContext*>(ptr);
+    OnigurumaContext* context = reinterpret_cast<OnigurumaContext*>(ptr);
     if (!context) {
       LOGE("Invalid scanner ID");
       return nullptr;
     }
 
     const char* textChars = env->GetStringUTFChars(text, nullptr);
-    OnigResult* result = find_next_match(context, textChars, static_cast<int>(startPosition));
+    OnigurumaResult* result = find_next_match(context, textChars, static_cast<int>(startPosition));
     env->ReleaseStringUTFChars(text, textChars);
 
     if (!result) {
@@ -110,7 +110,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_shikiengine_ShikiEngineModule_destroy
     JNIEnv* env, jobject thiz, jdouble scannerId) {
   try {
     uint64_t ptr = static_cast<uint64_t>(scannerId);
-    OnigContext* context = reinterpret_cast<OnigContext*>(ptr);
+    OnigurumaContext* context = reinterpret_cast<OnigurumaContext*>(ptr);
     if (context) {
       free_scanner(context);
     }

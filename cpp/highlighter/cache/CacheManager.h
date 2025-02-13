@@ -1,6 +1,7 @@
 #pragma once
 #include "../core/CacheEntry.h"
 #include "../core/Constants.h"
+#include "Cache.h"
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -14,25 +15,48 @@ public:
     return instance;
   }
 
-  void add(const std::string& key, CacheEntry entry);
-  std::optional<CacheEntry> get(const std::string& key);
-  void clear();
+  void add(const std::string& key, CacheEntry entry) {
+    size_t entrySize = entry.getMemoryUsage();
+
+    // Determine priority based on hit count and language
+    Cache<std::string, CacheEntry>::Priority priority;
+    if (entry.language == "javascript" || entry.language == "typescript" ||
+        entry.language == "jsx" || entry.language == "tsx") {
+      priority = Cache<std::string, CacheEntry>::Priority::HIGH;
+    } else {
+      priority = entry.hitCount > 5
+          ? Cache<std::string, CacheEntry>::Priority::HIGH
+          : Cache<std::string, CacheEntry>::Priority::NORMAL;
+    }
+
+    cache_.add(key, std::move(entry), entrySize, priority);
+  }
+
+  std::optional<CacheEntry> get(const std::string& key) {
+    return cache_.get(key);
+  }
+
+  void clear() {
+    cache_.clear();
+  }
 
   size_t getCurrentSize() const {
-    return currentSize_;
+    return cache_.memoryUsage();
   }
+
   size_t getEntryCount() const {
     return cache_.size();
   }
 
+  Cache<std::string, CacheEntry>::CacheMetrics getMetrics() const {
+    return cache_.getMetrics();
+  }
+
 private:
-  CacheManager() = default;
+  CacheManager()
+    : cache_(cache::SIZE_LIMIT, cache::MAX_ENTRIES) {}
 
-  std::unordered_map<std::string, CacheEntry> cache_;
-  size_t currentSize_{0};
-
-  void evictLeastUsed();
-  void evictUntilFits(size_t requiredSize);
+  Cache<std::string, CacheEntry> cache_;
 };
 
 } // namespace shiki

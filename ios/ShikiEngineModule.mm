@@ -1,5 +1,5 @@
 #import "ShikiEngineModule.h"
-#import "../cpp/onig_regex.h"
+#import "../cpp/engine/OnigurumaRegex.h"
 #import <RNShikiEngine/RNShikiEngine.h>
 #import <React/RCTBridge.h>
 
@@ -8,7 +8,7 @@ using namespace facebook::react;
 #endif
 
 @implementation RCTShikiEngineModule {
-  std::unordered_map<double, OnigContext*> scanners_;
+  std::unordered_map<double, OnigurumaContext*> scanners_;
   double nextScannerId_;
 }
 
@@ -54,7 +54,7 @@ RCT_EXPORT_METHOD(createScanner : (NSArray*)patterns maxCacheSize : (double)
       patternPtrs.push_back(patternStrings.back().c_str());
     }
 
-    OnigContext* context = create_scanner(patternPtrs.data(), static_cast<int>(patternPtrs.size()),
+    OnigurumaContext* context = create_scanner(patternPtrs.data(), static_cast<int>(patternPtrs.size()),
                                           static_cast<size_t>(maxCacheSize));
 
     if (!context) {
@@ -81,7 +81,7 @@ RCT_EXPORT_METHOD(findNextMatchSync : (double)scannerId text : (NSString*)
     }
 
     std::string textStr = std::string([text UTF8String]);
-    OnigResult* result =
+    OnigurumaResult* result =
         find_next_match(it->second, textStr.c_str(), static_cast<int>(startPosition));
 
     if (!result) {
