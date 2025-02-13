@@ -1,70 +1,41 @@
-import type { PatternScanner, RegexEngine } from '@shikijs/types'
-import type { IOnigMatch, OnigString } from '@shikijs/vscode-textmate'
+import type { Match } from './NativeShikiEngine'
 import { TurboModuleRegistry } from 'react-native'
-import ShikiEngine from '../NativeShikiEngine'
-import { convertToOnigMatch } from './utils'
+import NativeShikiEngine from './NativeShikiEngine'
 
-export function createNativeEngine(options: { maxCacheSize?: number } = {}): RegexEngine {
-  const { maxCacheSize = 1000 } = options
+export class OnigScanner {
+  private scannerId: number | null = null
 
-  if (!isNativeEngineAvailable()) {
-    throw new Error('Native engine not available')
+  constructor(private patterns: string[], private maxCacheSize: number = 1000) {}
+
+  async initialize(): Promise<void> {
+    if (this.scannerId !== null)
+      return
+
+    this.scannerId = await NativeShikiEngine.createScanner(this.patterns, this.maxCacheSize)
   }
 
-  return {
-    createScanner(patterns: string[]): PatternScanner {
-      if (!Array.isArray(patterns) || patterns.some(p => typeof p !== 'string')) {
-        throw new TypeError('Patterns must be an array of strings')
-      }
+  async findNextMatch(text: string, startPosition: number): Promise<Match | null> {
+    if (this.scannerId === null)
+      throw new Error('Scanner not initialized')
 
-      const scannerId = ShikiEngine.createScanner(patterns, maxCacheSize)
-      if (typeof scannerId !== 'number') {
-        throw new TypeError('Failed to create native scanner')
-      }
-
-      return {
-        findNextMatchSync(string: string | OnigString, startPosition: number): IOnigMatch | null {
-          if (startPosition < 0)
-            throw new RangeError('Start position must be >= 0')
-
-          const stringContent = typeof string === 'string' ? string : string.content
-          if (typeof stringContent !== 'string')
-            throw new TypeError('Invalid input string')
-
-          try {
-            const result = ShikiEngine.findNextMatchSync(scannerId, stringContent, startPosition)
-            return convertToOnigMatch(result)
-          }
-          catch (err) {
-            if (__DEV__)
-              console.error('Error in findNextMatchSync:', err)
-            throw err
-          }
-        },
-
-        dispose(): void {
-          try {
-            ShikiEngine.destroyScanner(scannerId)
-          }
-          catch (err) {
-            if (__DEV__)
-              console.error('Error disposing scanner:', err)
-          }
-        },
-      }
-    },
-
-    createString(s: string): OnigString {
-      if (typeof s !== 'string')
-        throw new TypeError('Input must be a string')
-      return { content: s }
-    },
+    return await NativeShikiEngine.findNextMatchSync(this.scannerId, text, startPosition)
   }
+
+  async dispose(): Promise<void> {
+    if (this.scannerId !== null) {
+      await NativeShikiEngine.destroyScanner(this.scannerId)
+      this.scannerId = null
+    }
+  }
+}
+
+export function createNativeEngine(patterns: string[], options: { maxCacheSize?: number } = {}): OnigScanner {
+  return new OnigScanner(patterns, options.maxCacheSize)
 }
 
 export function isNativeEngineAvailable(): boolean {
   try {
-    return TurboModuleRegistry.getEnforcing('ShikiEngine') != null
+    return TurboModuleRegistry.getEnforcing('RNShikiEngine') != null
   }
   catch {
     return false
