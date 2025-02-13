@@ -1,35 +1,51 @@
-import type { ThemedToken } from '@shikijs/core'
-import React from 'react'
-import { ScrollView, Text, View } from 'react-native'
-import { styles } from '../styles'
+import type { ViewStyle } from 'react-native'
+import type { Token } from 'react-native-shiki-engine'
+import { ScrollView, StyleSheet, Text, View } from 'react-native'
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  codeWrapper: {
+    padding: 16,
+  },
+  codeText: {
+    fontFamily: 'Menlo',
+    fontSize: 12,
+    lineHeight: 20,
+  },
+})
 
 interface TokenDisplayProps {
-  tokens: ThemedToken[][]
+  tokens: Token[]
+  code: string
+  style?: ViewStyle
 }
 
-function generateLineKey(lineIndex: number, lineContent: ThemedToken[]) {
-  const lineText = lineContent.map(token => token.content).join('')
-  return `line-${lineIndex}-${lineText}`
-}
-
-function generateTokenKey(lineIndex: number, tokenIndex: number, token: ThemedToken) {
-  return `token-${lineIndex}-${tokenIndex}-${token.offset}-${token.content}`
-}
-
-export function TokenDisplay({ tokens }: TokenDisplayProps) {
+export function TokenDisplay({ tokens, code, style }: TokenDisplayProps) {
   return (
-    <ScrollView style={styles.codeContainer}>
+    <ScrollView style={[styles.container, style]}>
       <ScrollView horizontal showsHorizontalScrollIndicator>
-        <View style={styles.codeScrollContainer}>
-          {tokens.map((line, lineIndex) => (
-            <View key={generateLineKey(lineIndex, line)} style={styles.codeLine}>
-              {line.map((token, tokenIndex) => (
-                <Text key={generateTokenKey(lineIndex, tokenIndex, token)} style={[{ color: token.color, fontStyle: token.fontStyle === 1 ? 'italic' : 'normal' }, styles.codeText]}>
-                  {token.content}
+        <View style={styles.codeWrapper}>
+          <Text style={styles.codeText}>
+            {tokens.map((token, index) => {
+              const content = code.slice(token.start, token.start + token.length)
+              return (
+                <Text
+                  key={`${index}-${token.scope}`}
+                  style={{
+                    color: token.style?.color,
+                    backgroundColor: token.style?.backgroundColor,
+                    fontWeight: token.style?.bold ? 'bold' : undefined,
+                    fontStyle: token.style?.italic ? 'italic' : undefined,
+                    textDecorationLine: token.style?.underline ? 'underline' : undefined,
+                  }}
+                >
+                  {content}
                 </Text>
-              ))}
-            </View>
-          ))}
+              )
+            })}
+          </Text>
         </View>
       </ScrollView>
     </ScrollView>

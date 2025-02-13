@@ -3,7 +3,11 @@
   "compilerOptions": {
     "paths": {
       "react-native-shiki-engine": ["../src/index"]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/shiki.d.ts"
+    ]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

@@ -1,4 +1,4 @@
-import type { ThemedToken } from '@shikijs/core'
+import type { Token } from 'react-native-shiki-engine'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, Text, View } from 'react-native'
 import { isNativeEngineAvailable } from 'react-native-shiki-engine'
@@ -101,7 +101,7 @@ fn main() {
 
 function ShikiDemo() {
   const [engineStatus, setEngineStatus] = useState('Initializing...')
-  const [tokens, setTokens] = useState<ThemedToken[][]>([])
+  const [tokens, setTokens] = useState<Token[]>([])
   const [error, setError] = useState('')
   const highlighter = useHighlighter()
 
@@ -116,7 +116,7 @@ function ShikiDemo() {
 
         await highlighter.initialize()
 
-        const tokenized = highlighter.tokenize(code, {
+        const tokenized = await highlighter.tokenize(code, {
           lang: 'rust',
           theme: 'dracula',
         })
@@ -161,7 +161,7 @@ function ShikiDemo() {
               </View>
             )
           : (
-              <TokenDisplay tokens={tokens} />
+              <TokenDisplay tokens={tokens} code={code} />
             )}
       </View>
     </SafeAreaView>

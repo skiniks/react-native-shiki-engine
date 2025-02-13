@@ -1,49 +1,51 @@
 import type { HighlighterContextType } from './context'
-import { createHighlighterCore, type HighlighterCore } from '@shikijs/core'
+import rust from '@shikijs/langs/dist/rust.mjs'
+import dracula from '@shikijs/themes/dist/dracula.mjs'
 import React from 'react'
-import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
-import rust from 'shiki/dist/langs/rust.mjs'
-import dracula from 'shiki/dist/themes/dracula.mjs'
-
+import { isNativeEngineAvailable, NativeShikiHighlighter } from 'react-native-shiki-engine'
 import { HighlighterContext } from './context'
-
-let highlighterInstance: HighlighterCore | null = null
-let initializationPromise: Promise<void> | null = null
 
 export function HighlighterProvider({ children }: { children: React.ReactNode }) {
   const value = React.useMemo<HighlighterContextType>(
     () => ({
       initialize: async () => {
-        if (!initializationPromise) {
-          initializationPromise = (async () => {
-            const available = isNativeEngineAvailable()
-            if (!available)
-              throw new Error('Native engine not available.')
+        const available = isNativeEngineAvailable()
 
-            highlighterInstance = await createHighlighterCore({
-              langs: [rust],
-              themes: [dracula],
-              engine: createNativeEngine(),
-            })
-          })()
+        if (!available)
+          throw new Error('Native engine not available.')
+
+        // Parse the grammar array and extract the first object
+        const grammarArray = Array.isArray(rust) ? rust : [rust]
+        if (grammarArray.length === 0) {
+          throw new Error('No grammar definitions found')
+        }
+        const grammarData = JSON.stringify(grammarArray[0])
+
+        try {
+          await NativeShikiHighlighter.loadLanguage('rust', grammarData)
+        }
+        catch (error) {
+          console.error('Failed to load rust grammar:', error)
+          throw error
         }
 
-        await initializationPromise
+        const themeData = JSON.stringify(dracula)
+        try {
+          await NativeShikiHighlighter.loadTheme('dracula', themeData)
+        }
+        catch (error) {
+          console.error('Failed to load dracula theme:', error)
+          throw error
+        }
       },
 
-      tokenize: (code: string, options: { lang: string, theme: string }) => {
-        if (!highlighterInstance) {
-          throw new Error('Highlighter not initialized. Call initialize() first.')
-        }
-        return highlighterInstance.codeToTokensBase(code, options)
+      tokenize: async (code: string, options: { lang: string, theme: string }) => {
+        const tokens = await NativeShikiHighlighter.highlightCode(code, options.lang, options.theme)
+        return tokens
       },
 
       dispose: () => {
-        if (highlighterInstance) {
-          highlighterInstance.dispose()
-          highlighterInstance = null
-          initializationPromise = null
-        }
+        // No explicit disposal needed for the native highlighter
       },
     }),
     [],
