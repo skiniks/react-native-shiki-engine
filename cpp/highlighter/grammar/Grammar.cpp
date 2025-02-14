@@ -31,12 +31,9 @@ void Grammar::validateInclude(const std::string& include) const {
       throw GrammarError(GrammarErrorCode::InvalidInclude,
                         "Repository reference not found: " + repoName);
     }
-  } else if (include != "$self" && include != "$base") {
-    // External grammar reference - validate format
-    if (include.find('.') == std::string::npos) {
-      throw GrammarError(GrammarErrorCode::InvalidInclude,
-                        "Invalid external grammar reference: " + include);
-    }
+  } else if (include != "$self") {
+    throw GrammarError(GrammarErrorCode::InvalidInclude,
+                      "Only repository (#) and self ($self) references are supported");
   }
 }
 
@@ -82,6 +79,64 @@ std::string Grammar::getScopeForMatch(size_t patternIndex,
   return "";
 }
 
+void Grammar::cacheResolvedInclude(const IncludeKey& key,
+                                 const std::vector<GrammarPattern>& patterns) {
+  includeCache_[key] = patterns;
+}
+
+std::vector<GrammarPattern>* Grammar::findCachedInclude(const IncludeKey& key) const {
+  auto it = includeCache_.find(key);
+  if (it != includeCache_.end()) {
+    return &it->second;
+  }
+  return nullptr;
+}
+
+void Grammar::clearIncludeCache() {
+  includeCache_.clear();
+}
+
+std::vector<GrammarPattern> Grammar::resolveRepositoryReference(const std::string& repoName) {
+  auto it = repository.find(repoName);
+  if (it == repository.end()) {
+    throw GrammarError(GrammarErrorCode::InvalidRepository,
+                      "Repository not found: " + repoName);
+  }
+  return it->second.patterns;
+}
+
+std::vector<GrammarPattern> Grammar::resolveSelfReference() {
+  return patterns;
+}
+
+std::vector<GrammarPattern> Grammar::resolveInclude(const std::string& include,
+                                                  const std::string& repositoryKey) {
+  IncludeKey key{include, repositoryKey};
+
+  // Check cache first
+  if (auto cached = findCachedInclude(key)) {
+    return *cached;
+  }
+
+  std::vector<GrammarPattern> resolvedPatterns;
+
+  // Resolve based on include type
+  if (include[0] == '#') {
+    // Repository reference
+    resolvedPatterns = resolveRepositoryReference(include.substr(1));
+  } else if (include == "$self") {
+    resolvedPatterns = resolveSelfReference();
+  } else {
+    throw GrammarError(GrammarErrorCode::InvalidInclude,
+                      "Unsupported include type: " + include);
+  }
+
+  // Cache the result
+  cacheResolvedInclude(key, resolvedPatterns);
+
+  return resolvedPatterns;
+}
+
 void Grammar::processIncludePattern(GrammarPattern& pattern, const std::string& repositoryKey) {
   try {
     if (!pattern.hasInclude()) {
@@ -93,20 +148,8 @@ void Grammar::processIncludePattern(GrammarPattern& pattern, const std::string& 
 
     includeStack_.insert(pattern.include);
 
-    if (pattern.include[0] == '#') {
-      // Repository reference
-      std::string repoName = pattern.include.substr(1);
-      auto it = repository.find(repoName);
-      if (it != repository.end()) {
-        pattern.patterns = it->second.patterns;
-      } else {
-        throw GrammarError(GrammarErrorCode::InvalidRepository,
-                          "Repository not found: " + repoName);
-      }
-    } else if (pattern.include == "$self") {
-      pattern.patterns = patterns;
-    }
-    // Note: $base and external grammar references would require additional infrastructure
+    // Resolve the include with caching
+    pattern.patterns = resolveInclude(pattern.include, repositoryKey);
 
     includeStack_.erase(pattern.include);
   } catch (const GrammarError& e) {
@@ -223,12 +266,6 @@ std::shared_ptr<Grammar> Grammar::fromJson(const std::string& content) {
     throw GrammarError(GrammarErrorCode::ValidationError,
                       "Failed to parse grammar JSON: " + std::string(e.what()));
   }
-}
-
-std::shared_ptr<Grammar> Grammar::loadByScope(const std::string& scope) {
-  // TODO: Implement grammar loading from file system or embedded resources
-  throw GrammarError(GrammarErrorCode::ValidationError,
-                    "Grammar not found for scope: " + scope);
 }
 
 bool Grammar::validateJson(const std::string& content) {

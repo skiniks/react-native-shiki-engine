@@ -856,24 +856,6 @@ bool ShikiTokenizer::findBestMatch(const std::string& code, size_t pos,
   return bestPosition >= 0;
 }
 
-std::shared_ptr<Grammar> ShikiTokenizer::loadExternalGrammar(const std::string& scope) {
-  // Check if we've already loaded this grammar
-  auto it = externalGrammars_.find(scope);
-  if (it != externalGrammars_.end()) {
-    return it->second;
-  }
-
-  // Try to load the grammar
-  // This should use your existing grammar loading mechanism
-  // For example, looking up the grammar file based on scope name
-  auto grammar = Grammar::loadByScope(scope);
-  if (grammar) {
-    externalGrammars_[scope] = grammar;
-  }
-
-  return grammar;
-}
-
 // Helper function to split a scope string into its component parts
 std::vector<std::string> splitScope(const std::string& scope) {
   std::vector<std::string> parts;

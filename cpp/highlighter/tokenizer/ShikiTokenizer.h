@@ -91,76 +91,51 @@ private:
   // Mutex specifically for pattern compilation
   std::mutex pattern_mutex_;
 
-  // Mutex for external grammar loading
-  mutable std::shared_mutex grammar_mutex_;
-
   std::shared_ptr<Grammar> grammar_;
   std::shared_ptr<Theme> theme_;
   std::vector<CompiledPattern> compiledPatterns_;
   std::unique_ptr<ConcurrencyUtil> concurrencyUtil_;
   std::unique_ptr<LineNumbers> lineNumbers_;
 
-  // Cache for external grammars
-  std::unordered_map<std::string, std::shared_ptr<Grammar>> externalGrammars_;
+  // Token cache
+  static constexpr size_t MIN_CACHE_REGION_SIZE = 1024;  // 1KB minimum for caching
+  static constexpr size_t MAX_TOKEN_CACHE_ENTRIES = 100;
+  mutable std::mutex tokenCacheMutex_;
+  mutable std::unordered_map<std::string, TokenCacheEntry> tokenCache_;
+  mutable size_t cacheTimestamp_ = 0;
 
-  // External grammar loading
-  std::shared_ptr<Grammar> loadExternalGrammar(const std::string& scope);
-
+  // Private methods
   void clearCompiledPatterns();
   void compilePatterns();
-
-  // Pattern processing helpers
-  void processPatterns(const std::vector<GrammarPattern>& patterns, const std::string& code,
-                       std::vector<Token>& tokens, std::vector<std::string>& scopeStack);
-
-  void processCompiledPatterns(const std::string& code, std::vector<Token>& tokens,
-                               std::vector<std::string>& scopeStack,
-                               std::unordered_set<size_t>& processedPositions);
-
-  bool tryMatchPattern(regex_t* regex, const std::string& code, size_t pos, OnigRegion* region,
-                       size_t& matchStart, size_t& matchLength);
-
-  bool tryMatchBeginEndPattern(const CompiledPattern& pattern, const std::string& code, size_t pos,
-                               OnigRegion* region, size_t& matchStart, size_t& matchLength);
-
-  std::string buildFullScope(const std::vector<std::string>& scopeStack);
-
-  void processPattern(const GrammarPattern& pattern, const std::string& code,
-                      std::vector<Token>& tokens, std::vector<std::string>& scopeStack);
-
-  // Remove redundant methods that are no longer used
-  void processBeginEndPattern(const GrammarPattern& pattern, const std::string& code,
-                              std::vector<Token>& tokens) = delete;
-
   std::vector<Token> tokenizeBatch(const std::string& code, size_t start, size_t length);
   std::vector<Token> mergeTokens(std::vector<std::vector<Token>>& batchResults);
   bool isPatternBoundary(const std::string& code, size_t pos);
-  bool findBestMatch(const std::string& code, size_t pos, const std::vector<OnigRegex>& regexes,
+  bool findBestMatch(const std::string& code, size_t pos,
+                     const std::vector<OnigRegex>& regexes,
                      OnigRegion* bestRegion, size_t& bestRegexIndex);
 
-  void resolveStyles(std::vector<Token>& tokens);
-
-  // Style resolution helpers
-  void resolveStylesParallel(std::vector<Token>& tokens);
-  void resolveStylesBatch(
-      std::vector<Token>::iterator start,
-      std::vector<Token>::iterator end,
-      shiki::StyleCache& styleCache,
-      size_t& resolvedCount,
-      size_t& cacheHits);
-
-  // Token caching
-  static constexpr size_t MAX_TOKEN_CACHE_ENTRIES = 100;
-  static constexpr size_t MIN_CACHE_REGION_SIZE = 50;  // Minimum characters to cache
-  std::unordered_map<std::string, TokenCacheEntry> tokenCache_;
-  std::mutex tokenCacheMutex_;
-  size_t cacheTimestamp_{0};
-
-  // Token cache helpers
+  // Cache management
   std::string computeTextHash(const std::string& text) const;
   std::optional<std::vector<Token>> tryGetCachedTokens(const std::string& text);
   void cacheTokens(const std::string& text, const std::vector<Token>& tokens);
   void evictOldestTokenCache();
+
+  // Style resolution
+  void resolveStyles(std::vector<Token>& tokens);
+  void resolveStylesParallel(std::vector<Token>& tokens);
+  void resolveStylesBatch(std::vector<Token>::iterator start,
+                         std::vector<Token>::iterator end,
+                         StyleCache& styleCache,
+                         size_t& resolvedCount,
+                         size_t& cacheHits);
+
+  // Pattern processing
+  void processPatterns(const std::vector<GrammarPattern>& patterns,
+                      const std::string& code,
+                      std::vector<Token>& tokens,
+                      std::vector<std::string>& scopeStack);
+
+  friend class TokenCleaner;
 };
 
 } // namespace shiki

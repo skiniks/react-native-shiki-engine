@@ -245,7 +245,6 @@ public:
 
   static std::shared_ptr<Grammar> fromJson(const std::string& content);
   static bool validateJson(const std::string& content);
-  static std::shared_ptr<Grammar> loadByScope(const std::string& scope);
 
   std::string name;
   std::string scopeName;
@@ -253,8 +252,40 @@ public:
   std::unordered_map<std::string, GrammarRule> repository;
 
 private:
+  // Pattern indexing
   std::unordered_map<int, size_t> patternIndexMap_;
+
+  // Include resolution tracking
   std::unordered_set<std::string> includeStack_;
+
+  // Include resolution cache
+  struct IncludeKey {
+    std::string include;
+    std::string repository;
+
+    bool operator==(const IncludeKey& other) const {
+      return include == other.include && repository == other.repository;
+    }
+  };
+
+  struct IncludeKeyHash {
+    size_t operator()(const IncludeKey& key) const {
+      return std::hash<std::string>()(key.include) ^
+             std::hash<std::string>()(key.repository);
+    }
+  };
+
+  // Cache resolved includes to avoid redundant processing
+  mutable std::unordered_map<IncludeKey, std::vector<GrammarPattern>, IncludeKeyHash> includeCache_;
+
+  std::vector<GrammarPattern> resolveInclude(const std::string& include,
+                                           const std::string& repositoryKey);
+  std::vector<GrammarPattern> resolveRepositoryReference(const std::string& repoName);
+  std::vector<GrammarPattern> resolveSelfReference();
+
+  void cacheResolvedInclude(const IncludeKey& key, const std::vector<GrammarPattern>& patterns);
+  std::vector<GrammarPattern>* findCachedInclude(const IncludeKey& key) const;
+  void clearIncludeCache();
 
   void validatePattern(const GrammarPattern& pattern) const;
   void validateInclude(const std::string& include) const;
