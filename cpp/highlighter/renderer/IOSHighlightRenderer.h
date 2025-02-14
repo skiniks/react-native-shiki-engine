@@ -10,8 +10,9 @@
 
 namespace shiki {
 
-// Forward declarations
 class VirtualizedContentManager;
+enum class WorkPriority;
+class WorkPrioritizer;
 
 struct ViewConfig {
   std::string language;
@@ -26,7 +27,6 @@ struct ViewConfig {
   bool selectable{true};
 };
 
-// Add new struct for background work
 struct StyleComputationWork {
   std::vector<StyledToken> tokens;
   std::string text;

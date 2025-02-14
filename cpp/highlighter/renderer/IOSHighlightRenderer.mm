@@ -1,11 +1,11 @@
 #include "IOSHighlightRenderer.h"
+#include "../utils/WorkPrioritizer.h"
 #import "LineNumberView.h"
 #import "ShikiTextView.h"
 #import <UIKit/UIKit.h>
 
 namespace shiki {
 
-// Add singleton instance
 IOSHighlightRenderer& IOSHighlightRenderer::getInstance() {
   static IOSHighlightRenderer instance;
   return instance;
@@ -149,8 +149,8 @@ void IOSHighlightRenderer::processStylesInBackground(StyleComputationWork work) 
   // Capture weak reference to view
   __weak ShikiTextView* weakView = (__bridge ShikiTextView*)work.targetView;
 
-  // Move to background queue
-  dispatch_async(styleQueue_, ^{
+  // Create work item
+  auto styleTask = [this, work = std::move(work), weakView]() {
     @autoreleasepool {
       // Check if view still exists
       ShikiTextView* strongView = weakView;
@@ -178,10 +178,21 @@ void IOSHighlightRenderer::processStylesInBackground(StyleComputationWork work) 
         applyStyle(token.style, (__bridge void*)attributedString, range, baseFont);
       }
 
-      // Move to layout queue
+      // Move to layout queue for final processing
       computeLayoutInBackground(attributedString, work.targetView);
     }
-  });
+  };
+
+  // Determine priority based on whether this is an incremental update
+  WorkPriority priority = work.isIncremental ? WorkPriority::HIGH : WorkPriority::NORMAL;
+
+  // Estimate work cost based on token count and text size
+  size_t estimatedCost = work.tokens.size() * sizeof(StyledToken) + work.text.length();
+
+  // Submit to work prioritizer
+  WorkPrioritizer::getInstance().submitWork(
+    WorkItem(std::move(styleTask), priority, estimatedCost, "style_computation", work.isIncremental)
+  );
 }
 
 void IOSHighlightRenderer::computeLayoutInBackground(NSAttributedString* styledText,

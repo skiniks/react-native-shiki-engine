@@ -17,6 +17,9 @@
 
 namespace shiki {
 
+enum class WorkPriority;
+class WorkPrioritizer;
+
 // Default batch size (32KB)
 constexpr size_t DEFAULT_BATCH_SIZE = 32 * 1024;
 

@@ -1,6 +1,7 @@
 #include "ShikiTokenizer.h"
 #include "../cache/CacheManager.h"
 #include "../utils/ScopedResource.h"
+#include "../utils/WorkPrioritizer.h"
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -493,7 +494,10 @@ void ShikiTokenizer::resolveStyles(std::vector<Token>& tokens) {
 }
 
 std::vector<Token> ShikiTokenizer::tokenizeParallel(const std::string& code, size_t batchSize) {
+  std::vector<std::promise<std::vector<Token>>> promises;
   std::vector<std::future<std::vector<Token>>> futures;
+  promises.reserve((code.length() + batchSize - 1) / batchSize);
+  futures.reserve(promises.size());
 
   size_t pos = 0;
   while (pos < code.length()) {
@@ -505,12 +509,42 @@ std::vector<Token> ShikiTokenizer::tokenizeParallel(const std::string& code, siz
       }
     }
 
-    auto processFunction = [this, code, pos, length]() { return tokenizeBatch(code, pos, length); };
-    futures.push_back(concurrencyUtil_->submit(std::move(processFunction)));
+    // Create promise and future
+    promises.emplace_back();
+    futures.push_back(promises.back().get_future());
+
+    // Create work item
+    auto processFunction = [this, code, pos, length, promise = &promises.back()]() mutable {
+      try {
+        auto tokens = tokenizeBatch(code, pos, length);
+        promise->set_value(std::move(tokens));
+      } catch (...) {
+        promise->set_exception(std::current_exception());
+      }
+    };
+
+    // Determine work priority based on visibility
+    bool isVisible = pos < code.length() && pos + length <= std::min(code.length(), size_t(1000));
+    WorkPriority priority = isVisible ? WorkPriority::HIGH : WorkPriority::NORMAL;
+
+    // Estimate work cost based on text length and pattern complexity
+    size_t estimatedCost = length * sizeof(Token) * compiledPatterns_.size();
+
+    // Submit work item
+    WorkPrioritizer::getInstance().submitWork(
+      WorkItem(std::move(processFunction), priority, estimatedCost, "tokenization", isVisible)
+    );
 
     pos += length;
   }
 
+  // Process pending work while waiting for results
+  while (WorkPrioritizer::getInstance().getMetrics().pendingHigh > 0 ||
+         WorkPrioritizer::getInstance().getMetrics().pendingNormal > 0) {
+    WorkPrioritizer::getInstance().processPendingWork();
+  }
+
+  // Collect results
   std::vector<std::vector<Token>> results;
   results.reserve(futures.size());
   for (auto& future : futures) {
