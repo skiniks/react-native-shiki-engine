@@ -13,7 +13,8 @@ enum class HighlightErrorCode {
   InputTooLarge,
   ResourceLoadFailed,
   OutOfMemory,
-  InvalidInput
+  InvalidInput,
+  GrammarError
 };
 
 class HighlightError : public std::runtime_error {
@@ -29,7 +30,6 @@ private:
   HighlightErrorCode code_;
 };
 
-// Helper for throwing errors with formatted messages
 class ErrorUtils {
 public:
   static void throwError(HighlightErrorCode code, const std::string& message) {

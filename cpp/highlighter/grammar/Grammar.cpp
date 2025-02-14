@@ -1,5 +1,6 @@
 #include "Grammar.h"
 #include "GrammarParser.h"
+#include <sstream>
 
 namespace shiki {
 
@@ -14,114 +15,194 @@ Grammar::Grammar(const std::string& name) : name(name) {
   }
 }
 
-void Grammar::addPattern(const GrammarPattern& pattern) {
-  patterns.push_back(pattern);
-  if (pattern.index >= 0) {
-    patternIndexMap_[pattern.index] = patterns.size() - 1;
+void Grammar::validatePattern(const GrammarPattern& pattern) const {
+  // Validate basic pattern structure
+  if (pattern.match.empty() && pattern.begin.empty() && pattern.include.empty()) {
+    throw GrammarError(GrammarErrorCode::InvalidPattern,
+                      "Pattern must have either match, begin, or include property");
+  }
+
+  // Validate begin/end pairs
+  if (!pattern.begin.empty() && pattern.end.empty()) {
+    throw GrammarError(GrammarErrorCode::InvalidPattern,
+                      "Pattern with 'begin' must also have 'end' property");
+  }
+
+  // Validate captures
+  for (const auto& [index, name] : pattern.captures) {
+    if (name.empty()) {
+      throw GrammarError(GrammarErrorCode::InvalidPattern,
+                        "Capture name cannot be empty for index " + std::to_string(index));
+    }
   }
 }
 
-std::string Grammar::getScopeForMatch(size_t patternIndex,
-                                      const std::vector<std::string>& captures) const {
-  auto it = patternIndexMap_.find(static_cast<int>(patternIndex));
-  if (it != patternIndexMap_.end()) {
-    const auto& pattern = patterns[it->second];
-
-    // If we have captures and they match the pattern's capture groups,
-    // return the appropriate scope
-    if (!captures.empty() && patternIndex < captures.size()) {
-      return captures[patternIndex];
-    }
-
-    return pattern.name;
+void Grammar::validateInclude(const std::string& include) const {
+  if (include.empty()) {
+    throw GrammarError(GrammarErrorCode::InvalidInclude, "Include reference cannot be empty");
   }
-  return "";
+
+  if (include[0] == '#') {
+    // Repository reference
+    std::string repoName = include.substr(1);
+    if (repository.find(repoName) == repository.end()) {
+      throw GrammarError(GrammarErrorCode::InvalidInclude,
+                        "Repository reference not found: " + repoName);
+    }
+  } else if (include != "$self" && include != "$base") {
+    // External grammar reference - validate format
+    if (include.find('.') == std::string::npos) {
+      throw GrammarError(GrammarErrorCode::InvalidInclude,
+                        "Invalid external grammar reference: " + include);
+    }
+  }
+}
+
+void Grammar::checkCircularDependency(const std::string& include) {
+  if (includeStack_.find(include) != includeStack_.end()) {
+    std::stringstream ss;
+    ss << "Circular dependency detected in include chain: ";
+    for (const auto& inc : includeStack_) {
+      ss << inc << " -> ";
+    }
+    ss << include;
+    throw GrammarError(GrammarErrorCode::CircularInclude, ss.str());
+  }
+}
+
+void Grammar::addPattern(const GrammarPattern& pattern) {
+  try {
+    validatePattern(pattern);
+    patterns.push_back(pattern);
+    if (pattern.index >= 0) {
+      patternIndexMap_[pattern.index] = patterns.size() - 1;
+    }
+  } catch (const GrammarError& e) {
+    throw GrammarError(e.getGrammarCode(),
+                      "Failed to add pattern '" + pattern.name + "': " + e.what());
+  }
 }
 
 void Grammar::processIncludePattern(GrammarPattern& pattern, const std::string& repositoryKey) {
-  // Handle different types of includes:
-  // #<scope> - repository reference
-  // $self - self reference
-  // $base - base grammar reference
-  // source.xxx - external grammar reference
-
-  if (pattern.include[0] == '#') {
-    // Repository reference - look up in current grammar's repository
-    std::string repoName = pattern.include.substr(1);
-    auto it = repository.find(repoName);
-    if (it != repository.end()) {
-      pattern.patterns = it->second.patterns;
+  try {
+    if (!pattern.hasInclude()) {
+      return;
     }
-  } else if (pattern.include == "$self") {
-    // Self reference - use all patterns from current grammar
-    pattern.patterns = patterns;
+
+    validateInclude(pattern.include);
+    checkCircularDependency(pattern.include);
+
+    includeStack_.insert(pattern.include);
+
+    if (pattern.include[0] == '#') {
+      // Repository reference
+      std::string repoName = pattern.include.substr(1);
+      auto it = repository.find(repoName);
+      if (it != repository.end()) {
+        pattern.patterns = it->second.patterns;
+      } else {
+        throw GrammarError(GrammarErrorCode::InvalidRepository,
+                          "Repository not found: " + repoName);
+      }
+    } else if (pattern.include == "$self") {
+      pattern.patterns = patterns;
+    }
+    // Note: $base and external grammar references would require additional infrastructure
+
+    includeStack_.erase(pattern.include);
+  } catch (const GrammarError& e) {
+    throw GrammarError(e.getGrammarCode(),
+                      "Failed to process include '" + pattern.include + "': " + e.what());
   }
-  // Note: $base and external grammar references would require additional infrastructure
 }
 
 std::vector<GrammarPattern> Grammar::processPatterns(const rapidjson::Value& patternsJson,
-                                                     const std::string& repositoryKey) {
+                                                   const std::string& repositoryKey) {
   std::vector<GrammarPattern> result;
 
   if (!patternsJson.IsArray()) {
-    return result;
+    throw GrammarError(GrammarErrorCode::InvalidPattern, "Patterns must be an array");
   }
 
-  for (const auto& pattern : patternsJson.GetArray()) {
-    GrammarPattern p;
+  try {
+    for (const auto& pattern : patternsJson.GetArray()) {
+      GrammarPattern p;
 
-    // Handle includes
-    if (pattern.HasMember("include")) {
-      p.include = pattern["include"].GetString();
-      processIncludePattern(p, repositoryKey);
-      result.push_back(std::move(p));
-      continue;
-    }
-
-    // Basic pattern properties
-    if (pattern.HasMember("match")) {
-      p.match = pattern["match"].GetString();
-    }
-    if (pattern.HasMember("name")) {
-      p.name = pattern["name"].GetString();
-    }
-    if (pattern.HasMember("begin")) {
-      p.begin = pattern["begin"].GetString();
-    }
-    if (pattern.HasMember("end")) {
-      p.end = pattern["end"].GetString();
-    }
-
-    // Process captures
-    auto processCaptureObject =
-        [](const rapidjson::Value& obj) -> std::unordered_map<int, std::string> {
-      std::unordered_map<int, std::string> captures;
-      if (obj.IsObject()) {
-        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-          if (it->value.HasMember("name")) {
-            captures[std::stoi(it->name.GetString())] = it->value["name"].GetString();
-          }
+      // Handle includes
+      if (pattern.HasMember("include")) {
+        if (!pattern["include"].IsString()) {
+          throw GrammarError(GrammarErrorCode::InvalidInclude, "Include must be a string");
         }
+        p.include = pattern["include"].GetString();
+        processIncludePattern(p, repositoryKey);
+        result.push_back(std::move(p));
+        continue;
       }
-      return captures;
-    };
 
-    if (pattern.HasMember("captures")) {
-      p.captures = processCaptureObject(pattern["captures"]);
-    }
-    if (pattern.HasMember("beginCaptures")) {
-      p.beginCaptures = processCaptureObject(pattern["beginCaptures"]);
-    }
-    if (pattern.HasMember("endCaptures")) {
-      p.endCaptures = processCaptureObject(pattern["endCaptures"]);
-    }
+      // Basic pattern properties
+      if (pattern.HasMember("match")) {
+        if (!pattern["match"].IsString()) {
+          throw GrammarError(GrammarErrorCode::InvalidPattern, "Match must be a string");
+        }
+        p.match = pattern["match"].GetString();
+      }
+      if (pattern.HasMember("name")) {
+        if (!pattern["name"].IsString()) {
+          throw GrammarError(GrammarErrorCode::InvalidPattern, "Name must be a string");
+        }
+        p.name = pattern["name"].GetString();
+      }
+      if (pattern.HasMember("begin")) {
+        if (!pattern["begin"].IsString()) {
+          throw GrammarError(GrammarErrorCode::InvalidPattern, "Begin must be a string");
+        }
+        p.begin = pattern["begin"].GetString();
+      }
+      if (pattern.HasMember("end")) {
+        if (!pattern["end"].IsString()) {
+          throw GrammarError(GrammarErrorCode::InvalidPattern, "End must be a string");
+        }
+        p.end = pattern["end"].GetString();
+      }
 
-    // Process nested patterns
-    if (pattern.HasMember("patterns")) {
-      p.patterns = processPatterns(pattern["patterns"], repositoryKey);
-    }
+      // Process captures
+      auto processCaptureObject =
+          [](const rapidjson::Value& obj) -> std::unordered_map<int, std::string> {
+        std::unordered_map<int, std::string> captures;
+        if (!obj.IsObject()) {
+          throw GrammarError(GrammarErrorCode::InvalidPattern, "Captures must be an object");
+        }
+        for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
+          if (!it->value.HasMember("name") || !it->value["name"].IsString()) {
+            throw GrammarError(GrammarErrorCode::InvalidPattern,
+                             "Capture must have a string name property");
+          }
+          captures[std::stoi(it->name.GetString())] = it->value["name"].GetString();
+        }
+        return captures;
+      };
 
-    result.push_back(std::move(p));
+      if (pattern.HasMember("captures")) {
+        p.captures = processCaptureObject(pattern["captures"]);
+      }
+      if (pattern.HasMember("beginCaptures")) {
+        p.beginCaptures = processCaptureObject(pattern["beginCaptures"]);
+      }
+      if (pattern.HasMember("endCaptures")) {
+        p.endCaptures = processCaptureObject(pattern["endCaptures"]);
+      }
+
+      // Process nested patterns
+      if (pattern.HasMember("patterns")) {
+        p.patterns = processPatterns(pattern["patterns"], repositoryKey);
+      }
+
+      validatePattern(p);
+      result.push_back(std::move(p));
+    }
+  } catch (const GrammarError& e) {
+    throw GrammarError(e.getGrammarCode(),
+                      "Error processing patterns in repository '" + repositoryKey + "': " + e.what());
   }
 
   return result;
@@ -130,15 +211,16 @@ std::vector<GrammarPattern> Grammar::processPatterns(const rapidjson::Value& pat
 std::shared_ptr<Grammar> Grammar::fromJson(const std::string& content) {
   try {
     return GrammarParser::parse(content);
-  } catch (...) {
-    return nullptr;
+  } catch (const HighlightError& e) {
+    throw GrammarError(GrammarErrorCode::ValidationError,
+                      "Failed to parse grammar JSON: " + std::string(e.what()));
   }
 }
 
 std::shared_ptr<Grammar> Grammar::loadByScope(const std::string& scope) {
   // TODO: Implement grammar loading from file system or embedded resources
-  // For now, return nullptr to indicate grammar not found
-  return nullptr;
+  throw GrammarError(GrammarErrorCode::ValidationError,
+                    "Grammar not found for scope: " + scope);
 }
 
 bool Grammar::validateJson(const std::string& content) {

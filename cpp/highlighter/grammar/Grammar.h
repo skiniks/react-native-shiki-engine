@@ -4,9 +4,52 @@
 #include <rapidjson/document.h>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
+#include "../error/HighlightError.h"
 
 namespace shiki {
+
+enum class GrammarErrorCode {
+  InvalidPattern,         // Pattern is malformed or invalid
+  InvalidInclude,         // Include reference is invalid or not found
+  IncludeResolutionError, // Error while resolving an include
+  CircularInclude,        // Detected circular include dependency
+  InvalidRepository,      // Repository reference is invalid
+  ValidationError         // General pattern validation error
+};
+
+inline std::string grammarErrorToString(GrammarErrorCode code) {
+  switch (code) {
+    case GrammarErrorCode::InvalidPattern:
+      return "Invalid pattern";
+    case GrammarErrorCode::InvalidInclude:
+      return "Invalid include reference";
+    case GrammarErrorCode::IncludeResolutionError:
+      return "Include resolution error";
+    case GrammarErrorCode::CircularInclude:
+      return "Circular include dependency detected";
+    case GrammarErrorCode::InvalidRepository:
+      return "Invalid repository reference";
+    case GrammarErrorCode::ValidationError:
+      return "Pattern validation error";
+    default:
+      return "Unknown grammar error";
+  }
+}
+
+class GrammarError : public HighlightError {
+public:
+  GrammarError(GrammarErrorCode code, const std::string& details)
+      : HighlightError(HighlightErrorCode::GrammarError,
+                      grammarErrorToString(code) + ": " + details),
+        grammarCode_(code) {}
+
+  GrammarErrorCode getGrammarCode() const { return grammarCode_; }
+
+private:
+  GrammarErrorCode grammarCode_;
+};
 
 struct GrammarPattern {
   std::string name;
@@ -54,7 +97,7 @@ public:
 
   void processIncludePattern(GrammarPattern& pattern, const std::string& repository);
   std::vector<GrammarPattern> processPatterns(const rapidjson::Value& patterns,
-                                              const std::string& repository);
+                                            const std::string& repository);
 
   static std::shared_ptr<Grammar> fromJson(const std::string& content);
   static bool validateJson(const std::string& content);
@@ -67,6 +110,11 @@ public:
 
 private:
   std::unordered_map<int, size_t> patternIndexMap_;
+  std::unordered_set<std::string> includeStack_;
+
+  void validatePattern(const GrammarPattern& pattern) const;
+  void validateInclude(const std::string& include) const;
+  void checkCircularDependency(const std::string& include);
 
   friend class GrammarParser;
 };
