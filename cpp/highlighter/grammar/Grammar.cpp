@@ -16,25 +16,7 @@ Grammar::Grammar(const std::string& name) : name(name) {
 }
 
 void Grammar::validatePattern(const GrammarPattern& pattern) const {
-  // Validate basic pattern structure
-  if (pattern.match.empty() && pattern.begin.empty() && pattern.include.empty()) {
-    throw GrammarError(GrammarErrorCode::InvalidPattern,
-                      "Pattern must have either match, begin, or include property");
-  }
-
-  // Validate begin/end pairs
-  if (!pattern.begin.empty() && pattern.end.empty()) {
-    throw GrammarError(GrammarErrorCode::InvalidPattern,
-                      "Pattern with 'begin' must also have 'end' property");
-  }
-
-  // Validate captures
-  for (const auto& [index, name] : pattern.captures) {
-    if (name.empty()) {
-      throw GrammarError(GrammarErrorCode::InvalidPattern,
-                        "Capture name cannot be empty for index " + std::to_string(index));
-    }
-  }
+  GrammarPatternValidator::validatePattern(pattern);
 }
 
 void Grammar::validateInclude(const std::string& include) const {
@@ -81,6 +63,23 @@ void Grammar::addPattern(const GrammarPattern& pattern) {
     throw GrammarError(e.getGrammarCode(),
                       "Failed to add pattern '" + pattern.name + "': " + e.what());
   }
+}
+
+std::string Grammar::getScopeForMatch(size_t patternIndex,
+                                    const std::vector<std::string>& captures) const {
+  auto it = patternIndexMap_.find(static_cast<int>(patternIndex));
+  if (it != patternIndexMap_.end()) {
+    const auto& pattern = patterns[it->second];
+
+    // If we have captures and they match the pattern's capture groups,
+    // return the appropriate scope
+    if (!captures.empty() && patternIndex < captures.size()) {
+      return captures[patternIndex];
+    }
+
+    return pattern.name;
+  }
+  return "";
 }
 
 void Grammar::processIncludePattern(GrammarPattern& pattern, const std::string& repositoryKey) {
@@ -210,6 +209,15 @@ std::vector<GrammarPattern> Grammar::processPatterns(const rapidjson::Value& pat
 
 std::shared_ptr<Grammar> Grammar::fromJson(const std::string& content) {
   try {
+    rapidjson::Document doc;
+    if (doc.Parse(content.c_str()).HasParseError()) {
+      throw GrammarError(GrammarErrorCode::ValidationError,
+                        "Invalid JSON syntax in grammar definition");
+    }
+
+    // Validate the overall grammar schema
+    GrammarPatternValidator::validateGrammarSchema(doc);
+
     return GrammarParser::parse(content);
   } catch (const HighlightError& e) {
     throw GrammarError(GrammarErrorCode::ValidationError,
@@ -224,7 +232,16 @@ std::shared_ptr<Grammar> Grammar::loadByScope(const std::string& scope) {
 }
 
 bool Grammar::validateJson(const std::string& content) {
-  return GrammarParser::validateGrammarJson(content);
+  try {
+    rapidjson::Document doc;
+    if (doc.Parse(content.c_str()).HasParseError()) {
+      return false;
+    }
+    GrammarPatternValidator::validateGrammarSchema(doc);
+    return true;
+  } catch (...) {
+    return false;
+  }
 }
 
 } // namespace shiki
