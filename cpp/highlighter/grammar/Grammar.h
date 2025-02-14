@@ -8,13 +8,6 @@
 
 namespace shiki {
 
-struct ScopePattern {
-  std::string name;                  // The scope name (e.g., "keyword.control")
-  std::string match;                 // The regex pattern
-  std::vector<std::string> captures; // Named capture groups
-  int index{-1};                     // Pattern index in Oniguruma scanner
-};
-
 struct GrammarPattern {
   std::string name;
   std::string match;
@@ -25,7 +18,7 @@ struct GrammarPattern {
   std::unordered_map<int, std::string> beginCaptures;
   std::unordered_map<int, std::string> endCaptures;
   std::vector<GrammarPattern> patterns;
-  int index{-1};  // Oniguruma scanner index
+  int index{-1};
 
   bool hasInclude() const {
     return !include.empty();
@@ -38,7 +31,7 @@ struct GrammarRule {
 
 class Grammar {
 public:
-  Grammar() = default; // Default constructor
+  Grammar() = default;
   explicit Grammar(const std::string& name);
   virtual ~Grammar() = default;
 
@@ -59,7 +52,6 @@ public:
     return patterns;
   }
 
-  // Add methods for pattern processing
   void processIncludePattern(GrammarPattern& pattern, const std::string& repository);
   std::vector<GrammarPattern> processPatterns(const rapidjson::Value& patterns,
                                               const std::string& repository);
@@ -74,7 +66,7 @@ public:
   std::unordered_map<std::string, GrammarRule> repository;
 
 private:
-  std::unordered_map<int, size_t> patternIndexMap_; // Maps Oniguruma index to pattern index
+  std::unordered_map<int, size_t> patternIndexMap_;
 
   friend class GrammarParser;
 };
