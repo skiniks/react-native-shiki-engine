@@ -25,6 +25,7 @@ struct GrammarPattern {
   std::unordered_map<int, std::string> beginCaptures;
   std::unordered_map<int, std::string> endCaptures;
   std::vector<GrammarPattern> patterns;
+  int index{-1};  // Oniguruma scanner index
 
   bool hasInclude() const {
     return !include.empty();
@@ -41,7 +42,7 @@ public:
   explicit Grammar(const std::string& name);
   virtual ~Grammar() = default;
 
-  void addPattern(const ScopePattern& pattern);
+  void addPattern(const GrammarPattern& pattern);
   std::string getScopeForMatch(size_t index, const std::vector<std::string>& captures) const;
 
   const std::string& getName() const {
@@ -73,11 +74,7 @@ public:
   std::unordered_map<std::string, GrammarRule> repository;
 
 private:
-  std::string name_;
-  std::vector<ScopePattern> patterns_;
-  std::unordered_map<int, size_t> patternIndexMap_; // Maps Oniguruma index to pattern
-  // Add repository support
-  std::map<std::string, std::vector<GrammarPattern>> repository_;
+  std::unordered_map<int, size_t> patternIndexMap_; // Maps Oniguruma index to pattern index
 
   friend class GrammarParser;
 };

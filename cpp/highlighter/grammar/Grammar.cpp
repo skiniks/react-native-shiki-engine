@@ -3,21 +3,21 @@
 
 namespace shiki {
 
-Grammar::Grammar(const std::string& name) : name_(name) {
+Grammar::Grammar(const std::string& name) : name(name) {
   // Initialize with default patterns if needed
   if (name == "text") {
     // Add basic text patterns
-    ScopePattern pattern;
+    GrammarPattern pattern;
     pattern.name = "text";
     pattern.match = ".*";
     addPattern(pattern);
   }
 }
 
-void Grammar::addPattern(const ScopePattern& pattern) {
-  patterns_.push_back(pattern);
+void Grammar::addPattern(const GrammarPattern& pattern) {
+  patterns.push_back(pattern);
   if (pattern.index >= 0) {
-    patternIndexMap_[pattern.index] = patterns_.size() - 1;
+    patternIndexMap_[pattern.index] = patterns.size() - 1;
   }
 }
 
@@ -25,7 +25,7 @@ std::string Grammar::getScopeForMatch(size_t patternIndex,
                                       const std::vector<std::string>& captures) const {
   auto it = patternIndexMap_.find(static_cast<int>(patternIndex));
   if (it != patternIndexMap_.end()) {
-    const auto& pattern = patterns_[it->second];
+    const auto& pattern = patterns[it->second];
 
     // If we have captures and they match the pattern's capture groups,
     // return the appropriate scope
@@ -38,7 +38,7 @@ std::string Grammar::getScopeForMatch(size_t patternIndex,
   return "";
 }
 
-void Grammar::processIncludePattern(GrammarPattern& pattern, const std::string& repository) {
+void Grammar::processIncludePattern(GrammarPattern& pattern, const std::string& repositoryKey) {
   // Handle different types of includes:
   // #<scope> - repository reference
   // $self - self reference
@@ -48,44 +48,32 @@ void Grammar::processIncludePattern(GrammarPattern& pattern, const std::string& 
   if (pattern.include[0] == '#') {
     // Repository reference - look up in current grammar's repository
     std::string repoName = pattern.include.substr(1);
-    auto it = repository_.find(repoName);
-    if (it != repository_.end()) {
-      pattern.patterns = it->second;
+    auto it = repository.find(repoName);
+    if (it != repository.end()) {
+      pattern.patterns = it->second.patterns;
     }
   } else if (pattern.include == "$self") {
     // Self reference - use all patterns from current grammar
-    for (const auto& p : patterns_) {
-      GrammarPattern converted;
-      converted.match = p.match;
-      converted.name = p.name;
-      // Convert captures from vector to map
-      for (size_t i = 0; i < p.captures.size(); i++) {
-        if (!p.captures[i].empty()) {
-          converted.captures[i] = p.captures[i];
-        }
-      }
-      pattern.patterns.push_back(converted);
-    }
+    pattern.patterns = patterns;
   }
   // Note: $base and external grammar references would require additional infrastructure
 }
 
-std::vector<GrammarPattern> Grammar::processPatterns(const rapidjson::Value& patterns,
-                                                     const std::string& repository) {
-
+std::vector<GrammarPattern> Grammar::processPatterns(const rapidjson::Value& patternsJson,
+                                                     const std::string& repositoryKey) {
   std::vector<GrammarPattern> result;
 
-  if (!patterns.IsArray()) {
+  if (!patternsJson.IsArray()) {
     return result;
   }
 
-  for (const auto& pattern : patterns.GetArray()) {
+  for (const auto& pattern : patternsJson.GetArray()) {
     GrammarPattern p;
 
     // Handle includes
     if (pattern.HasMember("include")) {
       p.include = pattern["include"].GetString();
-      processIncludePattern(p, repository);
+      processIncludePattern(p, repositoryKey);
       result.push_back(std::move(p));
       continue;
     }
@@ -130,7 +118,7 @@ std::vector<GrammarPattern> Grammar::processPatterns(const rapidjson::Value& pat
 
     // Process nested patterns
     if (pattern.HasMember("patterns")) {
-      p.patterns = processPatterns(pattern["patterns"], repository);
+      p.patterns = processPatterns(pattern["patterns"], repositoryKey);
     }
 
     result.push_back(std::move(p));
