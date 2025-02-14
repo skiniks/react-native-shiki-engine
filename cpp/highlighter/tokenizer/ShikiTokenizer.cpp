@@ -11,6 +11,8 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <mutex>
+#include <xxhash.h>
 
 namespace shiki {
 
@@ -138,10 +140,68 @@ std::vector<Token> convertRangesToTokens(const std::vector<TextRange>& ranges,
   return tokens;
 }
 
+std::string ShikiTokenizer::computeTextHash(const std::string& text) const {
+  const uint64_t hash = XXH64(text.data(), text.size(), 0);
+  return std::to_string(hash);
+}
+
+std::optional<std::vector<Token>> ShikiTokenizer::tryGetCachedTokens(const std::string& text) {
+  if (text.length() < MIN_CACHE_REGION_SIZE) {
+    return std::nullopt;
+  }
+
+  std::string hash = computeTextHash(text);
+  std::lock_guard<std::mutex> lock(tokenCacheMutex_);
+
+  auto it = tokenCache_.find(hash);
+  if (it != tokenCache_.end() && it->second.textHash == hash) {
+    it->second.lastUsed = ++cacheTimestamp_;
+    return it->second.tokens;
+  }
+
+  return std::nullopt;
+}
+
+void ShikiTokenizer::cacheTokens(const std::string& text, const std::vector<Token>& tokens) {
+  if (text.length() < MIN_CACHE_REGION_SIZE) {
+    return;
+  }
+
+  std::string hash = computeTextHash(text);
+  std::lock_guard<std::mutex> lock(tokenCacheMutex_);
+
+  // Evict if needed
+  if (tokenCache_.size() >= MAX_TOKEN_CACHE_ENTRIES) {
+    evictOldestTokenCache();
+  }
+
+  // Add to cache
+  tokenCache_.insert_or_assign(hash,
+    TokenCacheEntry(tokens, hash, ++cacheTimestamp_));
+}
+
+void ShikiTokenizer::evictOldestTokenCache() {
+  if (tokenCache_.empty()) return;
+
+  auto oldest = tokenCache_.begin();
+  for (auto it = tokenCache_.begin(); it != tokenCache_.end(); ++it) {
+    if (it->second.lastUsed < oldest->second.lastUsed) {
+      oldest = it;
+    }
+  }
+  tokenCache_.erase(oldest);
+}
+
 std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
   if (!grammar_ || !theme_) {
     std::cout << "[ERROR] Missing grammar or theme, skipping tokenization" << std::endl;
     return {};
+  }
+
+  // Try to get tokens from cache first
+  if (auto cachedTokens = tryGetCachedTokens(code)) {
+    std::cout << "[INFO] Using cached tokens" << std::endl;
+    return *cachedTokens;
   }
 
   std::vector<Token> tokens;
@@ -161,6 +221,9 @@ std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
 
   // Resolve theme styles for all tokens
   resolveStyles(tokens);
+
+  // Cache the tokens for future use
+  cacheTokens(code, tokens);
 
   // Log tokenization stats
   size_t whitespaceTokens = 0;

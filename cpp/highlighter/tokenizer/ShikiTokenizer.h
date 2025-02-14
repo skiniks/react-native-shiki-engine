@@ -10,6 +10,7 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <xxhash.h>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
@@ -49,6 +50,17 @@ struct CompiledPattern {
   std::unique_ptr<regex_t, OnigRegexDeleter> regex;
   std::unique_ptr<regex_t, OnigRegexDeleter> beginRegex;
   std::unique_ptr<regex_t, OnigRegexDeleter> endRegex;
+};
+
+// Token cache entry that stores tokens for a region of text
+struct TokenCacheEntry {
+  std::vector<Token> tokens;
+  std::string textHash;  // Hash of the text region
+  size_t lastUsed;      // Timestamp for LRU
+
+  TokenCacheEntry() = default;
+  TokenCacheEntry(std::vector<Token> t, std::string hash, size_t time)
+    : tokens(std::move(t)), textHash(std::move(hash)), lastUsed(time) {}
 };
 
 class ShikiTokenizer {
@@ -136,6 +148,19 @@ private:
       shiki::StyleCache& styleCache,
       size_t& resolvedCount,
       size_t& cacheHits);
+
+  // Token caching
+  static constexpr size_t MAX_TOKEN_CACHE_ENTRIES = 100;
+  static constexpr size_t MIN_CACHE_REGION_SIZE = 50;  // Minimum characters to cache
+  std::unordered_map<std::string, TokenCacheEntry> tokenCache_;
+  std::mutex tokenCacheMutex_;
+  size_t cacheTimestamp_{0};
+
+  // Token cache helpers
+  std::string computeTextHash(const std::string& text) const;
+  std::optional<std::vector<Token>> tryGetCachedTokens(const std::string& text);
+  void cacheTokens(const std::string& text, const std::vector<Token>& tokens);
+  void evictOldestTokenCache();
 };
 
 } // namespace shiki

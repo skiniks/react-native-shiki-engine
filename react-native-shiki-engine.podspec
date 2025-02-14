@@ -18,7 +18,8 @@ Pod::Spec.new do |s|
     "cpp/**/*.{cpp,h,mm,hpp}",
     "ios/**/*.{h,mm}",
     "cpp/highlighter/platform/ios/**/*.{h,mm}",
-    "cpp/highlighter/assets/ios/**/*.{h,mm}"
+    "cpp/highlighter/assets/ios/**/*.{h,mm}",
+    "thirdparty/xxHash/xxhash.{c,h}"
   ]
 
   s.exclude_files = [
@@ -31,6 +32,7 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = {
     'HEADER_SEARCH_PATHS' => [
       '$(PODS_TARGET_SRCROOT)/thirdparty/rapidjson/include',
+      '$(PODS_TARGET_SRCROOT)/thirdparty/xxHash',
       '$(PODS_TARGET_SRCROOT)/cpp/fabric',
       '$(PODS_TARGET_SRCROOT)/cpp',
       '$(PODS_TARGET_SRCROOT)/cpp/highlighter',
