@@ -1,7 +1,11 @@
 #pragma once
 #include "../theme/ThemeStyle.h"
+#include "../platform/PlatformMeasurement.h"
+#include "TextMetrics.h"
 #include <cstdint>
 #include <string>
+#include <memory>
+#include <vector>
 
 namespace shiki {
 
@@ -12,22 +16,52 @@ public:
   TextRange(size_t s, size_t l, const ThemeStyle& st) : start(s), length(l), style(st) {}
   virtual ~TextRange() = default;
 
-  // Make this non-abstract by providing a default implementation
-  virtual void measure() {}
-
   size_t start;
   size_t length;
-
   ThemeStyle style;
-  int fontStyle{0};
 
-  // Platform-independent size metrics
-  float width{0};
-  float height{0};
-
-  bool isValid() const {
-    return start >= 0 && length > 0;
+  virtual void measure(const std::string& text, const std::shared_ptr<PlatformMeasurement>& measurer) {
+    if (measurer) {
+      metrics_ = measurer->measureRange(text, start, length, style);
+    }
   }
+
+  bool isValid() const { return start >= 0 && length > 0; }
+
+  bool contains(size_t position) const {
+    return position >= start && position < (start + length);
+  }
+
+  bool overlaps(const TextRange& other) const {
+    return !(other.start >= (start + length) || (other.start + other.length) <= start);
+  }
+
+  bool operator==(const TextRange& other) const {
+    return start == other.start && length == other.length;
+  }
+
+  const TextMetrics& getMetrics() const { return metrics_; }
+
+  TextRange intersect(const TextRange& other) const {
+    size_t newStart = std::max(start, other.start);
+    size_t newEnd = std::min(start + length, other.start + other.length);
+    if (newStart < newEnd) {
+      return TextRange(newStart, newEnd - newStart);
+    }
+    return TextRange(0, 0);
+  }
+
+  TextRange merge(const TextRange& other) const {
+    if (!overlaps(other)) {
+      return *this;
+    }
+    size_t newStart = std::min(start, other.start);
+    size_t newEnd = std::max(start + length, other.start + other.length);
+    return TextRange(newStart, newEnd - newStart);
+  }
+
+protected:
+  TextMetrics metrics_;
 };
 
 } // namespace shiki
