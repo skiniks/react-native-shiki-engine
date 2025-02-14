@@ -4,6 +4,7 @@
 #include "../text/TokenRange.h"
 #include "../theme/Theme.h"
 #include "../utils/ConcurrencyUtil.h"
+#include "../cache/StyleCache.h"
 #include "Token.h"
 #include "oniguruma.h"
 #include <future>
@@ -126,6 +127,15 @@ private:
                      OnigRegion* bestRegion, size_t& bestRegexIndex);
 
   void resolveStyles(std::vector<Token>& tokens);
+
+  // Style resolution helpers
+  void resolveStylesParallel(std::vector<Token>& tokens);
+  void resolveStylesBatch(
+      std::vector<Token>::iterator start,
+      std::vector<Token>::iterator end,
+      shiki::StyleCache& styleCache,
+      size_t& resolvedCount,
+      size_t& cacheHits);
 };
 
 } // namespace shiki

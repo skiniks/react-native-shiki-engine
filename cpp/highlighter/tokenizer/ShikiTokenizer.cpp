@@ -461,12 +461,108 @@ void ShikiTokenizer::resolveStyles(std::vector<Token>& tokens) {
   if (!theme_)
     return;
 
+  // Use parallel resolution for large documents (>1000 tokens)
+  if (tokens.size() > 1000 && concurrencyUtil_) {
+    resolveStylesParallel(tokens);
+    return;
+  }
+
   auto& styleCache = StyleCache::getInstance();
   size_t resolvedCount = 0;
   size_t cacheHits = 0;
 
-  // First pass: Try to resolve from cache
-  for (auto& token : tokens) {
+  resolveStylesBatch(tokens.begin(), tokens.end(), styleCache, resolvedCount, cacheHits);
+
+  // Log summary of style resolution with cache metrics
+  auto metrics = styleCache.getMetrics();
+  std::cout << "[INFO] Style resolution stats:" << std::endl
+            << "  - Resolved styles: " << resolvedCount << "/" << tokens.size() << " tokens" << std::endl
+            << "  - Cache hits: " << cacheHits << " ("
+            << (tokens.size() > 0 ? (cacheHits * 100.0 / tokens.size()) : 0) << "%)" << std::endl
+            << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
+            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/"
+            << metrics.maxSize / 1024 << "KB" << std::endl;
+}
+
+void ShikiTokenizer::resolveStylesParallel(std::vector<Token>& tokens) {
+  const size_t batchSize = 250; // Process 250 tokens per batch
+  const size_t numBatches = (tokens.size() + batchSize - 1) / batchSize;
+
+  std::vector<std::promise<std::pair<size_t, size_t>>> promises(numBatches);
+  std::vector<std::future<std::pair<size_t, size_t>>> futures;
+  futures.reserve(numBatches);
+
+  auto& styleCache = StyleCache::getInstance();
+  size_t totalResolved = 0;
+  size_t totalCacheHits = 0;
+
+  // Create batches of work
+  for (size_t i = 0; i < numBatches; i++) {
+    auto start = tokens.begin() + i * batchSize;
+    auto end = (i == numBatches - 1) ? tokens.end() : start + batchSize;
+
+    futures.push_back(promises[i].get_future());
+
+    // Create work item for this batch
+    auto processFunction = [this, start, end, &styleCache, promise = &promises[i]]() mutable {
+      size_t resolvedCount = 0;
+      size_t cacheHits = 0;
+
+      try {
+        resolveStylesBatch(start, end, styleCache, resolvedCount, cacheHits);
+        promise->set_value({resolvedCount, cacheHits});
+      } catch (...) {
+        promise->set_exception(std::current_exception());
+      }
+    };
+
+    // Determine work priority based on visibility (first 1000 tokens get high priority)
+    bool isVisible = std::distance(tokens.begin(), start) < 1000;
+    WorkPriority priority = isVisible ? WorkPriority::HIGH : WorkPriority::NORMAL;
+
+    // Estimate work cost based on number of tokens and their scopes
+    size_t estimatedCost = std::distance(start, end) * sizeof(Token) * 2;
+
+    // Submit work item
+    WorkPrioritizer::getInstance().submitWork(
+      WorkItem(std::move(processFunction), priority, estimatedCost, "style_resolution", isVisible)
+    );
+  }
+
+  // Process pending work while waiting for results
+  while (WorkPrioritizer::getInstance().getMetrics().pendingHigh > 0 ||
+         WorkPrioritizer::getInstance().getMetrics().pendingNormal > 0) {
+    WorkPrioritizer::getInstance().processPendingWork();
+  }
+
+  // Collect results
+  for (auto& future : futures) {
+    auto [resolved, hits] = future.get();
+    totalResolved += resolved;
+    totalCacheHits += hits;
+  }
+
+  // Log summary of parallel style resolution with cache metrics
+  auto metrics = styleCache.getMetrics();
+  std::cout << "[INFO] Parallel style resolution stats:" << std::endl
+            << "  - Resolved styles: " << totalResolved << "/" << tokens.size() << " tokens" << std::endl
+            << "  - Cache hits: " << totalCacheHits << " ("
+            << (tokens.size() > 0 ? (totalCacheHits * 100.0 / tokens.size()) : 0) << "%)" << std::endl
+            << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
+            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/"
+            << metrics.maxSize / 1024 << "KB" << std::endl
+            << "  - Batches: " << numBatches << std::endl;
+}
+
+void ShikiTokenizer::resolveStylesBatch(
+    std::vector<Token>::iterator start,
+    std::vector<Token>::iterator end,
+    shiki::StyleCache& styleCache,
+    size_t& resolvedCount,
+    size_t& cacheHits) {
+
+  for (auto it = start; it != end; ++it) {
+    auto& token = *it;
     // Try combined scope first from cache
     std::string combinedScope = token.getCombinedScope();
     if (auto cachedStyle = styleCache.getCachedStyle(combinedScope)) {
@@ -523,16 +619,6 @@ void ShikiTokenizer::resolveStyles(std::vector<Token>& tokens) {
       token.style = bestStyle.color.empty() ? ThemeStyle{theme_->getForeground().toHex()} : bestStyle;
     }
   }
-
-  // Log summary of style resolution with cache metrics
-  auto metrics = styleCache.getMetrics();
-  std::cout << "[INFO] Style resolution stats:" << std::endl
-            << "  - Resolved styles: " << resolvedCount << "/" << tokens.size() << " tokens" << std::endl
-            << "  - Cache hits: " << cacheHits << " ("
-            << (tokens.size() > 0 ? (cacheHits * 100.0 / tokens.size()) : 0) << "%)" << std::endl
-            << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
-            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/"
-            << metrics.maxSize / 1024 << "KB" << std::endl;
 }
 
 std::vector<Token> ShikiTokenizer::tokenizeParallel(const std::string& code, size_t batchSize) {

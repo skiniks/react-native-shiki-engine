@@ -1,5 +1,6 @@
 #import "NativeHighlighter.h"
 #include "../../cpp/highlighter/assets/ios/IOSAssetLoader.h"
+#include "../../cpp/highlighter/cache/StyleCache.h"
 #include "../../cpp/highlighter/cache/SyntaxTreeCache.h"
 #include "../../cpp/highlighter/error/HighlightError.h"
 #include "../../cpp/highlighter/grammar/Grammar.h"
