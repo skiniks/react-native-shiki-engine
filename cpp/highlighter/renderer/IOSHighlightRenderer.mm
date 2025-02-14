@@ -81,7 +81,7 @@ void IOSHighlightRenderer::destroyView(void* view) {
   viewConfigs_.erase(view);
 }
 
-void IOSHighlightRenderer::updateView(void* view, const std::vector<StyledToken>& tokens,
+void IOSHighlightRenderer::updateView(void* view, const std::vector<Token>& tokens,
                                       const std::string& text) {
   if (!view)
     return;
@@ -118,7 +118,7 @@ void IOSHighlightRenderer::configureTextView(UITextView* textView, const ViewCon
 }
 
 void IOSHighlightRenderer::renderIncrementalHighlights(
-    const std::vector<NativeHighlighter::IncrementalUpdate>& updates, const std::string& text,
+    const std::vector<IncrementalUpdate>& updates, const std::string& text,
     void* nativeView) {
 
   if (!nativeView)
@@ -128,7 +128,7 @@ void IOSHighlightRenderer::renderIncrementalHighlights(
   cancelPendingWork(nativeView);
 
   // Convert updates to tokens
-  std::vector<StyledToken> allTokens;
+  std::vector<Token> allTokens;
   for (const auto& update : updates) {
     allTokens.insert(allTokens.end(), update.tokens.begin(), update.tokens.end());
   }
@@ -187,7 +187,7 @@ void IOSHighlightRenderer::processStylesInBackground(StyleComputationWork work) 
   WorkPriority priority = work.isIncremental ? WorkPriority::HIGH : WorkPriority::NORMAL;
 
   // Estimate work cost based on token count and text size
-  size_t estimatedCost = work.tokens.size() * sizeof(StyledToken) + work.text.length();
+  size_t estimatedCost = work.tokens.size() * sizeof(Token) + work.text.length();
 
   // Submit to work prioritizer
   WorkPrioritizer::getInstance().submitWork(

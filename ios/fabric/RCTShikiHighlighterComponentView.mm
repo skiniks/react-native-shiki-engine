@@ -1,7 +1,8 @@
 #import "RCTShikiHighlighterComponentView.h"
 #import "../../cpp/fabric/ShikiHighlighterComponentSpec.h"
 #import "../../cpp/highlighter/renderer/IOSHighlightRenderer.h"
-#import "../highlighter/NativeHighlighter.h"
+#import "../../cpp/highlighter/tokenizer/Token.h"
+#import "../highlighter/impl/IOSHighlighter.h"
 #import "../views/ShikiTextView.h"
 #import "../views/ShikiViewState.h"
 #import "LineNumberView.h"
@@ -36,7 +37,7 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
 @implementation RCTShikiHighlighterComponentView {
   ShikiTextView* _textView;
   LineNumberView* _lineNumberView;
-  std::shared_ptr<shiki::NativeHighlighter> _highlighter;
+  std::shared_ptr<shiki::IOSHighlighter> _highlighter;
   std::shared_ptr<shiki::IOSHighlightRenderer> _renderer;
   BOOL _isUpdating;
   BOOL _isVisible;
@@ -52,7 +53,7 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
 
     // Get C++ singletons
     _highlighter =
-        std::make_shared<shiki::NativeHighlighter>(shiki::NativeHighlighter::getInstance());
+        std::make_shared<shiki::IOSHighlighter>(shiki::IOSHighlighter::getInstance());
 
     // Create an empty shared_ptr and alias it to the singleton instance
     _renderer = std::shared_ptr<shiki::IOSHighlightRenderer>(
@@ -160,7 +161,7 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
   config.selectable = YES;
 
   // Update view with empty tokens and text for now - they'll be updated in highlight
-  std::vector<shiki::StyledToken> emptyTokens;
+  std::vector<shiki::Token> emptyTokens;
   _renderer->updateView((__bridge void*)_textView, emptyTokens, "");
 
   // Handle highlighting updates

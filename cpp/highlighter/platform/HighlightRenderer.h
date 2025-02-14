@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../ios/highlighter/NativeHighlighter.h"
+#include "PlatformHighlighter.h"
 #include "../core/ViewConfig.h"
 #include <string>
 #include <vector>

@@ -1,6 +1,7 @@
 #pragma once
-#include "../../ios/highlighter/NativeHighlighter.h"
+#include "../platform/PlatformHighlighter.h"
 #include "../theme/ThemeStyle.h"
+#include "../tokenizer/Token.h"
 #include "FontManager.h"
 #include <dispatch/dispatch.h>
 #include <memory>
@@ -13,6 +14,12 @@ namespace shiki {
 class VirtualizedContentManager;
 enum class WorkPriority;
 class WorkPrioritizer;
+
+struct IncrementalUpdate {
+  size_t start;
+  size_t length;
+  std::vector<Token> tokens;
+};
 
 struct ViewConfig {
   std::string language;
@@ -28,7 +35,7 @@ struct ViewConfig {
 };
 
 struct StyleComputationWork {
-  std::vector<StyledToken> tokens;
+  std::vector<Token> tokens;
   std::string text;
   void* targetView;
   bool isIncremental{false};
@@ -41,7 +48,7 @@ public:
   // View lifecycle
   void* createView(const ViewConfig& config);
   void destroyView(void* view);
-  void updateView(void* view, const std::vector<StyledToken>& tokens, const std::string& text);
+  void updateView(void* view, const std::vector<Token>& tokens, const std::string& text);
 
   // Styling
   void setFontConfig(const FontConfig& config) {
@@ -55,7 +62,7 @@ public:
   void applyLineNumberStyle(const ThemeStyle& style, void* lineNumberView);
 
   // Incremental highlighting support
-  void renderIncrementalHighlights(const std::vector<NativeHighlighter::IncrementalUpdate>& updates,
+  void renderIncrementalHighlights(const std::vector<IncrementalUpdate>& updates,
                                    const std::string& text, void* nativeView);
 
 private:

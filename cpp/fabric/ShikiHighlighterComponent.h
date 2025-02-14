@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../ios/highlighter/NativeHighlighter.h"
+#include "../../ios/highlighter/impl/IOSHighlighter.h"
 #include "ShikiHighlighterComponentSpec.h"
 #include <react/renderer/components/view/ConcreteViewShadowNode.h>
 #include <react/renderer/core/ConcreteComponentDescriptor.h>
