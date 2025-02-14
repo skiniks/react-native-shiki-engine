@@ -1,5 +1,6 @@
 #include "ShikiTokenizer.h"
 #include "../cache/CacheManager.h"
+#include "../cache/StyleCache.h"
 #include "../utils/ScopedResource.h"
 #include "../utils/WorkPrioritizer.h"
 #include <algorithm>
@@ -460,37 +461,78 @@ void ShikiTokenizer::resolveStyles(std::vector<Token>& tokens) {
   if (!theme_)
     return;
 
+  auto& styleCache = StyleCache::getInstance();
   size_t resolvedCount = 0;
-  for (auto& token : tokens) {
-    ThemeStyle bestStyle;
-    int bestSpecificity = -1;
+  size_t cacheHits = 0;
 
-    // Try combined scope first
-    auto combinedStyle = theme_->resolveStyle(token.getCombinedScope());
-    if (!combinedStyle.color.empty()) {
-      bestStyle = combinedStyle;
-      bestSpecificity = token.getCombinedScope().length();
+  // First pass: Try to resolve from cache
+  for (auto& token : tokens) {
+    // Try combined scope first from cache
+    std::string combinedScope = token.getCombinedScope();
+    if (auto cachedStyle = styleCache.getCachedStyle(combinedScope)) {
+      token.style = *cachedStyle;
       resolvedCount++;
+      cacheHits++;
+      continue;
     }
 
-    // Try individual scopes
+    // Try individual scopes from cache
+    ThemeStyle bestStyle;
+    int bestSpecificity = -1;
+    bool foundInCache = false;
+
     for (const auto& scope : token.scopes) {
-      auto style = theme_->resolveStyle(scope);
-      if (!style.color.empty()) {
+      if (auto cachedStyle = styleCache.getCachedStyle(scope)) {
         int specificity = scope.length();
         if (specificity > bestSpecificity) {
-          bestStyle = style;
+          bestStyle = *cachedStyle;
           bestSpecificity = specificity;
+          foundInCache = true;
         }
       }
     }
 
-    token.style = bestStyle.color.empty() ? ThemeStyle{theme_->getForeground().toHex()} : bestStyle;
+    if (foundInCache) {
+      token.style = bestStyle;
+      resolvedCount++;
+      cacheHits++;
+      continue;
+    }
+
+    // If not in cache, resolve from theme and cache the result
+    auto combinedStyle = theme_->resolveStyle(combinedScope);
+    if (!combinedStyle.color.empty()) {
+      styleCache.cacheStyle(combinedScope, combinedStyle);
+      token.style = combinedStyle;
+      bestSpecificity = combinedScope.length();
+      resolvedCount++;
+    } else {
+      // Try individual scopes
+      for (const auto& scope : token.scopes) {
+        auto style = theme_->resolveStyle(scope);
+        if (!style.color.empty()) {
+          styleCache.cacheStyle(scope, style);
+          int specificity = scope.length();
+          if (specificity > bestSpecificity) {
+            bestStyle = style;
+            bestSpecificity = specificity;
+          }
+        }
+      }
+
+      token.style = bestStyle.color.empty() ? ThemeStyle{theme_->getForeground().toHex()} : bestStyle;
+    }
   }
 
-  // Log summary of style resolution
-  std::cout << "[INFO] Resolved styles for " << resolvedCount << "/" << tokens.size() << " tokens"
-            << std::endl;
+  // Log summary of style resolution with cache metrics
+  auto metrics = styleCache.getMetrics();
+  std::cout << "[INFO] Style resolution stats:" << std::endl
+            << "  - Resolved styles: " << resolvedCount << "/" << tokens.size() << " tokens" << std::endl
+            << "  - Cache hits: " << cacheHits << " ("
+            << (tokens.size() > 0 ? (cacheHits * 100.0 / tokens.size()) : 0) << "%)" << std::endl
+            << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
+            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/"
+            << metrics.maxSize / 1024 << "KB" << std::endl;
 }
 
 std::vector<Token> ShikiTokenizer::tokenizeParallel(const std::string& code, size_t batchSize) {
