@@ -1,3 +1,5 @@
-export { default as NativeShikiHighlighter } from './highlighter/NativeShikiHighlighter'
+export type { Highlighter, HighlighterOptions, TokenizeOptions } from './highlighter/createHighlighter'
+export { createHighlighter, registerLanguage, registerTheme } from './highlighter/createHighlighter'
 export type { ThemeStyle, Token } from './highlighter/NativeShikiHighlighter'
-export { isNativeHighlighterAvailable } from './highlighter/utils'
+export { codeToTokens, loadLanguage, loadTheme } from './highlighter/shorthands'
+export { Clipboard, isHighlighterAvailable } from './utils'
