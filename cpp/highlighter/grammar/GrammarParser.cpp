@@ -1,8 +1,10 @@
 #include "GrammarParser.h"
-#include <fstream>
-#include <iostream>
+
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
+
+#include <fstream>
+#include <iostream>
 #include <sstream>
 
 namespace shiki {
@@ -10,9 +12,10 @@ namespace shiki {
 std::shared_ptr<Grammar> GrammarParser::parse(const std::string& jsonStr) {
   rapidjson::Document document;
   if (document.Parse(jsonStr.c_str()).HasParseError()) {
-    throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                         "Failed to parse grammar JSON: " +
-                             std::string(rapidjson::GetParseError_En(document.GetParseError())));
+    throw HighlightError(
+      HighlightErrorCode::InvalidGrammar,
+      "Failed to parse grammar JSON: " + std::string(rapidjson::GetParseError_En(document.GetParseError()))
+    );
   }
 
   try {
@@ -36,16 +39,14 @@ std::shared_ptr<Grammar> GrammarParser::parse(const std::string& jsonStr) {
 
     return grammar;
   } catch (const std::runtime_error& e) {
-    throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                         "Invalid grammar structure: " + std::string(e.what()));
+    throw HighlightError(HighlightErrorCode::InvalidGrammar, "Invalid grammar structure: " + std::string(e.what()));
   }
 }
 
 std::shared_ptr<Grammar> GrammarParser::parseFromFile(const std::string& filePath) {
   std::ifstream file(filePath);
   if (!file.is_open()) {
-    throw HighlightError(HighlightErrorCode::ResourceLoadFailed,
-                         "Failed to open grammar file: " + filePath);
+    throw HighlightError(HighlightErrorCode::ResourceLoadFailed, "Failed to open grammar file: " + filePath);
   }
 
   std::stringstream buffer;
@@ -57,10 +58,11 @@ bool GrammarParser::validateGrammarJson(const std::string& content) {
   try {
     rapidjson::Document document;
     if (document.Parse(content.c_str()).HasParseError()) {
-      throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                           "JSON parse error: " +
-                               std::string(rapidjson::GetParseError_En(document.GetParseError())) +
-                               " at offset " + std::to_string(document.GetErrorOffset()));
+      throw HighlightError(
+        HighlightErrorCode::InvalidGrammar,
+        "JSON parse error: " + std::string(rapidjson::GetParseError_En(document.GetParseError())) + " at offset " +
+          std::to_string(document.GetErrorOffset())
+      );
     }
 
     if (!document.IsObject()) {
@@ -71,17 +73,16 @@ bool GrammarParser::validateGrammarJson(const std::string& content) {
     const char* requiredFields[] = {"name", "scopeName", "patterns"};
     for (const char* field : requiredFields) {
       if (!document.HasMember(field)) {
-        throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                             std::string("Missing required field: ") + field);
+        throw HighlightError(HighlightErrorCode::InvalidGrammar, std::string("Missing required field: ") + field);
       }
 
       if (field == std::string("patterns") && !document[field].IsArray()) {
-        throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                             "The 'patterns' field must be an array");
-      } else if ((field == std::string("name") || field == std::string("scopeName")) &&
-                 !document[field].IsString()) {
-        throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                             std::string("The '") + field + "' field must be a string");
+        throw HighlightError(HighlightErrorCode::InvalidGrammar, "The 'patterns' field must be an array");
+      } else if ((field == std::string("name") || field == std::string("scopeName")) && !document[field].IsString()) {
+        throw HighlightError(
+          HighlightErrorCode::InvalidGrammar,
+          std::string("The '") + field + "' field must be a string"
+        );
       }
     }
 
@@ -90,8 +91,7 @@ bool GrammarParser::validateGrammarJson(const std::string& content) {
     // Re-throw the error to be caught by the caller
     throw;
   } catch (...) {
-    throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                         "Unknown error while validating grammar JSON");
+    throw HighlightError(HighlightErrorCode::InvalidGrammar, "Unknown error while validating grammar JSON");
   }
 }
 
@@ -104,14 +104,15 @@ void GrammarParser::validateRequiredFields(const rapidjson::Document& document) 
   const char* requiredFields[] = {"name", "scopeName"};
   for (const char* field : requiredFields) {
     if (!document.HasMember(field) || !document[field].IsString()) {
-      throw HighlightError(HighlightErrorCode::InvalidGrammar,
-                           std::string("Missing or invalid required field: ") + field);
+      throw HighlightError(
+        HighlightErrorCode::InvalidGrammar,
+        std::string("Missing or invalid required field: ") + field
+      );
     }
   }
 }
 
-void GrammarParser::parsePatterns(const rapidjson::Value& patterns,
-                                  std::vector<GrammarPattern>& patternList) {
+void GrammarParser::parsePatterns(const rapidjson::Value& patterns, std::vector<GrammarPattern>& patternList) {
   for (const auto& pattern : patterns.GetArray()) {
     GrammarPattern grammarPattern;
 
@@ -140,8 +141,7 @@ void GrammarParser::parsePatterns(const rapidjson::Value& patterns,
 
     // Parse captures
     if (pattern.HasMember("captures") && pattern["captures"].IsObject()) {
-      for (auto it = pattern["captures"].MemberBegin(); it != pattern["captures"].MemberEnd();
-           ++it) {
+      for (auto it = pattern["captures"].MemberBegin(); it != pattern["captures"].MemberEnd(); ++it) {
         if (it->value.HasMember("name") && it->value["name"].IsString()) {
           grammarPattern.captures[std::stoi(it->name.GetString())] = it->value["name"].GetString();
         }
@@ -150,20 +150,16 @@ void GrammarParser::parsePatterns(const rapidjson::Value& patterns,
 
     // Parse begin/end captures
     if (pattern.HasMember("beginCaptures") && pattern["beginCaptures"].IsObject()) {
-      for (auto it = pattern["beginCaptures"].MemberBegin();
-           it != pattern["beginCaptures"].MemberEnd(); ++it) {
+      for (auto it = pattern["beginCaptures"].MemberBegin(); it != pattern["beginCaptures"].MemberEnd(); ++it) {
         if (it->value.HasMember("name") && it->value["name"].IsString()) {
-          grammarPattern.beginCaptures[std::stoi(it->name.GetString())] =
-              it->value["name"].GetString();
+          grammarPattern.beginCaptures[std::stoi(it->name.GetString())] = it->value["name"].GetString();
         }
       }
     }
     if (pattern.HasMember("endCaptures") && pattern["endCaptures"].IsObject()) {
-      for (auto it = pattern["endCaptures"].MemberBegin(); it != pattern["endCaptures"].MemberEnd();
-           ++it) {
+      for (auto it = pattern["endCaptures"].MemberBegin(); it != pattern["endCaptures"].MemberEnd(); ++it) {
         if (it->value.HasMember("name") && it->value["name"].IsString()) {
-          grammarPattern.endCaptures[std::stoi(it->name.GetString())] =
-              it->value["name"].GetString();
+          grammarPattern.endCaptures[std::stoi(it->name.GetString())] = it->value["name"].GetString();
         }
       }
     }
@@ -202,4 +198,4 @@ void GrammarParser::parseRepository(const rapidjson::Value& repository, Grammar&
   }
 }
 
-} // namespace shiki
+}  // namespace shiki

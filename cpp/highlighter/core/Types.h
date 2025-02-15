@@ -1,7 +1,8 @@
 #pragma once
-#include "../theme/Theme.h"
 #include <string>
 #include <vector>
+
+#include "../theme/Theme.h"
 
 namespace shiki {
 
@@ -22,4 +23,4 @@ struct OnigCapture {
 class Theme;
 class Grammar;
 
-} // namespace shiki
+}  // namespace shiki

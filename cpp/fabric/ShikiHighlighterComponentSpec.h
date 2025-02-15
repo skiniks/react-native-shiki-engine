@@ -5,6 +5,7 @@
 #include <react/renderer/components/view/ViewProps.h>
 #include <react/renderer/core/ConcreteComponentDescriptor.h>
 #include <react/renderer/core/PropsParserContext.h>
+
 #include <string>
 
 namespace facebook::react {
@@ -13,10 +14,13 @@ namespace facebook::react {
 extern const char ShikiHighlighterComponentName[];
 
 class ShikiHighlighterProps final : public ViewProps {
-public:
+ public:
   ShikiHighlighterProps() = default;
-  ShikiHighlighterProps(const PropsParserContext& context, const ShikiHighlighterProps& sourceProps,
-                        const RawProps& rawProps);
+  ShikiHighlighterProps(
+    const PropsParserContext& context,
+    const ShikiHighlighterProps& sourceProps,
+    const RawProps& rawProps
+  );
   ShikiHighlighterProps(const ShikiHighlighterProps& sourceProps, const RawProps& rawProps);
 
   float fontSize{14.0f};
@@ -33,21 +37,20 @@ using ShikiHighlighterEventEmitter = ViewEventEmitter;
 
 class ShikiHighlighterShadowNode;
 
-using ConcreteShikiHighlighterShadowNode =
-    ConcreteViewShadowNode<ShikiHighlighterComponentName, ShikiHighlighterProps>;
+using ConcreteShikiHighlighterShadowNode = ConcreteViewShadowNode<ShikiHighlighterComponentName, ShikiHighlighterProps>;
 
 class ShikiHighlighterShadowNode final : public ConcreteShikiHighlighterShadowNode {
   using ConcreteShikiHighlighterShadowNode::ConcreteShikiHighlighterShadowNode;
 
-public:
+ public:
   using Shared = std::shared_ptr<const ShikiHighlighterShadowNode>;
 };
 
 class JSI_EXPORT ShikiHighlighterComponentDescriptor final
-    : public ConcreteComponentDescriptor<ShikiHighlighterShadowNode> {
+  : public ConcreteComponentDescriptor<ShikiHighlighterShadowNode> {
   using ConcreteComponentDescriptor::ConcreteComponentDescriptor;
 
-public:
+ public:
   ComponentHandle getComponentHandle() const {
     return reinterpret_cast<ComponentHandle>(this);
   }
@@ -57,4 +60,4 @@ public:
   }
 };
 
-} // namespace facebook::react
+}  // namespace facebook::react

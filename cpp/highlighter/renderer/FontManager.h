@@ -1,10 +1,11 @@
 #pragma once
-#include "../core/Constants.h"
 #include <memory>
 #include <string>
 
+#include "../core/Constants.h"
+
 #ifdef __APPLE__
-#import <UIKit/UIKit.h>
+#  import <UIKit/UIKit.h>
 #endif
 
 namespace shiki {
@@ -19,7 +20,7 @@ struct FontConfig {
 };
 
 class FontManager {
-public:
+ public:
   static FontManager& getInstance();
 
 #ifdef __APPLE__
@@ -27,7 +28,7 @@ public:
   UIFont* createFontWithStyle(UIFont* baseFont, bool bold, bool italic);
 #endif
 
-private:
+ private:
   FontManager() = default;
   FontManager(const FontManager&) = delete;
   FontManager& operator=(const FontManager&) = delete;
@@ -37,4 +38,4 @@ private:
   std::string mapFontStyle(const std::string& style);
 };
 
-} // namespace shiki
+}  // namespace shiki

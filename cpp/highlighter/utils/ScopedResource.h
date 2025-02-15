@@ -3,10 +3,11 @@
 
 namespace shiki {
 
-template <typename T> class ScopedResource {
-public:
+template <typename T>
+class ScopedResource {
+ public:
   explicit ScopedResource(T* resource, std::function<void(T*)> deleter)
-      : resource_(resource), deleter_(std::move(deleter)) {}
+    : resource_(resource), deleter_(std::move(deleter)) {}
 
   ~ScopedResource() {
     if (resource_ && deleter_) {
@@ -28,12 +29,11 @@ public:
   ScopedResource& operator=(const ScopedResource&) = delete;
 
   // Allow moving
-  ScopedResource(ScopedResource&& other) noexcept
-      : resource_(other.release()), deleter_(std::move(other.deleter_)) {}
+  ScopedResource(ScopedResource&& other) noexcept : resource_(other.release()), deleter_(std::move(other.deleter_)) {}
 
-private:
+ private:
   T* resource_;
   std::function<void(T*)> deleter_;
 };
 
-} // namespace shiki
+}  // namespace shiki

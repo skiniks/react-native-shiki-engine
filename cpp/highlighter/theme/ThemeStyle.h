@@ -1,16 +1,17 @@
 #pragma once
-#include "../core/Constants.h"
-#include "ThemeColor.h"
 #include <optional>
 #include <string>
+
+#include "../core/Constants.h"
+#include "ThemeColor.h"
 
 namespace shiki {
 
 struct ThemeStyle {
   std::string color;
-  std::string backgroundColor; // Only set if explicitly specified
+  std::string backgroundColor;  // Only set if explicitly specified
   std::string fontStyle;
-  std::string scope; // Added scope field for theme parsing
+  std::string scope;  // Added scope field for theme parsing
 
   bool bold{false};
   bool italic{false};
@@ -25,8 +26,8 @@ struct ThemeStyle {
   } lineNumbers;
 
   bool isEmpty() const {
-    return color.empty() && backgroundColor.empty() && fontStyle.empty() && scope.empty() &&
-           !bold && !italic && !underline;
+    return color.empty() && backgroundColor.empty() && fontStyle.empty() && scope.empty() && !bold && !italic &&
+      !underline;
   }
 
   void applySettings(const ThemeStyle& style) {
@@ -53,7 +54,7 @@ struct ThemeStyle {
     if (!lineNumbers.color && !color.empty()) {
       LineNumberStyle style;
       style.color = color;
-      style.backgroundColor = backgroundColor; // Only if set
+      style.backgroundColor = backgroundColor;  // Only if set
       return style;
     }
     return lineNumbers;
@@ -75,8 +76,7 @@ struct ThemeStyle {
       color = other.color[0] == '#' ? other.color : "#" + other.color;
     }
     if (!other.backgroundColor.empty()) {
-      backgroundColor =
-          other.backgroundColor[0] == '#' ? other.backgroundColor : "#" + other.backgroundColor;
+      backgroundColor = other.backgroundColor[0] == '#' ? other.backgroundColor : "#" + other.backgroundColor;
     }
     if (!other.fontStyle.empty()) {
       fontStyle = other.fontStyle;
@@ -88,16 +88,15 @@ struct ThemeStyle {
 
   // Check if this style has any properties set
   bool hasProperties() const {
-    return !color.empty() || !backgroundColor.empty() || !fontStyle.empty() || bold || italic ||
-           underline;
+    return !color.empty() || !backgroundColor.empty() || !fontStyle.empty() || bold || italic || underline;
   }
 
   // Create a style with default values
   static ThemeStyle createDefault() {
     ThemeStyle style;
-    style.color = "#F8F8F2"; // Default foreground color
+    style.color = "#F8F8F2";  // Default foreground color
     return style;
   }
 };
 
-} // namespace shiki
+}  // namespace shiki

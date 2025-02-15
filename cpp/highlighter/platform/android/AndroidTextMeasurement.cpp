@@ -1,4 +1,5 @@
 #include "AndroidTextMeasurement.h"
+
 #include <string>
 
 namespace shiki {
@@ -22,8 +23,8 @@ AndroidTextMeasurement::~AndroidTextMeasurement() {
   }
 }
 
-TextRange::Metrics AndroidTextMeasurement::measureRange(const std::string& text, size_t start, size_t length,
-                                                      const ThemeStyle& style) {
+TextRange::Metrics
+AndroidTextMeasurement::measureRange(const std::string& text, size_t start, size_t length, const ThemeStyle& style) {
   TextRange::Metrics metrics;
 
   if (!env_ || !paint_ || start + length > text.length()) {
@@ -39,10 +40,8 @@ TextRange::Metrics AndroidTextMeasurement::measureRange(const std::string& text,
 
   // Apply style color if specified
   if (!style.color.empty()) {
-    jint color = ((style.color.a & 0xFF) << 24) |
-                 ((style.color.r & 0xFF) << 16) |
-                 ((style.color.g & 0xFF) << 8) |
-                 (style.color.b & 0xFF);
+    jint color = ((style.color.a & 0xFF) << 24) | ((style.color.r & 0xFF) << 16) | ((style.color.g & 0xFF) << 8) |
+      (style.color.b & 0xFF);
     env_->CallVoidMethod(paint_, setColorMethod_, color);
   }
 
@@ -72,4 +71,4 @@ TextRange::Metrics AndroidTextMeasurement::measureRange(const std::string& text,
   return metrics;
 }
 
-} // namespace shiki
+}  // namespace shiki

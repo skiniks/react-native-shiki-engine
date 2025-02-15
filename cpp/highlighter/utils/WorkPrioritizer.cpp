@@ -1,14 +1,15 @@
 #include "WorkPrioritizer.h"
-#include "ConcurrencyUtil.h"
+
 #include <algorithm>
 #include <thread>
+
+#include "ConcurrencyUtil.h"
 
 namespace shiki {
 
 WorkPrioritizer::WorkPrioritizer()
-  : memoryManager_(MemoryManager::getInstance())
-  , concurrencyUtil_(std::make_unique<ConcurrencyUtil>(std::thread::hardware_concurrency())) {
-
+  : memoryManager_(MemoryManager::getInstance()),
+    concurrencyUtil_(std::make_unique<ConcurrencyUtil>(std::thread::hardware_concurrency())) {
   // Register memory pressure callbacks
   memoryManager_.setHighPressureCallback([this]() { onHighMemoryPressure(); });
   memoryManager_.setCriticalPressureCallback([this]() { onCriticalMemoryPressure(); });
@@ -172,4 +173,4 @@ WorkPrioritizer::WorkMetrics WorkPrioritizer::getMetrics() const {
   return metrics;
 }
 
-} // namespace shiki
+}  // namespace shiki

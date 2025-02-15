@@ -25,12 +25,13 @@
         viewportHeight:(CGFloat)viewportHeight
            isScrolling:(BOOL)isScrolling {
   _viewport = shiki::ViewportInfo{
-      static_cast<size_t>(firstVisibleLine), static_cast<size_t>(lastVisibleLine),
-      static_cast<float>(contentHeight), static_cast<float>(viewportHeight), isScrolling};
+      static_cast<size_t>(firstVisibleLine),
+      static_cast<size_t>(lastVisibleLine), static_cast<float>(contentHeight),
+      static_cast<float>(viewportHeight), isScrolling};
   // Store viewport info for later use in other methods
 }
 
-- (NSRange)getVisibleRangeForText:(NSString*)text {
+- (NSRange)getVisibleRangeForText:(NSString *)text {
   if (!text)
     return NSMakeRange(0, 0);
 
@@ -39,7 +40,7 @@
   return NSMakeRange(range.start, range.length);
 }
 
-- (BOOL)isRangeVisible:(NSRange)range inText:(NSString*)text {
+- (BOOL)isRangeVisible:(NSRange)range inText:(NSString *)text {
   if (!text)
     return NO;
   std::string cppText = text.UTF8String;
@@ -47,20 +48,23 @@
   return _cppManager->isRangeVisible(textRange, _viewport, cppText);
 }
 
-- (NSUInteger)getLineCount:(NSString*)text {
+- (NSUInteger)getLineCount:(NSString *)text {
   if (!text)
     return 0;
   std::string cppText = text.UTF8String;
   return _cppManager->getLineCount(cppText);
 }
 
-- (CGFloat)getEstimatedHeight:(NSUInteger)lineCount lineHeight:(CGFloat)lineHeight {
-  return _cppManager->getEstimatedHeight(lineCount, static_cast<float>(lineHeight));
+- (CGFloat)getEstimatedHeight:(NSUInteger)lineCount
+                   lineHeight:(CGFloat)lineHeight {
+  return _cppManager->getEstimatedHeight(lineCount,
+                                         static_cast<float>(lineHeight));
 }
 
-- (NSUInteger)getEstimatedLineAtPosition:(CGFloat)yOffset lineHeight:(CGFloat)lineHeight {
-  return _cppManager->getEstimatedLineAtPosition(static_cast<float>(yOffset),
-                                                 static_cast<float>(lineHeight));
+- (NSUInteger)getEstimatedLineAtPosition:(CGFloat)yOffset
+                              lineHeight:(CGFloat)lineHeight {
+  return _cppManager->getEstimatedLineAtPosition(
+      static_cast<float>(yOffset), static_cast<float>(lineHeight));
 }
 
 @end

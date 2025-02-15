@@ -1,12 +1,13 @@
 #pragma once
-#include "../theme/ThemeStyle.h"
 #include <string>
 #include <vector>
+
+#include "../theme/ThemeStyle.h"
 
 namespace shiki {
 
 class LineNumbers {
-public:
+ public:
   struct Config {
     bool show{false};
     float fontSize{12.0f};
@@ -41,7 +42,7 @@ public:
     return config_.style;
   }
 
-private:
+ private:
   Config config_;
   std::vector<LineInfo> lines_;
   float totalWidth_{0.0f};
@@ -51,4 +52,4 @@ private:
   float calculateMaxLineWidth(size_t maxLineNumber) const;
 };
 
-} // namespace shiki
+}  // namespace shiki

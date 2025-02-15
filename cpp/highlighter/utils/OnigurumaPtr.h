@@ -1,6 +1,7 @@
 #pragma once
-#include <memory>
 #include <oniguruma.h>
+
+#include <memory>
 
 namespace shiki {
 
@@ -27,13 +28,15 @@ inline OnigurumaRegexPtr createRegex(const char* pattern) {
   regex_t* regex = nullptr;
   OnigErrorInfo einfo;
 
-  int result = onig_new(&regex,
-                       reinterpret_cast<const OnigUChar*>(pattern),
-                       reinterpret_cast<const OnigUChar*>(pattern + strlen(pattern)),
-                       ONIG_OPTION_DEFAULT,
-                       ONIG_ENCODING_UTF8,
-                       ONIG_SYNTAX_DEFAULT,
-                       &einfo);
+  int result = onig_new(
+    &regex,
+    reinterpret_cast<const OnigUChar*>(pattern),
+    reinterpret_cast<const OnigUChar*>(pattern + strlen(pattern)),
+    ONIG_OPTION_DEFAULT,
+    ONIG_ENCODING_UTF8,
+    ONIG_SYNTAX_DEFAULT,
+    &einfo
+  );
 
   if (result != ONIG_NORMAL) {
     return nullptr;
@@ -46,4 +49,4 @@ inline OnigurumaRegionPtr createRegion() {
   return OnigurumaRegionPtr(onig_region_new());
 }
 
-} // namespace shiki
+}  // namespace shiki

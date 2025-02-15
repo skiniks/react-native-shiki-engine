@@ -3,7 +3,7 @@
 
 namespace {
 // Helper function to convert hex string to RGB components
-void parseHexColor(const std::string& hex, float& r, float& g, float& b) {
+void parseHexColor(const std::string &hex, float &r, float &g, float &b) {
   std::string cleanHex = hex;
   if (cleanHex[0] == '#') {
     cleanHex = cleanHex.substr(1);
@@ -21,7 +21,7 @@ void parseHexColor(const std::string& hex, float& r, float& g, float& b) {
 
 namespace shiki {
 
-UIColor* ThemeColor::toUIColor() const {
+UIColor *ThemeColor::toUIColor() const {
   return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
 }
 

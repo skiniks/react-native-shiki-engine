@@ -8,5 +8,6 @@ Class<RCTComponentViewProtocol> RCTShikiHighlighterCls(void) {
 }
 
 ComponentDescriptorProvider RCTShikiHighlighterDescriptorProvider(void) {
-  return concreteComponentDescriptorProvider<ShikiHighlighterComponentDescriptor>();
+  return concreteComponentDescriptorProvider<
+      ShikiHighlighterComponentDescriptor>();
 }

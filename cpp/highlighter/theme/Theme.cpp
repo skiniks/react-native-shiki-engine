@@ -1,10 +1,12 @@
 #include "Theme.h"
-#include "../tokenizer/Token.h"
-#include "ThemeParser.h"
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+
+#include "../tokenizer/Token.h"
+#include "ThemeParser.h"
 
 namespace shiki {
 
@@ -25,13 +27,11 @@ namespace {
   // Check if a rule scope matches a token scope following TextMate scope selector rules
   bool isScopeMatch(const std::string& ruleScope, const std::string& tokenScope) {
     // Exact match
-    if (ruleScope == tokenScope)
-      return true;
+    if (ruleScope == tokenScope) return true;
 
     // Check if rule scope is a parent scope of token scope
     // e.g. "source.rust" matches "source.rust.comment"
-    if (tokenScope.find(ruleScope + ".") == 0)
-      return true;
+    if (tokenScope.find(ruleScope + ".") == 0) return true;
 
     // For compound scopes (those with spaces), all parts must match
     auto ruleParts = splitScope(ruleScope);
@@ -46,15 +46,14 @@ namespace {
             break;
           }
         }
-        if (!found)
-          return false;
+        if (!found) return false;
       }
       return true;
     }
 
     return false;
   }
-} // namespace
+}  // namespace
 
 std::shared_ptr<Theme> Theme::fromJson(const std::string& content) {
   try {
@@ -122,7 +121,7 @@ ThemeStyle Theme::resolveSemanticToken(const std::string& token) const {
   if (it != semanticTokens_.end()) {
     return it->second;
   }
-  return ThemeStyle(); // Return default style
+  return ThemeStyle();  // Return default style
 }
 
 void Theme::addStyle(const ThemeStyle& style) {
@@ -169,7 +168,7 @@ ThemeStyle Theme::getLineNumberStyle() const {
 
   // Fall back to default line number style
   ThemeStyle style;
-  style.color = "#6272A4"; // Dracula theme default
+  style.color = "#6272A4";  // Dracula theme default
   return style;
 }
 
@@ -196,14 +195,15 @@ ThemeStyle Theme::resolveStyle(const std::string& scope) const {
           specificity += 1000;
         }
         matchingRules.push_back({&rule, specificity});
-        break; // Only count each rule once
+        break;  // Only count each rule once
       }
     }
   }
 
   // Sort rules by specificity (highest first)
-  std::sort(matchingRules.begin(), matchingRules.end(),
-            [](const auto& a, const auto& b) { return a.second > b.second; });
+  std::sort(matchingRules.begin(), matchingRules.end(), [](const auto& a, const auto& b) {
+    return a.second > b.second;
+  });
 
   ThemeStyle result;
   // Start with default foreground color
@@ -254,8 +254,9 @@ std::vector<std::string> Theme::getParentScopes(const std::string& scope) const 
   }
 
   // Sort from least to most specific
-  std::sort(parents.begin(), parents.end(),
-            [](const std::string& a, const std::string& b) { return a.length() < b.length(); });
+  std::sort(parents.begin(), parents.end(), [](const std::string& a, const std::string& b) {
+    return a.length() < b.length();
+  });
 
   // Add the full scope at the end (most specific)
   if (!scope.empty() && (parents.empty() || parents.back() != scope)) {
@@ -320,8 +321,7 @@ std::string ThemeColor::toHex() const {
 }
 
 bool Theme::applyStyle(Token& token) const {
-  std::cout << "[DEBUG] Applying style for token scopes: '" << token.getCombinedScope() << "'"
-            << std::endl;
+  std::cout << "[DEBUG] Applying style for token scopes: '" << token.getCombinedScope() << "'" << std::endl;
 
   // Find the most specific matching rule
   const ThemeRule* bestMatch = nullptr;
@@ -335,16 +335,16 @@ bool Theme::applyStyle(Token& token) const {
         if (!bestMatch || specificity > bestSpecificity) {
           bestMatch = &rule;
           bestSpecificity = specificity;
-          std::cout << "[DEBUG] Found better matching rule: '" << rule.scope
-                    << "' (specificity: " << specificity << ")" << std::endl;
+          std::cout << "[DEBUG] Found better matching rule: '" << rule.scope << "' (specificity: " << specificity << ")"
+                    << std::endl;
         }
       }
     }
   }
 
   if (bestMatch) {
-    std::cout << "[DEBUG] Applying style from rule: '" << bestMatch->scope
-              << "' color: " << bestMatch->style.color << std::endl;
+    std::cout << "[DEBUG] Applying style from rule: '" << bestMatch->scope << "' color: " << bestMatch->style.color
+              << std::endl;
     token.style = bestMatch->style;
     return true;
   }
@@ -353,4 +353,4 @@ bool Theme::applyStyle(Token& token) const {
   return false;
 }
 
-} // namespace shiki
+}  // namespace shiki

@@ -1,19 +1,17 @@
 #include "VirtualizedContentManager.h"
+
 #include <algorithm>
 
 namespace shiki {
 
-TextRange VirtualizedContentManager::getVisibleRange(const ViewportInfo& viewport,
-                                                     const std::string& text) {
-
+TextRange VirtualizedContentManager::getVisibleRange(const ViewportInfo& viewport, const std::string& text) {
   // Update line cache if text changed
   if (text != lastProcessedText_) {
     updateLineCache(text);
   }
 
   // Calculate visible range with buffer
-  size_t startLine =
-      viewport.firstVisibleLine > BUFFER_LINES ? viewport.firstVisibleLine - BUFFER_LINES : 0;
+  size_t startLine = viewport.firstVisibleLine > BUFFER_LINES ? viewport.firstVisibleLine - BUFFER_LINES : 0;
 
   size_t endLine = std::min(viewport.lastVisibleLine + BUFFER_LINES, lineStartCache_.size() - 1);
 
@@ -30,9 +28,11 @@ TextRange VirtualizedContentManager::getVisibleRange(const ViewportInfo& viewpor
   return range;
 }
 
-bool VirtualizedContentManager::isRangeVisible(const TextRange& range, const ViewportInfo& viewport,
-                                               const std::string& text) {
-
+bool VirtualizedContentManager::isRangeVisible(
+  const TextRange& range,
+  const ViewportInfo& viewport,
+  const std::string& text
+) {
   // Update line cache if needed
   if (text != lastProcessedText_) {
     updateLineCache(text);
@@ -40,20 +40,18 @@ bool VirtualizedContentManager::isRangeVisible(const TextRange& range, const Vie
 
   // Find lines containing the range
   auto startIt = std::lower_bound(lineStartCache_.begin(), lineStartCache_.end(), range.start);
-  auto endIt =
-      std::lower_bound(lineStartCache_.begin(), lineStartCache_.end(), range.start + range.length);
+  auto endIt = std::lower_bound(lineStartCache_.begin(), lineStartCache_.end(), range.start + range.length);
 
   size_t startLine = startIt - lineStartCache_.begin();
   size_t endLine = endIt - lineStartCache_.begin();
 
   // Check if range overlaps visible area (including buffer)
-  return !(endLine < viewport.firstVisibleLine - BUFFER_LINES ||
-           startLine > viewport.lastVisibleLine + BUFFER_LINES);
+  return !(endLine < viewport.firstVisibleLine - BUFFER_LINES || startLine > viewport.lastVisibleLine + BUFFER_LINES);
 }
 
 void VirtualizedContentManager::updateLineCache(const std::string& text) {
   lineStartCache_.clear();
-  lineStartCache_.push_back(0); // First line always starts at 0
+  lineStartCache_.push_back(0);  // First line always starts at 0
 
   for (size_t i = 0; i < text.length(); i++) {
     if (text[i] == '\n') {
@@ -86,4 +84,4 @@ size_t VirtualizedContentManager::getEstimatedLineAtPosition(float yOffset, floa
   return static_cast<size_t>(yOffset / lineHeight);
 }
 
-} // namespace shiki
+}  // namespace shiki

@@ -1,16 +1,17 @@
 #pragma once
-#include "Cache.h"
-#include "CacheConfig.h"
-#include "../theme/ThemeStyle.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 
+#include "../theme/ThemeStyle.h"
+#include "Cache.h"
+#include "CacheConfig.h"
+
 namespace shiki {
 
 class StyleCache {
-public:
+ public:
   static StyleCache& getInstance() {
     static StyleCache instance;
     return instance;
@@ -26,8 +27,8 @@ public:
     } else {
       auto usageIt = scopeUsage_.find(scope);
       priority = (usageIt != scopeUsage_.end() && usageIt->second > 5)
-          ? Cache<std::string, ThemeStyle>::Priority::HIGH
-          : Cache<std::string, ThemeStyle>::Priority::NORMAL;
+        ? Cache<std::string, ThemeStyle>::Priority::HIGH
+        : Cache<std::string, ThemeStyle>::Priority::NORMAL;
     }
 
     cache_.add(scope, style, styleSize, priority);
@@ -51,14 +52,21 @@ public:
     return cache_.getMetrics();
   }
 
-private:
-  StyleCache()
-      : cache_(cache::StyleCacheConfig::MEMORY_LIMIT,
-               cache::StyleCacheConfig::ENTRY_LIMIT) {
+ private:
+  StyleCache() : cache_(cache::StyleCacheConfig::MEMORY_LIMIT, cache::StyleCacheConfig::ENTRY_LIMIT) {
     // Initialize common scopes
     commonScopes_ = {
-      "source", "keyword", "string", "comment", "constant", "variable",
-      "function", "storage", "entity.name", "punctuation", "meta"
+      "source",
+      "keyword",
+      "string",
+      "comment",
+      "constant",
+      "variable",
+      "function",
+      "storage",
+      "entity.name",
+      "punctuation",
+      "meta"
     };
   }
 
@@ -76,4 +84,4 @@ private:
   std::unordered_set<std::string> commonScopes_;  // Store common scopes as member
 };
 
-} // namespace shiki
+}  // namespace shiki

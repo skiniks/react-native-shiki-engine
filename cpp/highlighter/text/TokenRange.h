@@ -1,21 +1,21 @@
 #pragma once
-#include "../theme/ThemeStyle.h"
-#include "TextRange.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
+
+#include "../theme/ThemeStyle.h"
+#include "TextRange.h"
 
 namespace shiki {
 
 class TokenRange : public TextRange {
-public:
+ public:
   TokenRange() = default;
   TokenRange(size_t s, size_t l) : TextRange(s, l) {}
   TokenRange(size_t s, size_t l, const ThemeStyle& st) : TextRange(s, l, st) {}
-  TokenRange(size_t s, size_t l, std::vector<std::string> sc)
-      : TextRange(s, l), scopes(std::move(sc)) {}
+  TokenRange(size_t s, size_t l, std::vector<std::string> sc) : TextRange(s, l), scopes(std::move(sc)) {}
   TokenRange(size_t s, size_t l, const ThemeStyle& st, std::vector<std::string> sc)
-      : TextRange(s, l, st), scopes(std::move(sc)) {}
+    : TextRange(s, l, st), scopes(std::move(sc)) {}
   std::vector<std::string> scopes;
 
   void addScope(const std::string& scope) {
@@ -64,4 +64,4 @@ public:
   }
 };
 
-} // namespace shiki
+}  // namespace shiki

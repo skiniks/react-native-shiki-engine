@@ -1,9 +1,12 @@
 #include "Configuration.h"
-#include "../platform/PlatformHighlighter.h"
+
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 #include <sstream>
+
+#include "../platform/PlatformHighlighter.h"
 
 namespace shiki {
 
@@ -189,8 +192,7 @@ std::optional<Configuration> Configuration::fromJson(const std::string& json) {
 
   if (doc.HasMember("memory") && doc["memory"].IsObject()) {
     const auto& mem = doc["memory"];
-    if (mem.HasMember("lowMemoryThreshold"))
-      config.memory.lowMemoryThreshold = mem["lowMemoryThreshold"].GetUint64();
+    if (mem.HasMember("lowMemoryThreshold")) config.memory.lowMemoryThreshold = mem["lowMemoryThreshold"].GetUint64();
     if (mem.HasMember("criticalMemoryThreshold"))
       config.memory.criticalMemoryThreshold = mem["criticalMemoryThreshold"].GetUint64();
     if (mem.HasMember("preserveStateOnMemoryWarning"))
@@ -205,7 +207,7 @@ std::optional<Configuration> Configuration::fromJson(const std::string& json) {
   return config;
 }
 
-template<>
+template <>
 PlatformViewConfig Configuration::toPlatformConfig<PlatformViewConfig>() const {
   PlatformViewConfig config;
   config.language = core.language;
@@ -220,4 +222,4 @@ PlatformViewConfig Configuration::toPlatformConfig<PlatformViewConfig>() const {
   return config;
 }
 
-} // namespace shiki
+}  // namespace shiki

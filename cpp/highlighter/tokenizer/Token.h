@@ -1,15 +1,16 @@
 #pragma once
-#include "../theme/ThemeStyle.h"
 #include <string>
 #include <vector>
+
+#include "../theme/ThemeStyle.h"
 
 namespace shiki {
 
 struct Token {
   size_t start;
   size_t length;
-  std::vector<std::string> scopes; // Changed from single scope to vector of scopes
-  ThemeStyle style;                // The resolved style from the theme
+  std::vector<std::string> scopes;  // Changed from single scope to vector of scopes
+  ThemeStyle style;  // The resolved style from the theme
 
   // Helper method to add a scope
   void addScope(const std::string& scope) {
@@ -22,8 +23,7 @@ struct Token {
   std::string getCombinedScope() const {
     std::string combined;
     for (size_t i = 0; i < scopes.size(); ++i) {
-      if (i > 0)
-        combined += " ";
+      if (i > 0) combined += " ";
       combined += scopes[i];
     }
     return combined;
@@ -34,4 +34,4 @@ struct Token {
     return start < other.start;
   }
 };
-} // namespace shiki
+}  // namespace shiki

@@ -40,4 +40,4 @@ void ConcurrencyUtil::workerThread() {
   }
 }
 
-} // namespace shiki
+}  // namespace shiki

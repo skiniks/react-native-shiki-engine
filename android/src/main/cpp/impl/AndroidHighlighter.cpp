@@ -1,8 +1,10 @@
 #include "AndroidHighlighter.h"
-#include "../../../../cpp/highlighter/tokenizer/ShikiTokenizer.h"
+
+#include <sstream>
+
 #include "../../../../cpp/highlighter/grammar/Grammar.h"
 #include "../../../../cpp/highlighter/theme/Theme.h"
-#include <sstream>
+#include "../../../../cpp/highlighter/tokenizer/ShikiTokenizer.h"
 
 namespace shiki {
 
@@ -130,11 +132,15 @@ jobject AndroidHighlighter::createJavaView(JNIEnv* env, const PlatformViewConfig
   jstring fontFamily = env->NewStringUTF(config.fontFamily.c_str());
 
   // Call Java method to create view
-  jobject view = env->CallStaticObjectMethod(viewClass_, createViewMethod_,
-                                           language, theme,
-                                           config.showLineNumbers,
-                                           static_cast<jfloat>(config.fontSize),
-                                           fontFamily);
+  jobject view = env->CallStaticObjectMethod(
+    viewClass_,
+    createViewMethod_,
+    language,
+    theme,
+    config.showLineNumbers,
+    static_cast<jfloat>(config.fontSize),
+    fontFamily
+  );
 
   // Cleanup local references
   env->DeleteLocalRef(language);
@@ -153,12 +159,7 @@ void AndroidHighlighter::updateJavaView(JNIEnv* env, jobject view, const std::st
     platformTokens.reserve(tokens.size());
 
     for (const auto& token : tokens) {
-      PlatformStyledToken platformToken{
-        token.start,
-        token.length,
-        token.style,
-        token.getCombinedScope()
-      };
+      PlatformStyledToken platformToken{token.start, token.length, token.style, token.getCombinedScope()};
       platformTokens.push_back(std::move(platformToken));
     }
 
@@ -176,10 +177,13 @@ void AndroidHighlighter::cacheJNIReferences(JNIEnv* env) {
   jclass localClass = env->FindClass("com/shikiengine/ShikiHighlighterView");
   if (localClass) {
     viewClass_ = static_cast<jclass>(env->NewGlobalRef(localClass));
-    createViewMethod_ = env->GetStaticMethodID(viewClass_, "create",
-      "(Ljava/lang/String;Ljava/lang/String;ZFLjava/lang/String;)Lcom/shikiengine/ShikiHighlighterView;");
-    updateViewMethod_ = env->GetMethodID(viewClass_, "updateContent",
-      "(Ljava/lang/String;[Lcom/shikiengine/StyledToken;)V");
+    createViewMethod_ = env->GetStaticMethodID(
+      viewClass_,
+      "create",
+      "(Ljava/lang/String;Ljava/lang/String;ZFLjava/lang/String;)Lcom/shikiengine/ShikiHighlighterView;"
+    );
+    updateViewMethod_ =
+      env->GetMethodID(viewClass_, "updateContent", "(Ljava/lang/String;[Lcom/shikiengine/StyledToken;)V");
     env->DeleteLocalRef(localClass);
   }
 }
@@ -193,4 +197,4 @@ void AndroidHighlighter::clearJNIReferences(JNIEnv* env) {
   updateViewMethod_ = nullptr;
 }
 
-} // namespace shiki
+}  // namespace shiki

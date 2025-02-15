@@ -1,10 +1,12 @@
 #pragma once
-#include "Cache.h"
-#include "CacheConfig.h"
 #include <oniguruma.h>
+
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+#include "Cache.h"
+#include "CacheConfig.h"
 
 namespace shiki {
 
@@ -15,8 +17,7 @@ struct CompiledPattern {
 
   CompiledPattern() : regex(nullptr), timestamp(0) {}
 
-  explicit CompiledPattern(regex_t* r)
-    : regex(r), timestamp(time(nullptr)), usageCount(0) {}
+  explicit CompiledPattern(regex_t* r) : regex(r), timestamp(time(nullptr)), usageCount(0) {}
 
   // Prevent copying
   CompiledPattern(const CompiledPattern&) = delete;
@@ -48,7 +49,7 @@ struct CompiledPattern {
 };
 
 class PatternCache {
-public:
+ public:
   static PatternCache& getInstance() {
     static PatternCache instance;
     return instance;
@@ -63,9 +64,9 @@ public:
     // Check if this pattern was previously used frequently
     auto priorityIt = patternPriorities_.find(pattern);
     Cache<std::string, std::shared_ptr<CompiledPattern>>::Priority priority =
-        (priorityIt != patternPriorities_.end() && priorityIt->second > 10)
-        ? Cache<std::string, std::shared_ptr<CompiledPattern>>::Priority::HIGH
-        : Cache<std::string, std::shared_ptr<CompiledPattern>>::Priority::NORMAL;
+      (priorityIt != patternPriorities_.end() && priorityIt->second > 10)
+      ? Cache<std::string, std::shared_ptr<CompiledPattern>>::Priority::HIGH
+      : Cache<std::string, std::shared_ptr<CompiledPattern>>::Priority::NORMAL;
 
     cache_.add(pattern, compiledPattern, patternSize, priority);
   }
@@ -78,7 +79,7 @@ public:
       if (time(nullptr) - compiledPattern->timestamp > cache::PatternCacheConfig::EXPIRY_SECONDS) {
         return nullptr;
       }
-      compiledPattern->timestamp = time(nullptr); // Update timestamp
+      compiledPattern->timestamp = time(nullptr);  // Update timestamp
 
       // Update usage count and priority tracking
       compiledPattern->usageCount++;
@@ -98,10 +99,8 @@ public:
     return cache_.getMetrics();
   }
 
-private:
-  PatternCache()
-      : cache_(cache::PatternCacheConfig::MEMORY_LIMIT,
-               cache::PatternCacheConfig::ENTRY_LIMIT) {}
+ private:
+  PatternCache() : cache_(cache::PatternCacheConfig::MEMORY_LIMIT, cache::PatternCacheConfig::ENTRY_LIMIT) {}
 
   size_t estimatePatternSize(const std::string& pattern, const regex_t* regex) const {
     // Base size + pattern size + estimated regex size
@@ -112,4 +111,4 @@ private:
   std::unordered_map<std::string, size_t> patternPriorities_;  // Track pattern usage counts
 };
 
-} // namespace shiki
+}  // namespace shiki

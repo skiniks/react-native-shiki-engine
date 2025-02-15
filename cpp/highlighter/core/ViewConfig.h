@@ -14,4 +14,4 @@ struct ViewConfig {
   bool selectable = true;
 };
 
-} // namespace shiki
+}  // namespace shiki

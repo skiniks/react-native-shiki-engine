@@ -4,12 +4,12 @@
 @end
 
 @implementation ShikiUpdateCoordinator {
-  NSMutableArray<ShikiUpdateOperation*>* _pendingUpdates;
+  NSMutableArray<ShikiUpdateOperation *> *_pendingUpdates;
   BOOL _isBatchUpdating;
   NSUInteger _batchUpdateCount;
 }
 
-- (instancetype)initWithViewState:(ShikiViewState*)viewState {
+- (instancetype)initWithViewState:(ShikiViewState *)viewState {
   self = [super init];
   if (self) {
     _viewState = viewState;
@@ -49,7 +49,7 @@
   if (!updateBlock)
     return;
 
-  ShikiUpdateOperation* operation = [[ShikiUpdateOperation alloc] init];
+  ShikiUpdateOperation *operation = [[ShikiUpdateOperation alloc] init];
   operation.updateBlock = updateBlock;
   operation.timestamp = CACurrentMediaTime();
 
@@ -61,7 +61,7 @@
 }
 
 - (void)cancelAllUpdates {
-  for (ShikiUpdateOperation* operation in _pendingUpdates) {
+  for (ShikiUpdateOperation *operation in _pendingUpdates) {
     operation.isCancelled = YES;
   }
   [_pendingUpdates removeAllObjects];
@@ -72,16 +72,16 @@
     return;
   }
 
-  NSArray<ShikiUpdateOperation*>* updates = [_pendingUpdates copy];
+  NSArray<ShikiUpdateOperation *> *updates = [_pendingUpdates copy];
   [_pendingUpdates removeAllObjects];
 
-  for (ShikiUpdateOperation* operation in updates) {
+  for (ShikiUpdateOperation *operation in updates) {
     if (operation.isCancelled)
       continue;
 
     @try {
       operation.updateBlock();
-    } @catch (NSException* exception) {
+    } @catch (NSException *exception) {
       if (self.onUpdateComplete) {
         self.onUpdateComplete(NO);
       }

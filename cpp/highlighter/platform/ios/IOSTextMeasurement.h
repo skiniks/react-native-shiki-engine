@@ -10,15 +10,14 @@ typedef void UIFont;
 namespace shiki {
 
 class IOSTextMeasurement : public PlatformMeasurement {
-public:
+ public:
   explicit IOSTextMeasurement(UIFont* font);
   ~IOSTextMeasurement() override = default;
 
-  TextMetrics measureRange(const std::string& text, size_t start, size_t length,
-                          const ThemeStyle& style) override;
+  TextMetrics measureRange(const std::string& text, size_t start, size_t length, const ThemeStyle& style) override;
 
-private:
+ private:
   UIFont* font_;
 };
 
-} // namespace shiki
+}  // namespace shiki

@@ -19,8 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, assign) BOOL hasPendingUpdates;
 @property(nonatomic, readonly) BOOL canAcceptUpdates;
 @property(nonatomic, readonly) BOOL canPerformUpdates;
-@property(nonatomic, strong, readonly, nullable) NSError* lastError;
-@property(nonatomic, readonly, copy, nonnull) NSArray<NSDictionary*>* stateHistory;
+@property(nonatomic, strong, readonly, nullable) NSError *lastError;
+@property(nonatomic, readonly, copy, nonnull)
+    NSArray<NSDictionary *> *stateHistory;
 
 // Update management
 - (void)beginUpdate;
@@ -40,9 +41,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reset;
 
 // Error handling
-- (void)setError:(nullable NSError*)error;
+- (void)setError:(nullable NSError *)error;
 - (void)clearError;
-- (void)attemptRecoveryWithCompletion:(void (^_Nullable)(BOOL succeeded))completion;
+- (void)attemptRecoveryWithCompletion:
+    (void (^_Nullable)(BOOL succeeded))completion;
 
 // State persistence
 - (void)saveStateToDisk;
@@ -52,8 +54,8 @@ NS_ASSUME_NONNULL_BEGIN
 // Helper methods
 - (BOOL)isActive;
 - (BOOL)needsRecovery;
-- (nonnull NSDictionary*)currentState;
-- (void)handleError:(nonnull NSError*)error;
+- (nonnull NSDictionary *)currentState;
+- (void)handleError:(nonnull NSError *)error;
 - (void)resetWithCompletion:(void (^_Nullable)(void))completion;
 
 @end

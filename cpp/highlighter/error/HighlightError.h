@@ -18,20 +18,19 @@ enum class HighlightErrorCode {
 };
 
 class HighlightError : public std::runtime_error {
-public:
-  HighlightError(HighlightErrorCode code, const std::string& message)
-      : std::runtime_error(message), code_(code) {}
+ public:
+  HighlightError(HighlightErrorCode code, const std::string& message) : std::runtime_error(message), code_(code) {}
 
   HighlightErrorCode code() const {
     return code_;
   }
 
-private:
+ private:
   HighlightErrorCode code_;
 };
 
 class ErrorUtils {
-public:
+ public:
   static void throwError(HighlightErrorCode code, const std::string& message) {
     throw HighlightError(code, message);
   }
@@ -49,4 +48,4 @@ public:
   }
 };
 
-} // namespace shiki
+}  // namespace shiki

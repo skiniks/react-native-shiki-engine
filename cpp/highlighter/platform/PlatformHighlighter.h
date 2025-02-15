@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../theme/ThemeStyle.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
+
+#include "../theme/ThemeStyle.h"
 
 namespace shiki {
 
@@ -31,7 +32,7 @@ struct PlatformStyledToken {
 };
 
 class PlatformHighlighter {
-public:
+ public:
   virtual ~PlatformHighlighter() = default;
 
   // Core functionality
@@ -51,10 +52,10 @@ public:
   virtual void invalidateResources() = 0;
   virtual void handleMemoryWarning() = 0;
 
-protected:
+ protected:
   // Shared resources
   std::shared_ptr<Grammar> grammar_;
   std::shared_ptr<Theme> theme_;
 };
 
-} // namespace shiki
+}  // namespace shiki

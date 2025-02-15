@@ -9,4 +9,4 @@ struct TextMetrics {
   bool isValid{false};
 };
 
-} // namespace shiki
+}  // namespace shiki

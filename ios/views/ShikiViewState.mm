@@ -2,26 +2,27 @@
 #import "ShikiPerformanceMonitor.h"
 
 @implementation ShikiViewState {
-  NSMutableArray* _stateHistory;
+  NSMutableArray *_stateHistory;
   NSUInteger _retryAttempts;
   NSUInteger _maxRetryAttempts;
   BOOL _isPerformingBatchUpdates;
   BOOL _isBatchUpdateInProgress;
-  NSMutableArray* _pendingUpdates;
+  NSMutableArray *_pendingUpdates;
   NSUInteger _pendingUpdateCount;
-  void (^_onStateChange)(ShikiViewLifecycleState oldState, ShikiViewLifecycleState newState);
+  void (^_onStateChange)(ShikiViewLifecycleState oldState,
+                         ShikiViewLifecycleState newState);
   BOOL _isInTransition;
   ShikiViewLifecycleState _pendingState;
   BOOL _enableStatePersistence;
-  NSError* _lastError;
+  NSError *_lastError;
   BOOL _isUpdating;
   BOOL _isBatchUpdating;
   BOOL _isTransitioning;
   BOOL _isPaused;
-  NSMutableArray<NSDictionary*>* _history;
+  NSMutableArray<NSDictionary *> *_history;
 }
 
-static NSString* const kStateStorageKey = @"com.shiki.viewstate";
+static NSString *const kStateStorageKey = @"com.shiki.viewstate";
 
 - (instancetype)init {
   if (self = [super init]) {
@@ -69,7 +70,7 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
   _isPaused = NO;
 }
 
-- (NSDictionary*)currentState {
+- (NSDictionary *)currentState {
   return @{
     @"lifecycleState" : @(_lifecycleState),
     @"stateHistory" : _stateHistory ?: @[],
@@ -90,22 +91,26 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
   // Start measuring transition
   [[ShikiPerformanceMonitor sharedMonitor]
       startMeasuring:ShikiPerformanceMetricStateTransition
-         description:[NSString stringWithFormat:@"State transition: %ld -> %ld", (long)oldState,
+         description:[NSString stringWithFormat:@"State transition: %ld -> %ld",
+                                                (long)oldState,
                                                 (long)newState]];
 
   // Add metadata
-  [[ShikiPerformanceMonitor sharedMonitor] addMetadata:@{
-    @"fromState" : @(oldState),
-    @"toState" : @(newState),
-    @"hasPendingUpdates" : @(_pendingUpdates.count > 0),
-    @"isPerformingBatchUpdates" : @(_isPerformingBatchUpdates)
-  }
-                                             forMetric:ShikiPerformanceMetricStateTransition];
+  [[ShikiPerformanceMonitor sharedMonitor]
+      addMetadata:@{
+        @"fromState" : @(oldState),
+        @"toState" : @(newState),
+        @"hasPendingUpdates" : @(_pendingUpdates.count > 0),
+        @"isPerformingBatchUpdates" : @(_isPerformingBatchUpdates)
+      }
+        forMetric:ShikiPerformanceMetricStateTransition];
 
   // Validate and perform transition
   if (![self canTransitionFromState:oldState toState:newState]) {
-    [[ShikiPerformanceMonitor sharedMonitor] stopMeasuring:ShikiPerformanceMetricStateTransition];
-    NSLog(@"Invalid state transition from %ld to %ld", (long)oldState, (long)newState);
+    [[ShikiPerformanceMonitor sharedMonitor]
+        stopMeasuring:ShikiPerformanceMetricStateTransition];
+    NSLog(@"Invalid state transition from %ld to %ld", (long)oldState,
+          (long)newState);
     [self handleInvalidTransition:oldState toState:newState];
     return;
   }
@@ -133,7 +138,8 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
   [self completeStateTransition];
 
   // Stop measuring
-  [[ShikiPerformanceMonitor sharedMonitor] stopMeasuring:ShikiPerformanceMetricStateTransition];
+  [[ShikiPerformanceMonitor sharedMonitor]
+      stopMeasuring:ShikiPerformanceMetricStateTransition];
 }
 
 - (void)beginStateTransition {
@@ -153,48 +159,48 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
                         toState:(ShikiViewLifecycleState)toState {
   // Try to recover from invalid transition
   switch (fromState) {
-    case ShikiViewLifecycleStateUpdating:
-      // Force complete any pending updates
-      [self completeStateTransition];
-      // Then retry transition
+  case ShikiViewLifecycleStateUpdating:
+    // Force complete any pending updates
+    [self completeStateTransition];
+    // Then retry transition
+    [self transitionToState:toState];
+    break;
+
+  case ShikiViewLifecycleStateBackground:
+    if (toState == ShikiViewLifecycleStateActive) {
+      // Need to go through intermediate state
+      [self transitionToState:ShikiViewLifecycleStateInactive];
       [self transitionToState:toState];
-      break;
+    }
+    break;
 
-    case ShikiViewLifecycleStateBackground:
-      if (toState == ShikiViewLifecycleStateActive) {
-        // Need to go through intermediate state
-        [self transitionToState:ShikiViewLifecycleStateInactive];
-        [self transitionToState:toState];
+  case ShikiViewLifecycleStateInactive:
+    // Force reset if trying to transition from Inactive incorrectly
+    [self reset];
+    break;
+
+  case ShikiViewLifecycleStateError:
+    // Must go through reset
+    [self reset];
+    if (toState != ShikiViewLifecycleStateInactive) {
+      [self transitionToState:ShikiViewLifecycleStateInactive];
+      [self transitionToState:toState];
+    }
+    break;
+
+  case ShikiViewLifecycleStateOffscreen:
+    if (toState == ShikiViewLifecycleStateUpdating) {
+      // Queue update for when view becomes visible
+      if (!_pendingUpdates) {
+        _pendingUpdates = [NSMutableArray new];
       }
-      break;
+      _pendingUpdateCount++;
+    }
+    break;
 
-    case ShikiViewLifecycleStateInactive:
-      // Force reset if trying to transition from Inactive incorrectly
-      [self reset];
-      break;
-
-    case ShikiViewLifecycleStateError:
-      // Must go through reset
-      [self reset];
-      if (toState != ShikiViewLifecycleStateInactive) {
-        [self transitionToState:ShikiViewLifecycleStateInactive];
-        [self transitionToState:toState];
-      }
-      break;
-
-    case ShikiViewLifecycleStateOffscreen:
-      if (toState == ShikiViewLifecycleStateUpdating) {
-        // Queue update for when view becomes visible
-        if (!_pendingUpdates) {
-          _pendingUpdates = [NSMutableArray new];
-        }
-        _pendingUpdateCount++;
-      }
-      break;
-
-    default:
-      [self recoverFromInvalidState];
-      break;
+  default:
+    [self recoverFromInvalidState];
+    break;
   }
 }
 
@@ -218,48 +224,50 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
 
   // Add more validation rules
   switch (fromState) {
-    case ShikiViewLifecycleStateInactive:
-      // Can transition to any state except Error
-      if (toState == ShikiViewLifecycleStateError) {
-        // Add update to pending queue instead of direct transition
-        if (!_pendingUpdates) {
-          _pendingUpdates = [NSMutableArray new];
-        }
-        _pendingUpdateCount++;
-        return NO;
+  case ShikiViewLifecycleStateInactive:
+    // Can transition to any state except Error
+    if (toState == ShikiViewLifecycleStateError) {
+      // Add update to pending queue instead of direct transition
+      if (!_pendingUpdates) {
+        _pendingUpdates = [NSMutableArray new];
       }
-      return YES;
-
-    case ShikiViewLifecycleStateActive:
-      // Can transition to any state except Inactive from Active
-      return toState != ShikiViewLifecycleStateInactive;
-
-    case ShikiViewLifecycleStateBackground:
-      // Must go through Inactive before becoming Active
-      if (toState == ShikiViewLifecycleStateActive)
-        return NO;
-      return YES;
-
-    case ShikiViewLifecycleStateOffscreen:
-      // Can't transition directly to Updating or Error
-      return (toState != ShikiViewLifecycleStateUpdating &&
-              toState != ShikiViewLifecycleStateError);
-
-    case ShikiViewLifecycleStateUpdating:
-      // Can only complete or error out from Updating
-      return (toState == ShikiViewLifecycleStateActive || toState == ShikiViewLifecycleStateError);
-
-    case ShikiViewLifecycleStateError:
-      // Must reset to Inactive from Error
-      return toState == ShikiViewLifecycleStateInactive;
-
-    default:
+      _pendingUpdateCount++;
       return NO;
+    }
+    return YES;
+
+  case ShikiViewLifecycleStateActive:
+    // Can transition to any state except Inactive from Active
+    return toState != ShikiViewLifecycleStateInactive;
+
+  case ShikiViewLifecycleStateBackground:
+    // Must go through Inactive before becoming Active
+    if (toState == ShikiViewLifecycleStateActive)
+      return NO;
+    return YES;
+
+  case ShikiViewLifecycleStateOffscreen:
+    // Can't transition directly to Updating or Error
+    return (toState != ShikiViewLifecycleStateUpdating &&
+            toState != ShikiViewLifecycleStateError);
+
+  case ShikiViewLifecycleStateUpdating:
+    // Can only complete or error out from Updating
+    return (toState == ShikiViewLifecycleStateActive ||
+            toState == ShikiViewLifecycleStateError);
+
+  case ShikiViewLifecycleStateError:
+    // Must reset to Inactive from Error
+    return toState == ShikiViewLifecycleStateInactive;
+
+  default:
+    return NO;
   }
 }
 
 - (BOOL)canPerformUpdates {
-  return !_isPaused && !_isUpdating && self.lifecycleState == ShikiViewLifecycleStateActive;
+  return !_isPaused && !_isUpdating &&
+         self.lifecycleState == ShikiViewLifecycleStateActive;
 }
 
 - (BOOL)isActive {
@@ -270,7 +278,7 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
   return !_isPaused && self.lifecycleState == ShikiViewLifecycleStateActive;
 }
 
-- (void)handleError:(NSError*)error {
+- (void)handleError:(NSError *)error {
   _lastError = error;
   _retryAttempts = 0;
   _lifecycleState = ShikiViewLifecycleStateError;
@@ -289,8 +297,8 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
   if (!_enableStatePersistence)
     return;
 
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  NSDictionary* state = @{
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSDictionary *state = @{
     @"lifecycleState" : @(_lifecycleState),
     @"stateHistory" : _stateHistory,
     @"hasPendingUpdates" : @(_pendingUpdates.count > 0)
@@ -304,11 +312,12 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
   if (!_enableStatePersistence)
     return;
 
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  NSDictionary* state = [defaults objectForKey:kStateStorageKey];
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSDictionary *state = [defaults objectForKey:kStateStorageKey];
 
   if (state) {
-    _lifecycleState = (ShikiViewLifecycleState)[state[@"lifecycleState"] integerValue];
+    _lifecycleState =
+        (ShikiViewLifecycleState)[state[@"lifecycleState"] integerValue];
     _stateHistory = [state[@"stateHistory"] mutableCopy];
     if ([state[@"hasPendingUpdates"] boolValue]) {
       if (!_pendingUpdates) {
@@ -363,7 +372,7 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
       update();
     }
     [self endBatchUpdate];
-  } @catch (NSException* exception) {
+  } @catch (NSException *exception) {
     [self cancelBatchUpdate];
     @throw exception;
   }
@@ -391,7 +400,7 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
 }
 
 // Add custom getter for stateHistory
-- (NSArray<NSDictionary*>*)stateHistory {
+- (NSArray<NSDictionary *> *)stateHistory {
   return [_stateHistory copy];
 }
 
@@ -399,11 +408,11 @@ static NSString* const kStateStorageKey = @"com.shiki.viewstate";
   return _pendingUpdates.count > 0;
 }
 
-- (NSError*)lastError {
+- (NSError *)lastError {
   return _lastError;
 }
 
-- (void)setError:(NSError*)error {
+- (void)setError:(NSError *)error {
   _lastError = error;
   if (error) {
     _lifecycleState = ShikiViewLifecycleStateError;

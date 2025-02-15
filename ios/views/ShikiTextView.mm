@@ -7,30 +7,31 @@
 #import <React/RCTBridge.h>
 #import <React/RCTBridgeModule.h>
 
-NSString* const ShikiTextViewSelectionChangedNotification =
+NSString *const ShikiTextViewSelectionChangedNotification =
     @"ShikiTextViewSelectionChangedNotification";
-NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotification";
+NSString *const ShikiTextViewDidCopyNotification =
+    @"ShikiTextViewDidCopyNotification";
 
 @interface ShikiTextView ()
-@property(nonatomic, strong, readwrite) NSTextStorage* optimizedStorage;
+@property(nonatomic, strong, readwrite) NSTextStorage *optimizedStorage;
 @end
 
 @implementation ShikiTextView {
-  NSOperationQueue* _highlightQueue;
+  NSOperationQueue *_highlightQueue;
   BOOL _isHighlighting;
-  NSMutableArray<NSValue*>* _selectableRanges;
-  NSTimer* _updateTimer;
-  ShikiViewState* _viewState;
+  NSMutableArray<NSValue *> *_selectableRanges;
+  NSTimer *_updateTimer;
+  ShikiViewState *_viewState;
   NSTimeInterval _updateDebounceInterval;
-  ShikiSelectionManager* _selectionManager;
+  ShikiSelectionManager *_selectionManager;
   BOOL _enableKeyboardShortcuts;
   BOOL _shouldPreserveStateOnMemoryWarning;
-  ShikiUpdateCoordinator* _updateCoordinator;
-  ShikiVirtualizedContentManager* _virtualizer;
+  ShikiUpdateCoordinator *_updateCoordinator;
+  ShikiVirtualizedContentManager *_virtualizer;
   CGFloat _lineHeight;
   BOOL _isScrolling;
-  __weak ShikiTextView* _weakSelf;
-  NSArray<UIKeyCommand*>* _customKeyCommands;
+  __weak ShikiTextView *_weakSelf;
+  NSArray<UIKeyCommand *> *_customKeyCommands;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -59,9 +60,9 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   _selectionManager = [[ShikiSelectionManager alloc] init];
 
   // Set up selection callback with proper weak reference
-  ShikiTextView* __weak weakSelf = self;
-  _selectionManager.onScopeSelected = ^(NSString* scope, NSRange range) {
-    ShikiTextView* strongSelf = weakSelf;
+  ShikiTextView *__weak weakSelf = self;
+  _selectionManager.onScopeSelected = ^(NSString *scope, NSRange range) {
+    ShikiTextView *strongSelf = weakSelf;
     if (!strongSelf)
       return;
 
@@ -74,10 +75,11 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   _viewState = [[ShikiViewState alloc] init];
 
   // Add observers for lifecycle events
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(applicationWillResignActive:)
-                                               name:UIApplicationWillResignActiveNotification
-                                             object:nil];
+  [[NSNotificationCenter defaultCenter]
+      addObserver:self
+         selector:@selector(applicationWillResignActive:)
+             name:UIApplicationWillResignActiveNotification
+           object:nil];
 
   // Add copy menu item observer
   [self addCopyMenuObserver];
@@ -85,13 +87,16 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   _updateDebounceInterval = 0.1; // 100ms default
 
   // Add long press gesture for scope selection
-  UILongPressGestureRecognizer* longPress =
-      [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
+  UILongPressGestureRecognizer *longPress =
+      [[UILongPressGestureRecognizer alloc]
+          initWithTarget:self
+                  action:@selector(handleLongPress:)];
   [self addGestureRecognizer:longPress];
 
   // Add drag gesture recognizer
-  UIPanGestureRecognizer* dragGesture =
-      [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDragGesture:)];
+  UIPanGestureRecognizer *dragGesture = [[UIPanGestureRecognizer alloc]
+      initWithTarget:self
+              action:@selector(handleDragGesture:)];
   dragGesture.minimumNumberOfTouches = 1;
   dragGesture.maximumNumberOfTouches = 1;
   [self addGestureRecognizer:dragGesture];
@@ -100,25 +105,28 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   [self registerKeyCommands];
 
   // Configure view state callbacks
-  [_viewState addObserver:self
-               forKeyPath:@"lifecycleState"
-                  options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                  context:nil];
+  [_viewState
+      addObserver:self
+       forKeyPath:@"lifecycleState"
+          options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+          context:nil];
 
   _shouldPreserveStateOnMemoryWarning = NO;
 
   // Add memory pressure observer
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(handleMemoryWarning:)
-                                               name:UIApplicationDidReceiveMemoryWarningNotification
-                                             object:nil];
+  [[NSNotificationCenter defaultCenter]
+      addObserver:self
+         selector:@selector(handleMemoryWarning:)
+             name:UIApplicationDidReceiveMemoryWarningNotification
+           object:nil];
 
   // Initialize update coordinator
-  _updateCoordinator = [[ShikiUpdateCoordinator alloc] initWithViewState:_viewState];
+  _updateCoordinator =
+      [[ShikiUpdateCoordinator alloc] initWithViewState:_viewState];
 
   // Set up update coordinator callback with proper weak reference
   _updateCoordinator.onUpdateComplete = ^(BOOL success) {
-    ShikiTextView* strongSelf = weakSelf;
+    ShikiTextView *strongSelf = weakSelf;
     if (!strongSelf)
       return;
 
@@ -128,22 +136,23 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   };
 
   // Configure performance reporting with strong reference
-  ShikiPerformanceReporter* reporter = [ShikiPerformanceReporter sharedReporter];
-  RCTBridge* bridge = [[RCTBridge alloc] init];
+  ShikiPerformanceReporter *reporter =
+      [ShikiPerformanceReporter sharedReporter];
+  RCTBridge *bridge = [[RCTBridge alloc] init];
   [reporter setBridge:bridge]; // Use setter method instead of direct assignment
   reporter.autoReportEnabled = YES;
   [reporter startReporting];
 }
 
-- (void)observeValueForKeyPath:(NSString*)keyPath
+- (void)observeValueForKeyPath:(NSString *)keyPath
                       ofObject:(id)object
-                        change:(NSDictionary<NSKeyValueChangeKey, id>*)change
-                       context:(void*)context {
+                        change:(NSDictionary<NSKeyValueChangeKey, id> *)change
+                       context:(void *)context {
   if ([keyPath isEqualToString:@"lifecycleState"] && object == _viewState) {
-    ShikiViewLifecycleState oldState =
-        (ShikiViewLifecycleState)[[change objectForKey:NSKeyValueChangeOldKey] integerValue];
-    ShikiViewLifecycleState newState =
-        (ShikiViewLifecycleState)[[change objectForKey:NSKeyValueChangeNewKey] integerValue];
+    ShikiViewLifecycleState oldState = (ShikiViewLifecycleState)[
+        [change objectForKey:NSKeyValueChangeOldKey] integerValue];
+    ShikiViewLifecycleState newState = (ShikiViewLifecycleState)[
+        [change objectForKey:NSKeyValueChangeNewKey] integerValue];
     [self handleLifecycleStateChange:oldState toState:newState];
   }
 }
@@ -188,15 +197,17 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 - (void)resetTextStorage {
   if (_optimizedStorage) {
     [_optimizedStorage beginEditing];
-    [_optimizedStorage deleteCharactersInRange:NSMakeRange(0, _optimizedStorage.length)];
+    [_optimizedStorage
+        deleteCharactersInRange:NSMakeRange(0, _optimizedStorage.length)];
     [_optimizedStorage endEditing];
 
     // Get the layout manager and text container
-    NSLayoutManager* layoutManager = self.layoutManager;
-    NSTextContainer* textContainer = self.textContainer;
+    NSLayoutManager *layoutManager = self.layoutManager;
+    NSTextContainer *textContainer = self.textContainer;
 
-    // On iOS, UITextView's NSLayoutManager generally only uses one text container
-    // so we don't need to remove any containers, just ensure our text container is attached
+    // On iOS, UITextView's NSLayoutManager generally only uses one text
+    // container so we don't need to remove any containers, just ensure our text
+    // container is attached
     if (![layoutManager.textContainers containsObject:textContainer]) {
       [layoutManager addTextContainer:textContainer];
     }
@@ -206,7 +217,7 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 
 #pragma mark - UITextViewDelegate
 
-- (void)textViewDidChangeSelection:(UITextView*)textView {
+- (void)textViewDidChangeSelection:(UITextView *)textView {
   if (!_shouldNotifySelectionChanges)
     return;
 
@@ -214,20 +225,26 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 
   // Notify via block if set
   if (_onSelectionChange) {
-    _onSelectionChange(
-        @{@"range" : @{@"start" : @(selectedRange.location), @"length" : @(selectedRange.length)}});
+    _onSelectionChange(@{
+      @"range" : @{
+        @"start" : @(selectedRange.location),
+        @"length" : @(selectedRange.length)
+      }
+    });
   }
 
   // Post notification
   [[NSNotificationCenter defaultCenter]
       postNotificationName:ShikiTextViewSelectionChangedNotification
                     object:self
-                  userInfo:@{@"selectedRange" : [NSValue valueWithRange:selectedRange]}];
+                  userInfo:@{
+                    @"selectedRange" : [NSValue valueWithRange:selectedRange]
+                  }];
 }
 
 #pragma mark - Notifications
 
-- (void)applicationWillResignActive:(NSNotification*)notification {
+- (void)applicationWillResignActive:(NSNotification *)notification {
   // Cancel any pending highlights when app goes to background
   [self cancelPendingHighlights];
 }
@@ -242,7 +259,7 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   [_selectionManager selectWordAtLocation:location];
 }
 
-- (void)selectScope:(NSString*)scope {
+- (void)selectScope:(NSString *)scope {
   [_selectionManager selectScope:scope];
 }
 
@@ -281,10 +298,10 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   [self resetTextStorage];
 }
 
-- (void)setContentWithoutHighlighting:(NSString*)content {
-  __weak ShikiTextView* weakSelf = self;
+- (void)setContentWithoutHighlighting:(NSString *)content {
+  __weak ShikiTextView *weakSelf = self;
   [_updateCoordinator scheduleUpdate:^{
-    ShikiTextView* strongSelf = weakSelf;
+    ShikiTextView *strongSelf = weakSelf;
     if (!strongSelf)
       return;
 
@@ -312,7 +329,7 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
     }
 
     [_viewState endBatchUpdate];
-  } @catch (NSException* exception) {
+  } @catch (NSException *exception) {
     [_viewState cancelBatchUpdate];
     [self handleViewError];
   }
@@ -321,13 +338,14 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 #pragma mark - Copy Support
 
 - (void)addCopyMenuObserver {
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(handleMenuControllerWillShow:)
-                                               name:UIMenuControllerWillShowMenuNotification
-                                             object:nil];
+  [[NSNotificationCenter defaultCenter]
+      addObserver:self
+         selector:@selector(handleMenuControllerWillShow:)
+             name:UIMenuControllerWillShowMenuNotification
+           object:nil];
 }
 
-- (void)handleMenuControllerWillShow:(NSNotification*)notification {
+- (void)handleMenuControllerWillShow:(NSNotification *)notification {
   // Just call setMenuItems directly without creating unused variable
   [[UIMenuController sharedMenuController] setMenuItems:nil];
 }
@@ -335,14 +353,15 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 - (void)copy:(id)sender {
   [super copy:sender];
 
-  NSString* copiedText = [[UIPasteboard generalPasteboard] string];
+  NSString *copiedText = [[UIPasteboard generalPasteboard] string];
   if (self.onCopy) {
     self.onCopy(copiedText);
   }
 
-  [[NSNotificationCenter defaultCenter] postNotificationName:ShikiTextViewDidCopyNotification
-                                                      object:self
-                                                    userInfo:@{@"text" : copiedText}];
+  [[NSNotificationCenter defaultCenter]
+      postNotificationName:ShikiTextViewDidCopyNotification
+                    object:self
+                  userInfo:@{@"text" : copiedText}];
 }
 
 #pragma mark - Text Storage Optimization
@@ -357,107 +376,114 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 #pragma mark - Gesture Recognizers
 
 - (void)addGestureRecognizers {
-  UITapGestureRecognizer* doubleTap =
-      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
+  UITapGestureRecognizer *doubleTap = [[UITapGestureRecognizer alloc]
+      initWithTarget:self
+              action:@selector(handleDoubleTap:)];
   doubleTap.numberOfTapsRequired = 2;
   [self addGestureRecognizer:doubleTap];
 
-  UITapGestureRecognizer* tripleTap =
-      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTripleTap:)];
+  UITapGestureRecognizer *tripleTap = [[UITapGestureRecognizer alloc]
+      initWithTarget:self
+              action:@selector(handleTripleTap:)];
   tripleTap.numberOfTapsRequired = 3;
   [self addGestureRecognizer:tripleTap];
 
   [doubleTap requireGestureRecognizerToFail:tripleTap];
 }
 
-- (void)handleDoubleTap:(UITapGestureRecognizer*)recognizer {
+- (void)handleDoubleTap:(UITapGestureRecognizer *)recognizer {
   CGPoint location = [recognizer locationInView:self];
-  NSUInteger index = [self.layoutManager characterIndexForPoint:location
-                                                inTextContainer:self.textContainer
-                       fractionOfDistanceBetweenInsertionPoints:NULL];
+  NSUInteger index =
+      [self.layoutManager characterIndexForPoint:location
+                                   inTextContainer:self.textContainer
+          fractionOfDistanceBetweenInsertionPoints:NULL];
 
   [_selectionManager selectWordAtLocation:index];
 }
 
-- (void)handleTripleTap:(UITapGestureRecognizer*)recognizer {
+- (void)handleTripleTap:(UITapGestureRecognizer *)recognizer {
   CGPoint location = [recognizer locationInView:self];
-  NSUInteger index = [self.layoutManager characterIndexForPoint:location
-                                                inTextContainer:self.textContainer
-                       fractionOfDistanceBetweenInsertionPoints:NULL];
+  NSUInteger index =
+      [self.layoutManager characterIndexForPoint:location
+                                   inTextContainer:self.textContainer
+          fractionOfDistanceBetweenInsertionPoints:NULL];
 
   [_selectionManager selectLineAtLocation:index];
 }
 
-- (void)handleLongPress:(UILongPressGestureRecognizer*)recognizer {
+- (void)handleLongPress:(UILongPressGestureRecognizer *)recognizer {
   if (recognizer.state != UIGestureRecognizerStateBegan)
     return;
 
   CGPoint location = [recognizer locationInView:self];
-  NSUInteger index = [self.layoutManager characterIndexForPoint:location
-                                                inTextContainer:self.textContainer
-                       fractionOfDistanceBetweenInsertionPoints:NULL];
+  NSUInteger index =
+      [self.layoutManager characterIndexForPoint:location
+                                   inTextContainer:self.textContainer
+          fractionOfDistanceBetweenInsertionPoints:NULL];
 
   [_selectionManager expandToSyntaxScope];
 }
 
-- (void)handleDragGesture:(UIPanGestureRecognizer*)recognizer {
+- (void)handleDragGesture:(UIPanGestureRecognizer *)recognizer {
   if (!_allowsDragSelection)
     return;
 
   CGPoint location = [recognizer locationInView:self];
 
   switch (recognizer.state) {
-    case UIGestureRecognizerStateBegan: {
-      if (_onSelectionDragBegin) {
-        _onSelectionDragBegin(location);
-      }
-      break;
+  case UIGestureRecognizerStateBegan: {
+    if (_onSelectionDragBegin) {
+      _onSelectionDragBegin(location);
+    }
+    break;
+  }
+
+  case UIGestureRecognizerStateChanged: {
+    if (_onSelectionDragMove) {
+      _onSelectionDragMove(location);
+    }
+    NSRange currentSelection = _selectionManager.primarySelectedRange;
+    NSUInteger characterIndex =
+        [self.layoutManager characterIndexForPoint:location
+                                     inTextContainer:self.textContainer
+            fractionOfDistanceBetweenInsertionPoints:NULL];
+    NSRange newRange;
+
+    if (characterIndex < currentSelection.location) {
+      newRange = NSMakeRange(characterIndex,
+                             NSMaxRange(currentSelection) - characterIndex);
+    } else {
+      newRange = NSMakeRange(currentSelection.location,
+                             characterIndex - currentSelection.location);
     }
 
-    case UIGestureRecognizerStateChanged: {
-      if (_onSelectionDragMove) {
-        _onSelectionDragMove(location);
-      }
-      NSRange currentSelection = _selectionManager.primarySelectedRange;
-      NSUInteger characterIndex = [self.layoutManager characterIndexForPoint:location
-                                                             inTextContainer:self.textContainer
-                                    fractionOfDistanceBetweenInsertionPoints:NULL];
-      NSRange newRange;
+    [_selectionManager selectRange:newRange];
+    break;
+  }
 
-      if (characterIndex < currentSelection.location) {
-        newRange = NSMakeRange(characterIndex, NSMaxRange(currentSelection) - characterIndex);
-      } else {
-        newRange =
-            NSMakeRange(currentSelection.location, characterIndex - currentSelection.location);
-      }
-
-      [_selectionManager selectRange:newRange];
-      break;
+  case UIGestureRecognizerStateEnded: {
+    if (_onSelectionDragEnd) {
+      _onSelectionDragEnd(location);
     }
 
-    case UIGestureRecognizerStateEnded: {
-      if (_onSelectionDragEnd) {
-        _onSelectionDragEnd(location);
-      }
-
-      if ([self isCommandKeyPressed]) {
-        [_selectionManager endMultiSelection];
-      }
-      break;
+    if ([self isCommandKeyPressed]) {
+      [_selectionManager endMultiSelection];
     }
+    break;
+  }
 
-    default:
-      break;
+  default:
+    break;
   }
 }
 
 - (BOOL)isCommandKeyPressed {
 #if TARGET_OS_OSX
   if (@available(iOS 13.0, *)) {
-    UIScene* scene = UIApplication.sharedApplication.connectedScenes.anyObject;
+    UIScene *scene = UIApplication.sharedApplication.connectedScenes.anyObject;
     if ([scene isKindOfClass:[UIWindowScene class]]) {
-      UIWindowScene* windowScene = (UIWindowScene*)scene;
-      UIWindow* window = windowScene.windows.firstObject;
+      UIWindowScene *windowScene = (UIWindowScene *)scene;
+      UIWindow *window = windowScene.windows.firstObject;
       return (window.undoManager.modifierFlags & UIKeyModifierCommand) != 0;
     }
   }
@@ -469,15 +495,15 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 
 #pragma mark - Syntax Scopes
 
-- (void)updateSyntaxScopes:(NSArray<NSString*>*)scopes {
+- (void)updateSyntaxScopes:(NSArray<NSString *> *)scopes {
   [_selectionManager updateSyntaxScopes:scopes];
 }
 
-- (NSArray<NSString*>*)getSyntaxScopesAtLocation:(NSUInteger)location {
+- (NSArray<NSString *> *)getSyntaxScopesAtLocation:(NSUInteger)location {
   return [_selectionManager getSyntaxScopesAtLocation:location];
 }
 
-- (void)willMoveToWindow:(UIWindow*)newWindow {
+- (void)willMoveToWindow:(UIWindow *)newWindow {
   [super willMoveToWindow:newWindow];
 
   if (!newWindow) {
@@ -487,8 +513,9 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
     [_updateCoordinator pauseUpdates];
   }
 
-  ShikiViewLifecycleState newState =
-      newWindow ? ShikiViewLifecycleStateActive : ShikiViewLifecycleStateOffscreen;
+  ShikiViewLifecycleState newState = newWindow
+                                         ? ShikiViewLifecycleStateActive
+                                         : ShikiViewLifecycleStateOffscreen;
 
   [_viewState transitionToState:newState];
 }
@@ -513,12 +540,13 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   if (!_enableKeyboardShortcuts)
     return;
 
-  UIKeyCommand* selectAll = [UIKeyCommand keyCommandWithInput:@"a"
-                                                modifierFlags:UIKeyModifierCommand
-                                                       action:@selector(selectAll:)];
+  UIKeyCommand *selectAll =
+      [UIKeyCommand keyCommandWithInput:@"a"
+                          modifierFlags:UIKeyModifierCommand
+                                 action:@selector(selectAll:)];
   selectAll.discoverabilityTitle = @"Select All";
 
-  UIKeyCommand* copy = [UIKeyCommand keyCommandWithInput:@"c"
+  UIKeyCommand *copy = [UIKeyCommand keyCommandWithInput:@"c"
                                            modifierFlags:UIKeyModifierCommand
                                                   action:@selector(copy:)];
   copy.discoverabilityTitle = @"Copy";
@@ -526,30 +554,30 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   _customKeyCommands = @[ selectAll, copy ];
 }
 
-- (NSArray<UIKeyCommand*>*)keyCommands {
+- (NSArray<UIKeyCommand *> *)keyCommands {
   return _customKeyCommands;
 }
 
 #pragma mark - Keyboard Command Handlers
 
-- (void)handleSelectAll:(UIKeyCommand*)command {
+- (void)handleSelectAll:(UIKeyCommand *)command {
   _selectionManager.selectionMode = ShikiSelectionModeNormal;
   [self selectAll:nil];
 }
 
-- (void)handleExpandSelection:(UIKeyCommand*)command {
+- (void)handleExpandSelection:(UIKeyCommand *)command {
   [_selectionManager expandSelection];
 }
 
-- (void)handleSelectNextOccurrence:(UIKeyCommand*)command {
+- (void)handleSelectNextOccurrence:(UIKeyCommand *)command {
   [_selectionManager selectNextOccurrence];
 }
 
-- (void)handleUndo:(UIKeyCommand*)command {
+- (void)handleUndo:(UIKeyCommand *)command {
   [_selectionManager undo];
 }
 
-- (void)handleRedo:(UIKeyCommand*)command {
+- (void)handleRedo:(UIKeyCommand *)command {
   [_selectionManager redo];
 }
 
@@ -559,11 +587,11 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   }
 }
 
-- (void)handleFindNext:(UIKeyCommand*)command {
+- (void)handleFindNext:(UIKeyCommand *)command {
   [_selectionManager selectNextMatch];
 }
 
-- (void)handleFindPrevious:(UIKeyCommand*)command {
+- (void)handleFindPrevious:(UIKeyCommand *)command {
   [_selectionManager selectPreviousMatch];
 }
 
@@ -574,34 +602,34 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
 
   @try {
     switch (newState) {
-      case ShikiViewLifecycleStateActive:
-        [self handleActiveState];
-        break;
+    case ShikiViewLifecycleStateActive:
+      [self handleActiveState];
+      break;
 
-      case ShikiViewLifecycleStateBackground:
-        [self handleBackgroundState];
-        break;
+    case ShikiViewLifecycleStateBackground:
+      [self handleBackgroundState];
+      break;
 
-      case ShikiViewLifecycleStateOffscreen:
-        [self handleOffscreenState];
-        break;
+    case ShikiViewLifecycleStateOffscreen:
+      [self handleOffscreenState];
+      break;
 
-      case ShikiViewLifecycleStateError:
-        [self handleErrorState];
-        break;
+    case ShikiViewLifecycleStateError:
+      [self handleErrorState];
+      break;
 
-      case ShikiViewLifecycleStateUpdating:
-        [self handleUpdatingState];
-        break;
+    case ShikiViewLifecycleStateUpdating:
+      [self handleUpdatingState];
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
 
     // Complete transition if successful
     [_viewState completeStateTransition];
 
-  } @catch (NSException* exception) {
+  } @catch (NSException *exception) {
     // Cancel transition on error
     [_viewState cancelStateTransition];
     [self handleViewError];
@@ -640,19 +668,21 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   _updateTimer = nil;
 
   if (self.onError) {
-    NSError* error =
-        [NSError errorWithDomain:@"ShikiTextView"
-                            code:-1
-                        userInfo:@{NSLocalizedDescriptionKey : @"View entered error state"}];
+    NSError *error = [NSError
+        errorWithDomain:@"ShikiTextView"
+                   code:-1
+               userInfo:@{
+                 NSLocalizedDescriptionKey : @"View entered error state"
+               }];
     self.onError(error);
   }
 }
 
-- (void)handleAppDidEnterBackground:(NSNotification*)notification {
+- (void)handleAppDidEnterBackground:(NSNotification *)notification {
   [_viewState transitionToState:ShikiViewLifecycleStateBackground];
 }
 
-- (void)handleAppWillEnterForeground:(NSNotification*)notification {
+- (void)handleAppWillEnterForeground:(NSNotification *)notification {
   if (self.window) {
     [_viewState transitionToState:ShikiViewLifecycleStateActive];
   }
@@ -678,7 +708,7 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   [self handleError:_viewState.lastError];
 }
 
-- (void)handleMemoryWarning:(NSNotification*)notification {
+- (void)handleMemoryWarning:(NSNotification *)notification {
   if (!_shouldPreserveStateOnMemoryWarning) {
     [self clearMemoryHeavyResources];
   } else {
@@ -690,7 +720,8 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   // Clear optimized storage
   if (_optimizedStorage) {
     [_optimizedStorage beginEditing];
-    [_optimizedStorage deleteCharactersInRange:NSMakeRange(0, _optimizedStorage.length)];
+    [_optimizedStorage
+        deleteCharactersInRange:NSMakeRange(0, _optimizedStorage.length)];
     [_optimizedStorage endEditing];
     _optimizedStorage = nil;
   }
@@ -729,11 +760,12 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   CGPoint contentOffset = self.contentOffset;
 
   // Calculate visible lines
-  NSUInteger firstLine = [_virtualizer getEstimatedLineAtPosition:contentOffset.y
-                                                       lineHeight:_lineHeight];
-  NSUInteger lastLine =
-      [_virtualizer getEstimatedLineAtPosition:(contentOffset.y + visibleRect.size.height)
+  NSUInteger firstLine =
+      [_virtualizer getEstimatedLineAtPosition:contentOffset.y
                                     lineHeight:_lineHeight];
+  NSUInteger lastLine = [_virtualizer
+      getEstimatedLineAtPosition:(contentOffset.y + visibleRect.size.height)
+                      lineHeight:_lineHeight];
 
   [_virtualizer updateViewport:firstLine
                lastVisibleLine:lastLine
@@ -748,23 +780,24 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   [self requestUpdateForRange:visibleRange];
 }
 
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
   [self updateViewport];
 }
 
-- (void)scrollViewWillBeginDragging:(UIScrollView*)scrollView {
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
   _isScrolling = YES;
   [self updateViewport];
 }
 
-- (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
+                  willDecelerate:(BOOL)decelerate {
   if (!decelerate) {
     _isScrolling = NO;
     [self updateViewport];
   }
 }
 
-- (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
   _isScrolling = NO;
   [self updateViewport];
 }
@@ -779,22 +812,24 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
   }
 }
 
-- (void)handleError:(NSError*)error {
+- (void)handleError:(NSError *)error {
   if (self.onError) {
     self.onError(error);
   }
 }
 
-- (NSArray<NSValue*>*)getSelectableRanges {
+- (NSArray<NSValue *> *)getSelectableRanges {
   return [_selectableRanges copy];
 }
 
-- (NSArray<NSValue*>*)findText:(NSString*)text options:(NSRegularExpressionOptions)options {
-  NSMutableArray<NSValue*>* ranges = [NSMutableArray new];
-  NSError* error = nil;
-  NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:text
-                                                                         options:options
-                                                                           error:&error];
+- (NSArray<NSValue *> *)findText:(NSString *)text
+                         options:(NSRegularExpressionOptions)options {
+  NSMutableArray<NSValue *> *ranges = [NSMutableArray new];
+  NSError *error = nil;
+  NSRegularExpression *regex =
+      [NSRegularExpression regularExpressionWithPattern:text
+                                                options:options
+                                                  error:&error];
   if (error) {
     if (self.onError) {
       self.onError(error);
@@ -802,12 +837,13 @@ NSString* const ShikiTextViewDidCopyNotification = @"ShikiTextViewDidCopyNotific
     return @[];
   }
 
-  NSString* content = self.text;
-  NSArray<NSTextCheckingResult*>* matches = [regex matchesInString:content
-                                                           options:0
-                                                             range:NSMakeRange(0, content.length)];
+  NSString *content = self.text;
+  NSArray<NSTextCheckingResult *> *matches =
+      [regex matchesInString:content
+                     options:0
+                       range:NSMakeRange(0, content.length)];
 
-  for (NSTextCheckingResult* match in matches) {
+  for (NSTextCheckingResult *match in matches) {
     [ranges addObject:[NSValue valueWithRange:match.range]];
   }
 

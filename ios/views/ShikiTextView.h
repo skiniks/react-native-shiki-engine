@@ -7,17 +7,19 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString* const ShikiTextViewSelectionChangedNotification;
-extern NSString* const ShikiTextViewDidCopyNotification;
+extern NSString *const ShikiTextViewSelectionChangedNotification;
+extern NSString *const ShikiTextViewDidCopyNotification;
 
 @interface ShikiTextView : UITextView <UITextViewDelegate>
 
 // Event callbacks
 @property(nonatomic, copy, nullable) RCTDirectEventBlock onSelectionChange;
 @property(nonatomic, copy, nullable) RCTDirectEventBlock onVisibleRangeChanged;
-@property(nonatomic, copy, nullable) void (^onCopy)(NSString* copiedText);
-@property(nonatomic, copy, nullable) void (^onSyntaxScopeSelected)(NSString* scope, NSRange range);
-@property(nonatomic, copy, nullable) void (^onKeyCommandTriggered)(NSString* command);
+@property(nonatomic, copy, nullable) void (^onCopy)(NSString *copiedText);
+@property(nonatomic, copy, nullable) void (^onSyntaxScopeSelected)
+    (NSString *scope, NSRange range);
+@property(nonatomic, copy, nullable) void (^onKeyCommandTriggered)
+    (NSString *command);
 
 // State flags
 @property(nonatomic, assign) BOOL shouldNotifySelectionChanges;
@@ -29,30 +31,37 @@ extern NSString* const ShikiTextViewDidCopyNotification;
 @property(nonatomic, assign) BOOL isScrolling;
 
 // Core components
-@property(nonatomic, strong, readonly) ShikiViewState* viewState;
-@property(nonatomic, strong, readonly) ShikiSelectionManager* selectionManager;
-@property(nonatomic, strong, readonly) ShikiVirtualizedContentManager* virtualizer;
-@property(nonatomic, strong, readonly) ShikiUpdateCoordinator* updateCoordinator;
-@property(nonatomic, strong, readonly) NSTextStorage* optimizedStorage;
+@property(nonatomic, strong, readonly) ShikiViewState *viewState;
+@property(nonatomic, strong, readonly) ShikiSelectionManager *selectionManager;
+@property(nonatomic, strong, readonly)
+    ShikiVirtualizedContentManager *virtualizer;
+@property(nonatomic, strong, readonly)
+    ShikiUpdateCoordinator *updateCoordinator;
+@property(nonatomic, strong, readonly) NSTextStorage *optimizedStorage;
 @property(nonatomic, assign) NSTimeInterval updateDebounceInterval;
 
 // Selection handling
-@property(nonatomic, copy, nullable) void (^onSelectionDragBegin)(CGPoint location);
-@property(nonatomic, copy, nullable) void (^onSelectionDragMove)(CGPoint location);
-@property(nonatomic, copy, nullable) void (^onSelectionDragEnd)(CGPoint location);
+@property(nonatomic, copy, nullable) void (^onSelectionDragBegin)
+    (CGPoint location);
+@property(nonatomic, copy, nullable) void (^onSelectionDragMove)
+    (CGPoint location);
+@property(nonatomic, copy, nullable) void (^onSelectionDragEnd)
+    (CGPoint location);
 
 // Error handling
-@property(nonatomic, copy, nullable) void (^onError)(NSError* error);
-@property(nonatomic, copy, nullable) void (^onLifecycleStateChange)(ShikiViewLifecycleState state);
+@property(nonatomic, copy, nullable) void (^onError)(NSError *error);
+@property(nonatomic, copy, nullable) void (^onLifecycleStateChange)
+    (ShikiViewLifecycleState state);
 
 // Selection methods
 - (void)selectLine:(NSInteger)lineNumber;
 - (void)selectWord:(NSInteger)location;
-- (void)selectScope:(NSString*)scope;
-- (NSArray<NSValue*>*)getSelectableRanges;
+- (void)selectScope:(NSString *)scope;
+- (NSArray<NSValue *> *)getSelectableRanges;
 
 // Search methods
-- (NSArray<NSValue*>*)findText:(NSString*)text options:(NSRegularExpressionOptions)options;
+- (NSArray<NSValue *> *)findText:(NSString *)text
+                         options:(NSRegularExpressionOptions)options;
 - (void)selectNextMatch;
 - (void)selectPreviousMatch;
 - (void)selectAllMatches;
@@ -67,8 +76,8 @@ extern NSString* const ShikiTextViewDidCopyNotification;
 - (void)resetTextStorage;
 - (void)cancelPendingHighlights;
 - (void)optimizeForLargeContent;
-- (void)setContentWithoutHighlighting:(NSString*)content;
-- (void)handleError:(NSError*)error;
+- (void)setContentWithoutHighlighting:(NSString *)content;
+- (void)handleError:(NSError *)error;
 
 // Update management
 - (void)suspendUpdates;
@@ -77,9 +86,10 @@ extern NSString* const ShikiTextViewDidCopyNotification;
 
 // Viewport tracking
 - (void)updateViewport;
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView;
-- (void)scrollViewWillBeginDragging:(UIScrollView*)scrollView;
-- (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate;
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView;
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView;
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
+                  willDecelerate:(BOOL)decelerate;
 
 // Batch updates
 - (void)beginBatchUpdates;

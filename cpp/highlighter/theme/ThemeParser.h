@@ -1,18 +1,20 @@
 #pragma once
+#include <rapidjson/document.h>
+
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "../text/TokenRange.h"
 #include "Theme.h"
 #include "ThemeStyle.h"
-#include <memory>
-#include <rapidjson/document.h>
-#include <string>
-#include <vector>
 
 namespace shiki {
 
 class Theme;
 
 class ThemeParser {
-public:
+ public:
   explicit ThemeParser(Theme* theme) : theme_(theme) {}
 
   // Parse simple theme style
@@ -27,9 +29,9 @@ public:
   static ThemeStyle parseStyle(const std::string& json);
   static std::vector<ThemeStyle> parseStyles(const std::string& json);
 
-private:
+ private:
   Theme* theme_;
   friend class Theme;
 };
 
-} // namespace shiki
+}  // namespace shiki

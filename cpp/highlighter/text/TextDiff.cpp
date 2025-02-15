@@ -1,12 +1,11 @@
 #include "TextDiff.h"
+
 #include <algorithm>
 
 namespace shiki {
 
-std::vector<TextRange> TextDiff::findChangedRegions(const std::string& oldText,
-                                                    const std::string& newText,
-                                                    size_t contextLines) {
-
+std::vector<TextRange>
+TextDiff::findChangedRegions(const std::string& oldText, const std::string& newText, size_t contextLines) {
   std::vector<TextRange> changes;
 
   // Simple character-by-character diff
@@ -57,8 +56,7 @@ size_t TextDiff::findLineNumber(const std::string& text, size_t position) {
   size_t pos = 0;
 
   while (pos < position && pos < text.length()) {
-    if (text[pos] == '\n')
-      line++;
+    if (text[pos] == '\n') line++;
     pos++;
   }
 
@@ -72,8 +70,7 @@ TextRange TextDiff::getLineRange(const std::string& text, size_t lineNumber) {
 
   // Find line start
   while (currentLine < lineNumber && pos < text.length()) {
-    if (text[pos] == '\n')
-      currentLine++;
+    if (text[pos] == '\n') currentLine++;
     pos++;
   }
   range.start = pos;
@@ -87,9 +84,7 @@ TextRange TextDiff::getLineRange(const std::string& text, size_t lineNumber) {
   return range;
 }
 
-void TextDiff::expandRangeToFullLines(TextRange& range, const std::string& text,
-                                      size_t contextLines) {
-
+void TextDiff::expandRangeToFullLines(TextRange& range, const std::string& text, size_t contextLines) {
   // Find start of first line
   size_t start = range.start;
   while (start > 0 && text[start - 1] != '\n') {
@@ -115,8 +110,7 @@ void TextDiff::expandRangeToFullLines(TextRange& range, const std::string& text,
     while (end < text.length() && text[end] != '\n') {
       end++;
     }
-    if (end < text.length())
-      end++;
+    if (end < text.length()) end++;
   }
 
   range.start = start;
@@ -124,9 +118,7 @@ void TextDiff::expandRangeToFullLines(TextRange& range, const std::string& text,
 }
 
 std::vector<TextRange> TextDiff::mergeRanges(const std::vector<TextRange>& ranges, size_t maxGap) {
-
-  if (ranges.empty())
-    return ranges;
+  if (ranges.empty()) return ranges;
 
   std::vector<TextRange> merged;
   TextRange current = ranges[0];
@@ -147,4 +139,4 @@ std::vector<TextRange> TextDiff::mergeRanges(const std::vector<TextRange>& range
   return merged;
 }
 
-} // namespace shiki
+}  // namespace shiki

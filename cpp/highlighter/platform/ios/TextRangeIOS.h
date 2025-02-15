@@ -8,7 +8,7 @@ namespace shiki {
 
 class TextRangeIOS : public TextRange {
 public:
-  void measure(NSString* text, UIFont* font) override;
+  void measure(NSString *text, UIFont *font) override;
 };
 
 } // namespace shiki

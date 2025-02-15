@@ -1,15 +1,17 @@
 #pragma once
-#include "../core/Constants.h"
-#include "../tokenizer/Token.h"
-#include "ThemeColor.h"
-#include "ThemeStyle.h"
+#include <rapidjson/document.h>
+
 #include <map>
 #include <memory>
-#include <rapidjson/document.h>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "../core/Constants.h"
+#include "../tokenizer/Token.h"
+#include "ThemeColor.h"
+#include "ThemeStyle.h"
 
 namespace shiki {
 
@@ -23,13 +25,13 @@ struct ThemeRule {
 };
 
 class Theme {
-public:
+ public:
   explicit Theme(const std::string& name = "") : name(name), background_(""), foreground_("") {}
 
   std::string name;
-  std::string type = "dark"; // "dark" or "light"
+  std::string type = "dark";  // "dark" or "light"
   std::vector<ThemeRule> rules;
-  std::vector<ThemeColor> colors; // Editor colors (e.g. background, foreground)
+  std::vector<ThemeColor> colors;  // Editor colors (e.g. background, foreground)
   std::unordered_map<std::string, std::string> colorReplacements;
 
   // Style management
@@ -69,7 +71,7 @@ public:
 
   static std::shared_ptr<Theme> fromJson(const std::string& content);
 
-private:
+ private:
   friend class ThemeParser;
 
   // Find most specific matching rule for a scope
@@ -88,4 +90,4 @@ private:
   std::map<std::string, ThemeStyle> semanticTokens_;
 };
 
-} // namespace shiki
+}  // namespace shiki

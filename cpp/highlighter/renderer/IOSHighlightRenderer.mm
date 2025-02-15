@@ -6,7 +6,7 @@
 
 namespace shiki {
 
-IOSHighlightRenderer& IOSHighlightRenderer::getInstance() {
+IOSHighlightRenderer &IOSHighlightRenderer::getInstance() {
   static IOSHighlightRenderer instance;
   return instance;
 }
@@ -14,15 +14,17 @@ IOSHighlightRenderer& IOSHighlightRenderer::getInstance() {
 IOSHighlightRenderer::IOSHighlightRenderer() {
   // Create serial queues for style and layout work
   styleQueue_ = dispatch_queue_create("com.shiki.style", DISPATCH_QUEUE_SERIAL);
-  layoutQueue_ = dispatch_queue_create("com.shiki.layout", DISPATCH_QUEUE_SERIAL);
+  layoutQueue_ =
+      dispatch_queue_create("com.shiki.layout", DISPATCH_QUEUE_SERIAL);
 }
 
 IOSHighlightRenderer::~IOSHighlightRenderer() {
   // No need to call dispatch_release with ARC
 }
 
-void IOSHighlightRenderer::applyLineNumberStyle(const ThemeStyle& style, void* lineNumberView) {
-  LineNumberView* view = (__bridge LineNumberView*)lineNumberView;
+void IOSHighlightRenderer::applyLineNumberStyle(const ThemeStyle &style,
+                                                void *lineNumberView) {
+  LineNumberView *view = (__bridge LineNumberView *)lineNumberView;
 
   auto lineStyle = style.getLineNumberStyle();
 
@@ -40,8 +42,8 @@ void IOSHighlightRenderer::applyLineNumberStyle(const ThemeStyle& style, void* l
 
   // Apply font styling
   if (view.font) {
-    UIFont* baseFont = view.font;
-    UIFontDescriptor* descriptor = baseFont.fontDescriptor;
+    UIFont *baseFont = view.font;
+    UIFontDescriptor *descriptor = baseFont.fontDescriptor;
     UIFontDescriptorSymbolicTraits traits = descriptor.symbolicTraits;
 
     if (lineStyle.bold) {
@@ -51,29 +53,31 @@ void IOSHighlightRenderer::applyLineNumberStyle(const ThemeStyle& style, void* l
       traits |= UIFontDescriptorTraitItalic;
     }
 
-    UIFontDescriptor* newDescriptor = [descriptor fontDescriptorWithSymbolicTraits:traits];
-    UIFont* styledFont = [UIFont fontWithDescriptor:newDescriptor size:baseFont.pointSize];
+    UIFontDescriptor *newDescriptor =
+        [descriptor fontDescriptorWithSymbolicTraits:traits];
+    UIFont *styledFont = [UIFont fontWithDescriptor:newDescriptor
+                                               size:baseFont.pointSize];
     if (styledFont) {
       view.font = styledFont;
     }
   }
 }
 
-void* IOSHighlightRenderer::createView(const ViewConfig& config) {
-  ShikiTextView* textView = [[ShikiTextView alloc] initWithFrame:CGRectZero];
+void *IOSHighlightRenderer::createView(const ViewConfig &config) {
+  ShikiTextView *textView = [[ShikiTextView alloc] initWithFrame:CGRectZero];
   configureTextView(textView, config);
 
   // Store config for later use
-  viewConfigs_[(__bridge void*)textView] = config;
+  viewConfigs_[(__bridge void *)textView] = config;
 
-  return (__bridge void*)textView;
+  return (__bridge void *)textView;
 }
 
-void IOSHighlightRenderer::destroyView(void* view) {
+void IOSHighlightRenderer::destroyView(void *view) {
   if (!view)
     return;
 
-  ShikiTextView* textView = (__bridge ShikiTextView*)view;
+  ShikiTextView *textView = (__bridge ShikiTextView *)view;
   [textView cancelPendingHighlights];
   [textView prepareForReuse];
 
@@ -81,8 +85,9 @@ void IOSHighlightRenderer::destroyView(void* view) {
   viewConfigs_.erase(view);
 }
 
-void IOSHighlightRenderer::updateView(void* view, const std::vector<Token>& tokens,
-                                      const std::string& text) {
+void IOSHighlightRenderer::updateView(void *view,
+                                      const std::vector<Token> &tokens,
+                                      const std::string &text) {
   if (!view)
     return;
 
@@ -99,27 +104,28 @@ void IOSHighlightRenderer::updateView(void* view, const std::vector<Token>& toke
   processStylesInBackground(std::move(work));
 }
 
-void IOSHighlightRenderer::configureTextView(UITextView* textView, const ViewConfig& config) {
+void IOSHighlightRenderer::configureTextView(UITextView *textView,
+                                             const ViewConfig &config) {
   textView.editable = NO;
   textView.selectable = config.selectable;
   textView.scrollEnabled = config.scrollEnabled;
   textView.backgroundColor = [UIColor clearColor];
   textView.textContainer.lineFragmentPadding = 0;
-  textView.textContainerInset = *(const UIEdgeInsets*)&config.contentInset;
+  textView.textContainerInset = *(const UIEdgeInsets *)&config.contentInset;
 
   // Set initial font
   FontConfig fontConfig;
   fontConfig.fontSize = config.fontSize;
   fontConfig.fontFamily = config.fontFamily;
-  UIFont* font = FontManager::getInstance().createFont(fontConfig);
+  UIFont *font = FontManager::getInstance().createFont(fontConfig);
   if (font) {
     textView.font = font;
   }
 }
 
 void IOSHighlightRenderer::renderIncrementalHighlights(
-    const std::vector<IncrementalUpdate>& updates, const std::string& text,
-    void* nativeView) {
+    const std::vector<IncrementalUpdate> &updates, const std::string &text,
+    void *nativeView) {
 
   if (!nativeView)
     return;
@@ -129,8 +135,9 @@ void IOSHighlightRenderer::renderIncrementalHighlights(
 
   // Convert updates to tokens
   std::vector<Token> allTokens;
-  for (const auto& update : updates) {
-    allTokens.insert(allTokens.end(), update.tokens.begin(), update.tokens.end());
+  for (const auto &update : updates) {
+    allTokens.insert(allTokens.end(), update.tokens.begin(),
+                     update.tokens.end());
   }
 
   // Create work package
@@ -143,39 +150,42 @@ void IOSHighlightRenderer::renderIncrementalHighlights(
   processStylesInBackground(std::move(work));
 }
 
-void IOSHighlightRenderer::processStylesInBackground(StyleComputationWork work) {
+void IOSHighlightRenderer::processStylesInBackground(
+    StyleComputationWork work) {
   pendingWorkCount_++;
 
   // Capture weak reference to view
-  __weak ShikiTextView* weakView = (__bridge ShikiTextView*)work.targetView;
+  __weak ShikiTextView *weakView = (__bridge ShikiTextView *)work.targetView;
 
   // Create work item
   auto styleTask = [this, work = std::move(work), weakView]() {
     @autoreleasepool {
       // Check if view still exists
-      ShikiTextView* strongView = weakView;
+      ShikiTextView *strongView = weakView;
       if (!strongView) {
         pendingWorkCount_--;
         return;
       }
 
       // Create attributed string
-      NSString* nsText = @(work.text.c_str());
-      NSMutableAttributedString* attributedString;
+      NSString *nsText = @(work.text.c_str());
+      NSMutableAttributedString *attributedString;
 
       if (work.isIncremental) {
         // For incremental updates, start with existing text
         attributedString = strongView.attributedText.mutableCopy;
       } else {
-        attributedString = [[NSMutableAttributedString alloc] initWithString:nsText];
+        attributedString =
+            [[NSMutableAttributedString alloc] initWithString:nsText];
       }
 
-      UIFont* baseFont = getCurrentFont();
+      UIFont *baseFont = getCurrentFont();
 
       // Apply styles in background
-      for (const auto& token : work.tokens) {
+      for (const auto &token : work.tokens) {
         NSRange range = NSMakeRange(token.start, token.length);
-        applyStyle(token.style, (__bridge void*)attributedString, range, baseFont);
+        applyStyle(token.style, (__bridge void *)attributedString, range,
+                   baseFont);
       }
 
       // Move to layout queue for final processing
@@ -184,40 +194,42 @@ void IOSHighlightRenderer::processStylesInBackground(StyleComputationWork work) 
   };
 
   // Determine priority based on whether this is an incremental update
-  WorkPriority priority = work.isIncremental ? WorkPriority::HIGH : WorkPriority::NORMAL;
+  WorkPriority priority =
+      work.isIncremental ? WorkPriority::HIGH : WorkPriority::NORMAL;
 
   // Estimate work cost based on token count and text size
-  size_t estimatedCost = work.tokens.size() * sizeof(Token) + work.text.length();
+  size_t estimatedCost =
+      work.tokens.size() * sizeof(Token) + work.text.length();
 
   // Submit to work prioritizer
   WorkPrioritizer::getInstance().submitWork(
-    WorkItem(std::move(styleTask), priority, estimatedCost, "style_computation", work.isIncremental)
-  );
+      WorkItem(std::move(styleTask), priority, estimatedCost,
+               "style_computation", work.isIncremental));
 }
 
-void IOSHighlightRenderer::computeLayoutInBackground(NSAttributedString* styledText,
-                                                     void* targetView) {
+void IOSHighlightRenderer::computeLayoutInBackground(
+    NSAttributedString *styledText, void *targetView) {
 
   dispatch_async(layoutQueue_, ^{
     @autoreleasepool {
-      __weak ShikiTextView* weakView = (__bridge ShikiTextView*)targetView;
-      ShikiTextView* strongView = weakView;
+      __weak ShikiTextView *weakView = (__bridge ShikiTextView *)targetView;
+      ShikiTextView *strongView = weakView;
       if (!strongView) {
         pendingWorkCount_--;
         return;
       }
 
       // Create text container for layout
-      NSTextContainer* container = [[NSTextContainer alloc] init];
+      NSTextContainer *container = [[NSTextContainer alloc] init];
       container.size = strongView.bounds.size;
       container.widthTracksTextView = YES;
 
       // Create layout manager
-      NSLayoutManager* layoutManager = [[NSLayoutManager alloc] init];
+      NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
       [layoutManager addTextContainer:container];
 
       // Create temporary storage
-      NSTextStorage* storage = [[NSTextStorage alloc] init];
+      NSTextStorage *storage = [[NSTextStorage alloc] init];
       [storage addLayoutManager:layoutManager];
       [storage setAttributedString:styledText];
 
@@ -230,12 +242,13 @@ void IOSHighlightRenderer::computeLayoutInBackground(NSAttributedString* styledT
   });
 }
 
-void IOSHighlightRenderer::applyStylesToViewOnMain(void* view, NSAttributedString* text) {
+void IOSHighlightRenderer::applyStylesToViewOnMain(void *view,
+                                                   NSAttributedString *text) {
 
   dispatch_async(dispatch_get_main_queue(), ^{
     @autoreleasepool {
-      __weak ShikiTextView* weakView = (__bridge ShikiTextView*)view;
-      ShikiTextView* strongView = weakView;
+      __weak ShikiTextView *weakView = (__bridge ShikiTextView *)view;
+      ShikiTextView *strongView = weakView;
       if (!strongView) {
         pendingWorkCount_--;
         return;
@@ -250,30 +263,36 @@ void IOSHighlightRenderer::applyStylesToViewOnMain(void* view, NSAttributedStrin
   });
 }
 
-void IOSHighlightRenderer::cancelPendingWork(void* view) {
-  ShikiTextView* textView = (__bridge ShikiTextView*)view;
+void IOSHighlightRenderer::cancelPendingWork(void *view) {
+  ShikiTextView *textView = (__bridge ShikiTextView *)view;
   [textView cancelPendingHighlights];
 }
 
-void IOSHighlightRenderer::applyStyle(const ThemeStyle& style, void* attributedString,
-                                      NSRange range, UIFont* baseFont) {
-  NSMutableAttributedString* attrStr = (__bridge NSMutableAttributedString*)attributedString;
+void IOSHighlightRenderer::applyStyle(const ThemeStyle &style,
+                                      void *attributedString, NSRange range,
+                                      UIFont *baseFont) {
+  NSMutableAttributedString *attrStr =
+      (__bridge NSMutableAttributedString *)attributedString;
 
   // Apply text color
   if (!style.color.empty()) {
     auto color = ThemeColor::fromHex(style.color);
-    [attrStr addAttribute:NSForegroundColorAttributeName value:color.toUIColor() range:range];
+    [attrStr addAttribute:NSForegroundColorAttributeName
+                    value:color.toUIColor()
+                    range:range];
   }
 
   // Apply background color
   if (!style.backgroundColor.empty()) {
     auto bgColor = ThemeColor::fromHex(style.backgroundColor);
-    [attrStr addAttribute:NSBackgroundColorAttributeName value:bgColor.toUIColor() range:range];
+    [attrStr addAttribute:NSBackgroundColorAttributeName
+                    value:bgColor.toUIColor()
+                    range:range];
   }
 
   // Apply font styling
   if (baseFont) {
-    UIFontDescriptor* descriptor = baseFont.fontDescriptor;
+    UIFontDescriptor *descriptor = baseFont.fontDescriptor;
     UIFontDescriptorSymbolicTraits traits = descriptor.symbolicTraits;
 
     if (style.bold) {
@@ -283,8 +302,10 @@ void IOSHighlightRenderer::applyStyle(const ThemeStyle& style, void* attributedS
       traits |= UIFontDescriptorTraitItalic;
     }
 
-    UIFontDescriptor* newDescriptor = [descriptor fontDescriptorWithSymbolicTraits:traits];
-    UIFont* styledFont = [UIFont fontWithDescriptor:newDescriptor size:baseFont.pointSize];
+    UIFontDescriptor *newDescriptor =
+        [descriptor fontDescriptorWithSymbolicTraits:traits];
+    UIFont *styledFont = [UIFont fontWithDescriptor:newDescriptor
+                                               size:baseFont.pointSize];
     if (styledFont) {
       [attrStr addAttribute:NSFontAttributeName value:styledFont range:range];
     }

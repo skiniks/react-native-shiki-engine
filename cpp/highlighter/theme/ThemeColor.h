@@ -5,13 +5,13 @@
 #include <unordered_map>
 
 #ifdef __OBJC__
-#import <UIKit/UIKit.h>
+#  import <UIKit/UIKit.h>
 #endif
 
 namespace shiki {
 
 class ThemeColor {
-private:
+ private:
   std::string hexColor;
   float alpha;
   float red;
@@ -21,7 +21,7 @@ private:
 
   void parseHexColor() const;
 
-public:
+ public:
   ThemeColor() : hexColor("#000000"), alpha(1.0f), red(0), green(0), blue(0) {}
   explicit ThemeColor(const std::string& hex, float a = 1.0f);
 
@@ -54,4 +54,4 @@ public:
 #endif
 };
 
-} // namespace shiki
+}  // namespace shiki

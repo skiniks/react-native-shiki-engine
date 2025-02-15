@@ -1,8 +1,9 @@
 #pragma once
-#include "../text/TextRange.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "../text/TextRange.h"
 
 namespace shiki {
 
@@ -12,18 +13,15 @@ struct CacheEntry {
   std::vector<TextRange> ranges;
   size_t timestamp;
   size_t hitCount{0};
-  std::string themeHash; // Hash of theme settings to invalidate cache when theme changes
+  std::string themeHash;  // Hash of theme settings to invalidate cache when theme changes
 
   CacheEntry() = default;
 
-  CacheEntry(std::string c, std::string l, std::vector<TextRange> r, std::string th = "",
-             size_t ts = 0)
-      : code(std::move(c)), language(std::move(l)), ranges(std::move(r)), themeHash(std::move(th)),
-        timestamp(ts) {}
+  CacheEntry(std::string c, std::string l, std::vector<TextRange> r, std::string th = "", size_t ts = 0)
+    : code(std::move(c)), language(std::move(l)), ranges(std::move(r)), themeHash(std::move(th)), timestamp(ts) {}
 
   size_t getMemoryUsage() const {
-    return code.capacity() + language.capacity() + (ranges.capacity() * sizeof(TextRange)) +
-           themeHash.capacity();
+    return code.capacity() + language.capacity() + (ranges.capacity() * sizeof(TextRange)) + themeHash.capacity();
   }
 
   bool isValid(const std::string& currentThemeHash) const {
@@ -31,4 +29,4 @@ struct CacheEntry {
   }
 };
 
-} // namespace shiki
+}  // namespace shiki

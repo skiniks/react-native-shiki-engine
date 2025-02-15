@@ -1,7 +1,8 @@
 #pragma once
-#include "../text/TextDiff.h"
 #include <memory>
 #include <vector>
+
+#include "../text/TextDiff.h"
 
 namespace shiki {
 
@@ -14,15 +15,14 @@ struct ViewportInfo {
 };
 
 class VirtualizedContentManager {
-public:
-  static constexpr size_t BUFFER_LINES = 50; // Lines to render above/below viewport
+ public:
+  static constexpr size_t BUFFER_LINES = 50;  // Lines to render above/below viewport
 
   // Get visible range with buffer
   TextRange getVisibleRange(const ViewportInfo& viewport, const std::string& text);
 
   // Check if range is visible
-  bool isRangeVisible(const TextRange& range, const ViewportInfo& viewport,
-                      const std::string& text);
+  bool isRangeVisible(const TextRange& range, const ViewportInfo& viewport, const std::string& text);
 
   // Calculate line information
   size_t getLineCount(const std::string& text);
@@ -32,7 +32,7 @@ public:
   float getEstimatedHeight(size_t lineCount, float lineHeight);
   size_t getEstimatedLineAtPosition(float yOffset, float lineHeight);
 
-private:
+ private:
   // Cache of line start positions
   std::vector<size_t> lineStartCache_;
   std::string lastProcessedText_;
@@ -40,4 +40,4 @@ private:
   void updateLineCache(const std::string& text);
 };
 
-} // namespace shiki
+}  // namespace shiki

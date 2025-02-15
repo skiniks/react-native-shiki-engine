@@ -1,4 +1,5 @@
 #include "ThemeColor.h"
+
 #include <cstdio>
 #include <iomanip>
 #include <sstream>
@@ -8,8 +9,7 @@ namespace shiki {
 std::unordered_map<std::string, std::shared_ptr<ThemeColor>> ThemeColor::colorCache_;
 
 void ThemeColor::parseHexColor() const {
-  if (!isValid())
-    return;
+  if (!isValid()) return;
 
   std::string cleanHex = hexColor;
   if (cleanHex[0] == '#') {
@@ -35,8 +35,7 @@ void ThemeColor::parseHexColor() const {
 }
 
 ThemeColor::ThemeColor(const std::string& hex, float a)
-    : hexColor(hex.empty() ? "#000000" : (hex[0] == '#' ? hex : "#" + hex)), alpha(a), red(0),
-      green(0), blue(0) {
+  : hexColor(hex.empty() ? "#000000" : (hex[0] == '#' ? hex : "#" + hex)), alpha(a), red(0), green(0), blue(0) {
   if (!hexColor.empty()) {
     parseHexColor();
   }
@@ -62,19 +61,30 @@ ThemeColor ThemeColor::fromHex(const std::string& hex) {
 }
 
 std::string ThemeColor::toHex() const {
-  if (hexColor.empty())
-    return ""; // Return empty string instead of defaulting to black
+  if (hexColor.empty()) return "";  // Return empty string instead of defaulting to black
 
   char hexStr[10];
   if (alpha != 1.0f) {
-    snprintf(hexStr, sizeof(hexStr), "#%02X%02X%02X%02X", static_cast<int>(red * 255),
-             static_cast<int>(green * 255), static_cast<int>(blue * 255),
-             static_cast<int>(alpha * 255));
+    snprintf(
+      hexStr,
+      sizeof(hexStr),
+      "#%02X%02X%02X%02X",
+      static_cast<int>(red * 255),
+      static_cast<int>(green * 255),
+      static_cast<int>(blue * 255),
+      static_cast<int>(alpha * 255)
+    );
   } else {
-    snprintf(hexStr, sizeof(hexStr), "#%02X%02X%02X", static_cast<int>(red * 255),
-             static_cast<int>(green * 255), static_cast<int>(blue * 255));
+    snprintf(
+      hexStr,
+      sizeof(hexStr),
+      "#%02X%02X%02X",
+      static_cast<int>(red * 255),
+      static_cast<int>(green * 255),
+      static_cast<int>(blue * 255)
+    );
   }
   return std::string(hexStr);
 }
 
-} // namespace shiki
+}  // namespace shiki

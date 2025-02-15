@@ -1,17 +1,18 @@
 #pragma once
+#include <functional>
+#include <string>
+#include <vector>
+
 #include "../core/Constants.h"
 #include "../error/HighlightError.h"
 #include "../memory/MemoryManager.h"
 #include "TextRange.h"
-#include <functional>
-#include <string>
-#include <vector>
 
 namespace shiki {
 namespace text {
 
   class HighlightedText {
-  public:
+   public:
     virtual ~HighlightedText() = default;
 
     HighlightedText(const std::string& text) {
@@ -48,7 +49,7 @@ namespace text {
     virtual void clearHighlighting() = 0;
     virtual void measureRange(TextRange& range) = 0;
 
-  protected:
+   protected:
     std::string text_;
     std::vector<TextRange> ranges_;
 
@@ -67,5 +68,5 @@ namespace text {
     }
   };
 
-} // namespace text
-} // namespace shiki
+}  // namespace text
+}  // namespace shiki

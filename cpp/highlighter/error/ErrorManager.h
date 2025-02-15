@@ -1,9 +1,10 @@
 #pragma once
-#include "HighlightError.h"
 #include <functional>
 #include <memory>
 #include <queue>
 #include <string>
+
+#include "HighlightError.h"
 
 namespace shiki {
 
@@ -21,7 +22,7 @@ using ErrorCallback = std::function<void(const ErrorInfo&)>;
 using RecoveryCallback = std::function<bool()>;
 
 class ErrorManager {
-public:
+ public:
   static ErrorManager& getInstance();
 
   // Error reporting
@@ -43,7 +44,7 @@ public:
     bridgeErrorCallback_ = std::move(callback);
   }
 
-private:
+ private:
   ErrorManager() = default;
 
   bool hasUnrecoverableError_{false};
@@ -57,4 +58,4 @@ private:
   void handleUnrecoverableError(const ErrorInfo& error);
 };
 
-} // namespace shiki
+}  // namespace shiki

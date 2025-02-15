@@ -1,11 +1,12 @@
 #pragma once
-#include "Cache.h"
-#include "CacheConfig.h"
-#include "../grammar/Grammar.h"
-#include "../tokenizer/ShikiTokenizer.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+#include "../grammar/Grammar.h"
+#include "../tokenizer/ShikiTokenizer.h"
+#include "Cache.h"
+#include "CacheConfig.h"
 
 namespace shiki {
 
@@ -25,7 +26,7 @@ struct SyntaxTreeKey {
   }
 };
 
-} // namespace shiki
+}  // namespace shiki
 
 namespace std {
 template <>
@@ -34,19 +35,18 @@ struct hash<shiki::SyntaxTreeKey> {
     return hash<string>()(key.text) ^ hash<string>()(key.grammarId);
   }
 };
-}
+}  // namespace std
 
 namespace shiki {
 
 class SyntaxTreeCache {
-public:
+ public:
   static SyntaxTreeCache& getInstance() {
     static SyntaxTreeCache instance;
     return instance;
   }
 
-  void cacheTree(const std::string& text, const std::string& grammarId,
-                 std::shared_ptr<SyntaxTreeNode> tree) {
+  void cacheTree(const std::string& text, const std::string& grammarId, std::shared_ptr<SyntaxTreeNode> tree) {
     SyntaxTreeKey key{text, grammarId};
     size_t treeSize = estimateTreeSize(tree);
 
@@ -61,8 +61,7 @@ public:
     cache_.add(key, tree, treeSize, priority);
   }
 
-  std::shared_ptr<SyntaxTreeNode> getCachedTree(const std::string& text,
-                                               const std::string& grammarId) {
+  std::shared_ptr<SyntaxTreeNode> getCachedTree(const std::string& text, const std::string& grammarId) {
     SyntaxTreeKey key{text, grammarId};
     return cache_.get(key).value_or(nullptr);
   }
@@ -75,10 +74,8 @@ public:
     return cache_.getMetrics();
   }
 
-private:
-  SyntaxTreeCache()
-      : cache_(cache::SyntaxTreeCacheConfig::MEMORY_LIMIT,
-               cache::SyntaxTreeCacheConfig::ENTRY_LIMIT) {}
+ private:
+  SyntaxTreeCache() : cache_(cache::SyntaxTreeCacheConfig::MEMORY_LIMIT, cache::SyntaxTreeCacheConfig::ENTRY_LIMIT) {}
 
   size_t estimateTreeSize(const std::shared_ptr<SyntaxTreeNode>& tree) const {
     if (!tree) return 0;
@@ -103,4 +100,4 @@ private:
   Cache<SyntaxTreeKey, std::shared_ptr<SyntaxTreeNode>> cache_;
 };
 
-} // namespace shiki
+}  // namespace shiki

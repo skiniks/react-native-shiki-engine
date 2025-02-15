@@ -7,7 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ShikiPerformanceReporter : RCTEventEmitter
 
-@property(nonatomic, weak) RCTBridge* bridge;
+@property(nonatomic, weak) RCTBridge *bridge;
 @property(nonatomic, assign) BOOL autoReportEnabled;
 @property(nonatomic, assign) NSTimeInterval reportingInterval;
 

@@ -1,21 +1,23 @@
 #pragma once
-#include "../grammar/Grammar.h"
-#include "../renderer/LineNumbers.h"
-#include "../text/TokenRange.h"
-#include "../theme/Theme.h"
-#include "../utils/ConcurrencyUtil.h"
-#include "../cache/StyleCache.h"
-#include "Token.h"
-#include "oniguruma.h"
+#include <xxhash.h>
+
 #include <future>
 #include <memory>
 #include <mutex>
-#include <xxhash.h>
 #include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "../cache/StyleCache.h"
+#include "../grammar/Grammar.h"
+#include "../renderer/LineNumbers.h"
+#include "../text/TokenRange.h"
+#include "../theme/Theme.h"
+#include "../utils/ConcurrencyUtil.h"
+#include "Token.h"
+#include "oniguruma.h"
 
 namespace shiki {
 
@@ -36,10 +38,10 @@ struct OnigRegionDeleter {
 
 // Helper class for cleaning and organizing tokens
 class TokenCleaner {
-public:
+ public:
   std::vector<Token> clean(std::vector<Token>&& tokens, const std::string& code);
 
-private:
+ private:
   Token createWhitespaceToken(size_t start, size_t length);
   bool shouldAddToken(const Token& token, const std::vector<Token>& existingTokens);
 };
@@ -56,7 +58,7 @@ struct CompiledPattern {
 struct TokenCacheEntry {
   std::vector<Token> tokens;
   std::string textHash;  // Hash of the text region
-  size_t lastUsed;      // Timestamp for LRU
+  size_t lastUsed;  // Timestamp for LRU
 
   TokenCacheEntry() = default;
   TokenCacheEntry(std::vector<Token> t, std::string hash, size_t time)
@@ -64,7 +66,7 @@ struct TokenCacheEntry {
 };
 
 class ShikiTokenizer {
-public:
+ public:
   static ShikiTokenizer& getInstance();
   ~ShikiTokenizer();
 
@@ -74,11 +76,10 @@ public:
     return theme_;
   }
   std::vector<Token> tokenize(const std::string& code);
-  std::vector<Token> tokenizeParallel(const std::string& code,
-                                      size_t batchSize = DEFAULT_BATCH_SIZE);
+  std::vector<Token> tokenizeParallel(const std::string& code, size_t batchSize = DEFAULT_BATCH_SIZE);
   ThemeStyle resolveStyle(const std::string& scope) const;
 
-private:
+ private:
   ShikiTokenizer() = default;
 
   // Thread-local storage for temporary buffers
@@ -110,9 +111,13 @@ private:
   std::vector<Token> tokenizeBatch(const std::string& code, size_t start, size_t length);
   std::vector<Token> mergeTokens(std::vector<std::vector<Token>>& batchResults);
   bool isPatternBoundary(const std::string& code, size_t pos);
-  bool findBestMatch(const std::string& code, size_t pos,
-                     const std::vector<OnigRegex>& regexes,
-                     OnigRegion* bestRegion, size_t& bestRegexIndex);
+  bool findBestMatch(
+    const std::string& code,
+    size_t pos,
+    const std::vector<OnigRegex>& regexes,
+    OnigRegion* bestRegion,
+    size_t& bestRegexIndex
+  );
 
   // Cache management
   std::string computeTextHash(const std::string& text) const;
@@ -123,19 +128,23 @@ private:
   // Style resolution
   void resolveStyles(std::vector<Token>& tokens);
   void resolveStylesParallel(std::vector<Token>& tokens);
-  void resolveStylesBatch(std::vector<Token>::iterator start,
-                         std::vector<Token>::iterator end,
-                         StyleCache& styleCache,
-                         size_t& resolvedCount,
-                         size_t& cacheHits);
+  void resolveStylesBatch(
+    std::vector<Token>::iterator start,
+    std::vector<Token>::iterator end,
+    StyleCache& styleCache,
+    size_t& resolvedCount,
+    size_t& cacheHits
+  );
 
   // Pattern processing
-  void processPatterns(const std::vector<GrammarPattern>& patterns,
-                      const std::string& code,
-                      std::vector<Token>& tokens,
-                      std::vector<std::string>& scopeStack);
+  void processPatterns(
+    const std::vector<GrammarPattern>& patterns,
+    const std::string& code,
+    std::vector<Token>& tokens,
+    std::vector<std::string>& scopeStack
+  );
 
   friend class TokenCleaner;
 };
 
-} // namespace shiki
+}  // namespace shiki

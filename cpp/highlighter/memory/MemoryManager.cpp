@@ -1,14 +1,15 @@
 #include "MemoryManager.h"
+
 #include <cstdlib>
 
 #ifdef __ANDROID__
-#include <android/native_window.h>
-#include <jni.h>
+#  include <android/native_window.h>
+#  include <jni.h>
 #elif defined(__APPLE__)
-#include <dispatch/dispatch.h>
-#include <sys/sysctl.h>
-#include <mach/mach.h>
-#include <CoreFoundation/CoreFoundation.h>
+#  include <CoreFoundation/CoreFoundation.h>
+#  include <dispatch/dispatch.h>
+#  include <mach/mach.h>
+#  include <sys/sysctl.h>
 #endif
 
 namespace shiki {
@@ -21,30 +22,37 @@ void MemoryManager::initializePlatformSignals() {
     vm->AttachCurrentThread(&env, nullptr);
 
     jclass activityThread = env->FindClass("android/app/ActivityThread");
-    jmethodID currentApplication = env->GetStaticMethodID(
-        activityThread, "currentApplication", "()Landroid/app/Application;");
+    jmethodID currentApplication =
+      env->GetStaticMethodID(activityThread, "currentApplication", "()Landroid/app/Application;");
     jobject application = env->CallStaticObjectMethod(activityThread, currentApplication);
 
     // Register component callbacks to receive trim memory signals
     jclass componentCallbacks = env->FindClass("android/content/ComponentCallbacks2");
-    env->RegisterNatives(componentCallbacks, new JNINativeMethod[] {
-      {"onTrimMemory", "(I)V", (void*)&MemoryManager::onTrimMemory}
-    }, 1);
+    env->RegisterNatives(
+      componentCallbacks,
+      new JNINativeMethod[]{{"onTrimMemory", "(I)V", (void*)&MemoryManager::onTrimMemory}},
+      1
+    );
 
-    env->CallVoidMethod(application, env->GetMethodID(
+    env->CallVoidMethod(
+      application,
+      env->GetMethodID(
         env->GetObjectClass(application),
         "registerComponentCallbacks",
-        "(Landroid/content/ComponentCallbacks;)V"),
-        env->NewObject(componentCallbacks, env->GetMethodID(componentCallbacks, "<init>", "()V")));
+        "(Landroid/content/ComponentCallbacks;)V"
+      ),
+      env->NewObject(componentCallbacks, env->GetMethodID(componentCallbacks, "<init>", "()V"))
+    );
   }
 #elif defined(__APPLE__)
   // iOS/macOS memory pressure monitoring using dispatch source
   dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
   dispatch_source_t source = dispatch_source_create(
-      DISPATCH_SOURCE_TYPE_MEMORYPRESSURE,
-      0,
-      DISPATCH_MEMORYPRESSURE_WARN | DISPATCH_MEMORYPRESSURE_CRITICAL,
-      queue);
+    DISPATCH_SOURCE_TYPE_MEMORYPRESSURE,
+    0,
+    DISPATCH_MEMORYPRESSURE_WARN | DISPATCH_MEMORYPRESSURE_CRITICAL,
+    queue
+  );
 
   if (source) {
     dispatch_source_set_event_handler(source, ^{
@@ -96,8 +104,7 @@ float MemoryManager::getMemoryUsage() {
 #elif defined(__APPLE__)
   mach_task_basic_info_data_t info;
   mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
-  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &count) ==
-      KERN_SUCCESS) {
+  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &count) == KERN_SUCCESS) {
     return static_cast<float>(info.resident_size) / info.virtual_size;
   }
   return 0.0f;
@@ -124,4 +131,4 @@ MemoryManager::~MemoryManager() {
 #endif
 }
 
-} // namespace shiki
+}  // namespace shiki

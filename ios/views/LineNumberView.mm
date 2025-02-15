@@ -1,7 +1,7 @@
 #import "LineNumberView.h"
 
 @implementation LineNumberView {
-  NSMutableArray<NSString*>* _lineNumbers;
+  NSMutableArray<NSString *> *_lineNumbers;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -16,7 +16,8 @@
 - (void)updateLineNumbers {
   [_lineNumbers removeAllObjects];
   for (NSUInteger i = 1; i <= _numberOfLines; i++) {
-    [_lineNumbers addObject:[NSString stringWithFormat:@"%lu", (unsigned long)i]];
+    [_lineNumbers
+        addObject:[NSString stringWithFormat:@"%lu", (unsigned long)i]];
   }
   [self setNeedsDisplay];
 }
@@ -34,12 +35,14 @@
   [_textColor set];
   CGFloat y = 0;
 
-  for (NSString* number in _lineNumbers) {
+  for (NSString *number in _lineNumbers) {
     CGSize size = [number sizeWithAttributes:@{NSFontAttributeName : _font}];
     CGFloat x = self.bounds.size.width - size.width - _padding;
-    [number
-           drawAtPoint:CGPointMake(x, y)
-        withAttributes:@{NSFontAttributeName : _font, NSForegroundColorAttributeName : _textColor}];
+    [number drawAtPoint:CGPointMake(x, y)
+         withAttributes:@{
+           NSFontAttributeName : _font,
+           NSForegroundColorAttributeName : _textColor
+         }];
     y += _lineHeight;
   }
 }
@@ -49,7 +52,8 @@
     return 0;
 
   // Calculate width based on largest line number
-  NSString* lastNumber = [NSString stringWithFormat:@"%lu", (unsigned long)_numberOfLines];
+  NSString *lastNumber =
+      [NSString stringWithFormat:@"%lu", (unsigned long)_numberOfLines];
   CGSize size = [lastNumber sizeWithAttributes:@{NSFontAttributeName : _font}];
   return size.width + (_padding * 2);
 }

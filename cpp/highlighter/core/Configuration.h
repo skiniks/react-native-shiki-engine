@@ -1,9 +1,9 @@
 #pragma once
-#include <string>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 #include <unordered_map>
-#include <functional>
 
 namespace shiki {
 
@@ -33,16 +33,16 @@ struct Configuration {
   } view;
 
   struct Performance {
-    size_t maxCacheSize{50 * 1024 * 1024}; // 50MB
+    size_t maxCacheSize{50 * 1024 * 1024};  // 50MB
     size_t maxCacheEntries{1000};
-    size_t batchSize{32 * 1024}; // 32KB
+    size_t batchSize{32 * 1024};  // 32KB
     bool enableIncrementalUpdates{true};
     bool enableBackgroundProcessing{true};
   } performance;
 
   struct Memory {
-    size_t lowMemoryThreshold{50 * 1024 * 1024}; // 50MB
-    size_t criticalMemoryThreshold{100 * 1024 * 1024}; // 100MB
+    size_t lowMemoryThreshold{50 * 1024 * 1024};  // 50MB
+    size_t criticalMemoryThreshold{100 * 1024 * 1024};  // 100MB
     bool preserveStateOnMemoryWarning{false};
   } memory;
 
@@ -50,16 +50,16 @@ struct Configuration {
   std::string toJson() const;
   static std::optional<Configuration> fromJson(const std::string& json);
 
-  template<typename T>
+  template <typename T>
   T toPlatformConfig() const;
 
-private:
+ private:
   friend class ConfigurationValidator;
   static ConfigurationValidator& getValidator();
 };
 
 class ConfigurationValidator {
-public:
+ public:
   using ValidationRule = std::function<bool(const Configuration&, std::string&)>;
 
   void addRule(const std::string& name, ValidationRule rule) {
@@ -75,8 +75,8 @@ public:
     return true;
   }
 
-private:
+ private:
   std::unordered_map<std::string, ValidationRule> rules_;
 };
 
-} // namespace shiki
+}  // namespace shiki

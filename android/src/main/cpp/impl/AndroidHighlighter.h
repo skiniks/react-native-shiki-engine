@@ -1,15 +1,17 @@
 #pragma once
 
-#include "../../../../cpp/highlighter/platform/PlatformHighlighter.h"
 #include <jni.h>
+
 #include <functional>
+
+#include "../../../../cpp/highlighter/platform/PlatformHighlighter.h"
 
 namespace shiki {
 
 using ViewUpdateCallback = std::function<void(const std::string&, const std::vector<PlatformStyledToken>&)>;
 
 class AndroidHighlighter : public PlatformHighlighter {
-public:
+ public:
   static AndroidHighlighter& getInstance();
 
   // PlatformHighlighter implementation
@@ -33,7 +35,7 @@ public:
   jobject createJavaView(JNIEnv* env, const PlatformViewConfig& config);
   void updateJavaView(JNIEnv* env, jobject view, const std::string& code);
 
-private:
+ private:
   AndroidHighlighter() = default;
   ~AndroidHighlighter();
 
@@ -48,4 +50,4 @@ private:
   void clearJNIReferences(JNIEnv* env);
 };
 
-} // namespace shiki
+}  // namespace shiki

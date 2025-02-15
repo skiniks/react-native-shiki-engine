@@ -1,23 +1,19 @@
 #pragma once
 
+#include <limits>
 #include <list>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
 #include <unordered_map>
-#include <limits>
 
 namespace shiki {
 
 template <typename K, typename V>
 class Cache {
-public:
-  enum class Priority {
-    LOW = 0,
-    NORMAL = 1,
-    HIGH = 2
-  };
+ public:
+  enum class Priority { LOW = 0, NORMAL = 1, HIGH = 2 };
 
   struct CacheEntry {
     V value;
@@ -28,7 +24,7 @@ public:
     typename std::list<K>::iterator lruIter;
 
     CacheEntry(V v, size_t s, typename std::list<K>::iterator it, Priority p)
-        : value(std::move(v)), size(s), lruIter(it), priority(p) {}
+      : value(std::move(v)), size(s), lruIter(it), priority(p) {}
 
     // Calculate entry score for eviction decisions
     double getScore() const {
@@ -37,8 +33,7 @@ public:
     }
   };
 
-  explicit Cache(size_t maxSize, size_t maxEntries)
-      : maxSize_(maxSize), maxEntries_(maxEntries), currentSize_(0) {}
+  explicit Cache(size_t maxSize, size_t maxEntries) : maxSize_(maxSize), maxEntries_(maxEntries), currentSize_(0) {}
 
   void add(const K& key, V value, size_t size, Priority priority) {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -52,8 +47,7 @@ public:
     }
 
     // Evict entries until we have space
-    while (!cache_.empty() &&
-           (currentSize_ + size > maxSize_ || cache_.size() >= maxEntries_)) {
+    while (!cache_.empty() && (currentSize_ + size > maxSize_ || cache_.size() >= maxEntries_)) {
       evictLeastValuable();
     }
 
@@ -91,8 +85,12 @@ public:
   }
 
   // Metrics
-  size_t size() const { return cache_.size(); }
-  size_t memoryUsage() const { return currentSize_; }
+  size_t size() const {
+    return cache_.size();
+  }
+  size_t memoryUsage() const {
+    return currentSize_;
+  }
 
   struct CacheMetrics {
     size_t entryCount;
@@ -103,15 +101,10 @@ public:
 
   CacheMetrics getMetrics() const {
     std::lock_guard<std::mutex> lock(mutex_);
-    return CacheMetrics{
-      cache_.size(),
-      currentSize_,
-      maxSize_,
-      maxEntries_
-    };
+    return CacheMetrics{cache_.size(), currentSize_, maxSize_, maxEntries_};
   }
 
-private:
+ private:
   void evictLeastValuable() {
     if (lruList_.empty()) return;
 
@@ -143,4 +136,4 @@ private:
   std::list<K> lruList_;
 };
 
-} // namespace shiki
+}  // namespace shiki

@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setSelection:(NSRange)range;
 - (NSRange)getSelection;
 - (void)scrollToLine:(NSInteger)line;
-- (void)selectScope:(NSString*)scope;
+- (void)selectScope:(NSString *)scope;
 - (void)selectWord:(NSInteger)location;
 
 @end

@@ -1,10 +1,11 @@
 #pragma once
-#include "../core/Constants.h"
 #include <atomic>
 #include <chrono>
+#include <mutex>
 #include <string>
 #include <unordered_map>
-#include <mutex>
+
+#include "../core/Constants.h"
 
 namespace shiki {
 
@@ -22,7 +23,7 @@ struct MemoryMetrics {
 };
 
 class MemoryTracker {
-public:
+ public:
   static MemoryTracker& getInstance() {
     static MemoryTracker instance;
     return instance;
@@ -41,10 +42,10 @@ public:
 
     // Update peaks
     size_t current_peak = peakUsage_.load(std::memory_order_relaxed);
-    while (new_usage > current_peak &&
-           !peakUsage_.compare_exchange_weak(current_peak, new_usage,
-                                           std::memory_order_relaxed,
-                                           std::memory_order_relaxed)) {
+    while (
+      new_usage > current_peak &&
+      !peakUsage_.compare_exchange_weak(current_peak, new_usage, std::memory_order_relaxed, std::memory_order_relaxed)
+    ) {
       // Loop continues if compare_exchange_weak fails
     }
 
@@ -106,7 +107,7 @@ public:
     categoryPeaks_.clear();
   }
 
-private:
+ private:
   MemoryTracker() = default;
 
   mutable std::mutex mutex_;
@@ -124,4 +125,4 @@ private:
   std::chrono::steady_clock::time_point lastAllocationTime_;
 };
 
-} // namespace shiki
+}  // namespace shiki

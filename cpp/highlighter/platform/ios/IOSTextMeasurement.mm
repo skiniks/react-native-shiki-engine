@@ -3,10 +3,11 @@
 
 namespace shiki {
 
-IOSTextMeasurement::IOSTextMeasurement(UIFont* font) : font_(font) {}
+IOSTextMeasurement::IOSTextMeasurement(UIFont *font) : font_(font) {}
 
-TextMetrics IOSTextMeasurement::measureRange(const std::string& text, size_t start, size_t length,
-                                           const ThemeStyle& style) {
+TextMetrics IOSTextMeasurement::measureRange(const std::string &text,
+                                             size_t start, size_t length,
+                                             const ThemeStyle &style) {
   TextMetrics metrics;
 
   if (!font_ || start + length > text.length()) {
@@ -14,31 +15,34 @@ TextMetrics IOSTextMeasurement::measureRange(const std::string& text, size_t sta
   }
 
   // Extract the substring to measure
-  NSString* substring = [[NSString alloc] initWithBytes:text.data() + start
-                                               length:length
-                                             encoding:NSUTF8StringEncoding];
+  NSString *substring = [[NSString alloc] initWithBytes:text.data() + start
+                                                 length:length
+                                               encoding:NSUTF8StringEncoding];
   if (!substring) {
     return metrics;
   }
 
   // Create attributes dictionary with font and style
-  NSMutableDictionary* attributes = [NSMutableDictionary dictionary];
+  NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
   [attributes setObject:font_ forKey:NSFontAttributeName];
 
   // Apply style-specific attributes
   ThemeColor color = style.getThemeColor();
   if (color.isValid()) {
-    [attributes setObject:color.toUIColor() forKey:NSForegroundColorAttributeName];
+    [attributes setObject:color.toUIColor()
+                   forKey:NSForegroundColorAttributeName];
   }
 
   // Create attributed string
-  NSAttributedString* attrString = [[NSAttributedString alloc] initWithString:substring
-                                                                  attributes:attributes];
+  NSAttributedString *attrString =
+      [[NSAttributedString alloc] initWithString:substring
+                                      attributes:attributes];
 
   // Measure the text
-  CGRect bounds = [attrString boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)
-                                         options:NSStringDrawingUsesLineFragmentOrigin
-                                         context:nil];
+  CGRect bounds =
+      [attrString boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)
+                               options:NSStringDrawingUsesLineFragmentOrigin
+                               context:nil];
 
   metrics.width = bounds.size.width;
   metrics.height = bounds.size.height;

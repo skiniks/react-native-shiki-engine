@@ -1,15 +1,18 @@
 #include "ThemeParser.h"
-#include "Theme.h"
+
+#include <rapidjson/document.h>
+
 #include <cctype>
 #include <iomanip>
 #include <iostream>
 #include <map>
-#include <rapidjson/document.h>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "Theme.h"
 
 // Remove UIKit includes and use forward declarations if needed
 class ThemeColor;
@@ -58,8 +61,7 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
   if (doc.HasMember("settings") && doc["settings"].IsArray()) {
     const auto& settings = doc["settings"].GetArray();
     for (const auto& setting : settings) {
-      if (!setting.HasMember("scope") && !setting.HasMember("name") &&
-          setting.HasMember("settings")) {
+      if (!setting.HasMember("scope") && !setting.HasMember("name") && setting.HasMember("settings")) {
         const auto& settingsObj = setting["settings"];
         if (settingsObj.HasMember("foreground")) {
           std::string color = settingsObj["foreground"].GetString();
@@ -165,8 +167,7 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
 
   auto getReplacementColor = [&](const std::string& value) -> std::string {
     auto it = replacementMap.find(value);
-    if (it != replacementMap.end())
-      return it->second;
+    if (it != replacementMap.end()) return it->second;
     replacementCount++;
     std::stringstream ss;
     ss << "#" << std::setfill('0') << std::setw(8) << std::hex << replacementCount;
@@ -189,8 +190,7 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     const auto& colors = doc["colors"];
     for (auto it = colors.MemberBegin(); it != colors.MemberEnd(); ++it) {
       std::string key = it->name.GetString();
-      if (key == "editor.foreground" || key == "editor.background" ||
-          key.find("terminal.ansi") == 0) {
+      if (key == "editor.foreground" || key == "editor.background" || key.find("terminal.ansi") == 0) {
         if (it->value.IsString()) {
           std::string color = it->value.GetString();
           if (!color.empty() && color[0] != '#') {
@@ -215,8 +215,7 @@ std::vector<TokenRange> ThemeParser::tokenize(const std::string& content) {
       pos++;
     }
 
-    if (pos >= content.length())
-      break;
+    if (pos >= content.length()) break;
 
     size_t start = pos;
 
@@ -224,13 +223,10 @@ std::vector<TokenRange> ThemeParser::tokenize(const std::string& content) {
     if (content[pos] == '"' || content[pos] == '\'') {
       char quote = content[pos++];
       while (pos < content.length() && content[pos] != quote) {
-        if (content[pos] == '\\')
-          pos++; // Skip escaped character
-        if (pos < content.length())
-          pos++;
+        if (content[pos] == '\\') pos++;  // Skip escaped character
+        if (pos < content.length()) pos++;
       }
-      if (pos < content.length())
-        pos++; // Include closing quote
+      if (pos < content.length()) pos++;  // Include closing quote
     }
     // Handle identifiers and keywords
     else if (std::isalpha(content[pos]) || content[pos] == '_') {
@@ -335,8 +331,7 @@ std::vector<ThemeStyle> ThemeParser::parseStyles(const std::string& json) {
   return styles;
 }
 
-std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name,
-                                               const std::string& content) {
+std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name, const std::string& content) {
   Document doc;
   doc.Parse(content.c_str());
 
@@ -523,4 +518,4 @@ std::shared_ptr<Theme> ThemeParser::parseThemeFromObject(const rapidjson::Value&
   return theme;
 }
 
-} // namespace shiki
+}  // namespace shiki

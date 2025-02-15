@@ -11,7 +11,7 @@
 RCT_EXPORT_MODULE()
 
 + (instancetype)sharedReporter {
-  static ShikiPerformanceReporter* reporter = nil;
+  static ShikiPerformanceReporter *reporter = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     reporter = [[ShikiPerformanceReporter alloc] init];
@@ -23,7 +23,7 @@ RCT_EXPORT_MODULE()
   return NO;
 }
 
-- (NSArray<NSString*>*)supportedEvents {
+- (NSArray<NSString *> *)supportedEvents {
   return @[ @"ShikiPerformanceReport" ];
 }
 
@@ -38,7 +38,8 @@ RCT_EXPORT_MODULE()
 - (instancetype)init {
   if (self = [super init]) {
     _reportingInterval = 5.0; // 5 seconds default
-    _reporterQueue = dispatch_queue_create("com.shiki.performancereporter", DISPATCH_QUEUE_SERIAL);
+    _reporterQueue = dispatch_queue_create("com.shiki.performancereporter",
+                                           DISPATCH_QUEUE_SERIAL);
   }
   return self;
 }
@@ -47,11 +48,13 @@ RCT_EXPORT_MODULE()
   if (_reportingTimer)
     return;
 
-  _reportingTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _reporterQueue);
+  _reportingTimer =
+      dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _reporterQueue);
 
   uint64_t interval = (uint64_t)(_reportingInterval * NSEC_PER_SEC);
-  dispatch_source_set_timer(_reportingTimer, dispatch_time(DISPATCH_TIME_NOW, interval), interval,
-                            NSEC_PER_SEC / 10);
+  dispatch_source_set_timer(_reportingTimer,
+                            dispatch_time(DISPATCH_TIME_NOW, interval),
+                            interval, NSEC_PER_SEC / 10);
 
   dispatch_source_set_event_handler(_reportingTimer, ^{
     [self reportMetrics];
@@ -71,16 +74,17 @@ RCT_EXPORT_MODULE()
   if (!_hasListeners)
     return;
 
-  ShikiPerformanceMonitor* monitor = [ShikiPerformanceMonitor sharedMonitor];
+  ShikiPerformanceMonitor *monitor = [ShikiPerformanceMonitor sharedMonitor];
 
   // Collect metrics for each type
-  NSMutableDictionary* metrics = [NSMutableDictionary new];
+  NSMutableDictionary *metrics = [NSMutableDictionary new];
 
   // State transitions
-  NSArray* transitions = [monitor getEventsForMetric:ShikiPerformanceMetricStateTransition];
+  NSArray *transitions =
+      [monitor getEventsForMetric:ShikiPerformanceMetricStateTransition];
   if (transitions.count > 0) {
-    NSMutableArray* transitionMetrics = [NSMutableArray new];
-    for (ShikiPerformanceEvent* event in transitions) {
+    NSMutableArray *transitionMetrics = [NSMutableArray new];
+    for (ShikiPerformanceEvent *event in transitions) {
       [transitionMetrics addObject:@{
         @"description" : event.description ?: @"",
         @"duration" : @(event.duration * 1000), // Convert to ms
@@ -92,10 +96,11 @@ RCT_EXPORT_MODULE()
   }
 
   // Update processing
-  NSArray* updates = [monitor getEventsForMetric:ShikiPerformanceMetricUpdateProcessing];
+  NSArray *updates =
+      [monitor getEventsForMetric:ShikiPerformanceMetricUpdateProcessing];
   if (updates.count > 0) {
-    NSMutableArray* updateMetrics = [NSMutableArray new];
-    for (ShikiPerformanceEvent* event in updates) {
+    NSMutableArray *updateMetrics = [NSMutableArray new];
+    for (ShikiPerformanceEvent *event in updates) {
       [updateMetrics addObject:@{
         @"description" : event.description ?: @"",
         @"duration" : @(event.duration * 1000),

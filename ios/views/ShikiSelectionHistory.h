@@ -8,11 +8,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, assign) NSRange range;
 @property(nonatomic, assign) ShikiSelectionMode mode;
-@property(nonatomic, copy, nullable) NSString* scope;
+@property(nonatomic, copy, nullable) NSString *scope;
 
 + (instancetype)stateWithRange:(NSRange)range
                           mode:(ShikiSelectionMode)mode
-                         scope:(nullable NSString*)scope;
+                         scope:(nullable NSString *)scope;
 
 @end
 
@@ -22,9 +22,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) BOOL canRedo;
 @property(nonatomic, assign) NSUInteger maxHistorySize;
 
-- (void)pushState:(ShikiSelectionState*)state;
-- (nullable ShikiSelectionState*)undo;
-- (nullable ShikiSelectionState*)redo;
+- (void)pushState:(ShikiSelectionState *)state;
+- (nullable ShikiSelectionState *)undo;
+- (nullable ShikiSelectionState *)redo;
 - (void)clear;
 
 @end

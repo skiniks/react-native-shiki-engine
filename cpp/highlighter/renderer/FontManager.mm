@@ -4,19 +4,20 @@
 
 namespace shiki {
 
-FontManager& FontManager::getInstance() {
+FontManager &FontManager::getInstance() {
   static FontManager instance;
   return instance;
 }
 
-UIFont* FontManager::createFont(const FontConfig& config) {
-  UIFont* font = [UIFont systemFontOfSize:config.fontSize];
+UIFont *FontManager::createFont(const FontConfig &config) {
+  UIFont *font = [UIFont systemFontOfSize:config.fontSize];
 
   if (!config.fontFamily.empty()) {
-    font = [UIFont fontWithName:@(config.fontFamily.c_str()) size:config.fontSize];
+    font = [UIFont fontWithName:@(config.fontFamily.c_str())
+                           size:config.fontSize];
   }
 
-  UIFontDescriptor* descriptor = font.fontDescriptor;
+  UIFontDescriptor *descriptor = font.fontDescriptor;
   UIFontDescriptorSymbolicTraits traits = descriptor.symbolicTraits;
 
   // Map font weight to UIFont weight
@@ -29,10 +30,13 @@ UIFont* FontManager::createFont(const FontConfig& config) {
   if (!config.fontWeight.empty()) {
     auto it = weightMap.find(config.fontWeight);
     if (it != weightMap.end()) {
-      NSString* weightName = @(it->second.c_str());
-      UIFontDescriptor* weightedDescriptor = [descriptor
-          fontDescriptorByAddingAttributes:@{UIFontDescriptorFaceAttribute : weightName}];
-      font = [UIFont fontWithDescriptor:weightedDescriptor size:config.fontSize];
+      NSString *weightName = @(it->second.c_str());
+      UIFontDescriptor *weightedDescriptor =
+          [descriptor fontDescriptorByAddingAttributes:@{
+            UIFontDescriptorFaceAttribute : weightName
+          }];
+      font = [UIFont fontWithDescriptor:weightedDescriptor
+                                   size:config.fontSize];
     }
   }
 
@@ -41,7 +45,8 @@ UIFont* FontManager::createFont(const FontConfig& config) {
     traits |= UIFontDescriptorTraitItalic;
   }
 
-  UIFontDescriptor* newDescriptor = [descriptor fontDescriptorWithSymbolicTraits:traits];
+  UIFontDescriptor *newDescriptor =
+      [descriptor fontDescriptorWithSymbolicTraits:traits];
   if (newDescriptor) {
     font = [UIFont fontWithDescriptor:newDescriptor size:config.fontSize];
   }
@@ -49,11 +54,12 @@ UIFont* FontManager::createFont(const FontConfig& config) {
   return font;
 }
 
-UIFont* FontManager::createFontWithStyle(UIFont* baseFont, bool bold, bool italic) {
+UIFont *FontManager::createFontWithStyle(UIFont *baseFont, bool bold,
+                                         bool italic) {
   if (!baseFont)
     return nil;
 
-  UIFontDescriptor* descriptor = baseFont.fontDescriptor;
+  UIFontDescriptor *descriptor = baseFont.fontDescriptor;
   UIFontDescriptorSymbolicTraits traits = descriptor.symbolicTraits;
 
   if (bold) {
@@ -63,13 +69,15 @@ UIFont* FontManager::createFontWithStyle(UIFont* baseFont, bool bold, bool itali
     traits |= UIFontDescriptorTraitItalic;
   }
 
-  UIFontDescriptor* newDescriptor = [descriptor fontDescriptorWithSymbolicTraits:traits];
-  UIFont* styledFont = [UIFont fontWithDescriptor:newDescriptor size:baseFont.pointSize];
+  UIFontDescriptor *newDescriptor =
+      [descriptor fontDescriptorWithSymbolicTraits:traits];
+  UIFont *styledFont = [UIFont fontWithDescriptor:newDescriptor
+                                             size:baseFont.pointSize];
 
   return styledFont ?: baseFont;
 }
 
-std::string FontManager::mapFontWeight(const std::string& weight) {
+std::string FontManager::mapFontWeight(const std::string &weight) {
   // Map CSS-style font weights to system font weights
   static const std::unordered_map<std::string, std::string> weightMap = {
       {"100", "Thin"},    {"200", "UltraLight"}, {"300", "Light"},
@@ -80,7 +88,7 @@ std::string FontManager::mapFontWeight(const std::string& weight) {
   return it != weightMap.end() ? it->second : "Regular";
 }
 
-std::string FontManager::mapFontStyle(const std::string& style) {
+std::string FontManager::mapFontStyle(const std::string &style) {
   // Map CSS-style font styles to system font styles
   if (style == "italic")
     return "Italic";

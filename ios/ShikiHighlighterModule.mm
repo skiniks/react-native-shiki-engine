@@ -25,8 +25,8 @@ using namespace facebook::react;
 #import "../../cpp/highlighter/tokenizer/ShikiTokenizer.h"
 
 @implementation RCTShikiHighlighterModule {
-  __weak RCTBridge* _bridge;
-  shiki::ShikiTokenizer* tokenizer_;
+  __weak RCTBridge *_bridge;
+  shiki::ShikiTokenizer *tokenizer_;
   std::shared_ptr<shiki::Grammar> currentGrammar_;
   std::shared_ptr<shiki::Theme> currentTheme_;
   dispatch_queue_t highlightQueue_;
@@ -45,7 +45,8 @@ RCT_EXPORT_MODULE(RNShikiHighlighterModule)
 - (instancetype)init {
   if (self = [super init]) {
     tokenizer_ = &shiki::ShikiTokenizer::getInstance();
-    highlightQueue_ = dispatch_queue_create("com.shiki.highlight", DISPATCH_QUEUE_SERIAL);
+    highlightQueue_ =
+        dispatch_queue_create("com.shiki.highlight", DISPATCH_QUEUE_SERIAL);
     hasListeners = NO;
 
     [self setupErrorHandling];
@@ -54,20 +55,22 @@ RCT_EXPORT_MODULE(RNShikiHighlighterModule)
 }
 
 - (void)setupErrorHandling {
-  shiki::ErrorManager::getInstance().setBridgeErrorCallback([self](const std::string& errorJson) {
-    if (self->hasListeners) {
-      [self sendEventWithName:@"ShikiError" body:@{@"error" : @(errorJson.c_str())}];
-    }
-  });
+  shiki::ErrorManager::getInstance().setBridgeErrorCallback(
+      [self](const std::string &errorJson) {
+        if (self->hasListeners) {
+          [self sendEventWithName:@"ShikiError"
+                             body:@{@"error" : @(errorJson.c_str())}];
+        }
+      });
 
   [self registerRecoveryStrategies];
 }
 
 - (void)registerRecoveryStrategies {
-  auto& errorManager = shiki::ErrorManager::getInstance();
+  auto &errorManager = shiki::ErrorManager::getInstance();
 
-  errorManager.registerRecoveryStrategy(shiki::HighlightErrorCode::InvalidGrammar,
-                                        []() { return true; });
+  errorManager.registerRecoveryStrategy(
+      shiki::HighlightErrorCode::InvalidGrammar, []() { return true; });
 
   errorManager.registerRecoveryStrategy(shiki::HighlightErrorCode::InvalidTheme,
                                         []() { return true; });
@@ -78,22 +81,26 @@ RCT_EXPORT_MODULE(RNShikiHighlighterModule)
 
 #if RCT_NEW_ARCH_ENABLED
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
-    (const facebook::react::ObjCTurboModule::InitParams&)params {
-  return std::make_shared<facebook::react::NativeShikiHighlighterSpecJSI>(params);
+    (const facebook::react::ObjCTurboModule::InitParams &)params {
+  return std::make_shared<facebook::react::NativeShikiHighlighterSpecJSI>(
+      params);
 }
 #endif
 
-- (NSDictionary*)getConstants {
+- (NSDictionary *)getConstants {
   return @{
     @"ErrorCodes" : @{
-      @"InvalidGrammar" : @(static_cast<int>(shiki::HighlightErrorCode::InvalidGrammar)),
-      @"InvalidTheme" : @(static_cast<int>(shiki::HighlightErrorCode::InvalidTheme)),
-      @"OutOfMemory" : @(static_cast<int>(shiki::HighlightErrorCode::OutOfMemory))
+      @"InvalidGrammar" :
+          @(static_cast<int>(shiki::HighlightErrorCode::InvalidGrammar)),
+      @"InvalidTheme" :
+          @(static_cast<int>(shiki::HighlightErrorCode::InvalidTheme)),
+      @"OutOfMemory" :
+          @(static_cast<int>(shiki::HighlightErrorCode::OutOfMemory))
     }
   };
 }
 
-- (NSArray<NSString*>*)supportedEvents {
+- (NSArray<NSString *> *)supportedEvents {
   return @[ @"onHighlight", @"onError" ];
 }
 
@@ -105,25 +112,29 @@ RCT_EXPORT_MODULE(RNShikiHighlighterModule)
   hasListeners = NO;
 }
 
-RCT_EXPORT_METHOD(addListener : (NSString*)eventName) {
+RCT_EXPORT_METHOD(addListener : (NSString *)eventName)
+{
   // Required for RCTEventEmitter
 }
 
-RCT_EXPORT_METHOD(removeListeners : (double)count) {
+RCT_EXPORT_METHOD(removeListeners : (double)count)
+{
   // Required for RCTEventEmitter
 }
 
-RCT_EXPORT_METHOD(highlightCode : (NSString*)code language : (NSString*)language theme : (NSString*)
-                      theme resolve : (RCTPromiseResolveBlock)
-                          resolve reject : (RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(highlightCode : (NSString *)code language : (NSString *)
+                      language theme : (NSString *)
+                          theme resolve : (RCTPromiseResolveBlock)
+                              resolve reject : (RCTPromiseRejectBlock)reject)
+{
   if (!code || !language || !theme) {
     reject(@"invalid_params", @"Code, language, and theme are required", nil);
     return;
   }
 
-  __weak RCTShikiHighlighterModule* weakSelf = self;
+  __weak RCTShikiHighlighterModule *weakSelf = self;
   dispatch_async(self->highlightQueue_, ^{
-    RCTShikiHighlighterModule* strongSelf = weakSelf;
+    RCTShikiHighlighterModule *strongSelf = weakSelf;
     if (!strongSelf)
       return;
 
@@ -133,13 +144,14 @@ RCT_EXPORT_METHOD(highlightCode : (NSString*)code language : (NSString*)language
 
       NSLog(@"Generated %lu tokens", (unsigned long)tokens.size());
 
-      NSMutableArray* result = [NSMutableArray arrayWithCapacity:tokens.size()];
-      for (const auto& token : tokens) {
-        NSMutableDictionary* style = [NSMutableDictionary dictionary];
+      NSMutableArray *result = [NSMutableArray arrayWithCapacity:tokens.size()];
+      for (const auto &token : tokens) {
+        NSMutableDictionary *style = [NSMutableDictionary dictionary];
         [style setObject:@(token.style.color.c_str()) forKey:@"color"];
 
         if (!token.style.backgroundColor.empty()) {
-          [style setObject:@(token.style.backgroundColor.c_str()) forKey:@"backgroundColor"];
+          [style setObject:@(token.style.backgroundColor.c_str())
+                    forKey:@"backgroundColor"];
         }
         if (token.style.bold) {
           [style setObject:@(YES) forKey:@"bold"];
@@ -151,10 +163,11 @@ RCT_EXPORT_METHOD(highlightCode : (NSString*)code language : (NSString*)language
           [style setObject:@(YES) forKey:@"underline"];
         }
 
-        NSMutableDictionary* tokenDict = @{
+        NSMutableDictionary *tokenDict = @{
           @"start" : @(token.start),
           @"length" : @(token.length),
-          @"scope" : [NSString stringWithUTF8String:token.getCombinedScope().c_str()],
+          @"scope" :
+              [NSString stringWithUTF8String:token.getCombinedScope().c_str()],
           @"style" : style
         }
                                              .mutableCopy;
@@ -165,7 +178,7 @@ RCT_EXPORT_METHOD(highlightCode : (NSString*)code language : (NSString*)language
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(result);
       });
-    } @catch (NSException* e) {
+    } @catch (NSException *e) {
       dispatch_async(dispatch_get_main_queue(), ^{
         reject(@"highlight_error", e.reason, nil);
       });
@@ -173,17 +186,18 @@ RCT_EXPORT_METHOD(highlightCode : (NSString*)code language : (NSString*)language
   });
 }
 
-RCT_EXPORT_METHOD(loadLanguage : (NSString*)language grammarData : (NSString*)
+RCT_EXPORT_METHOD(loadLanguage : (NSString *)language grammarData : (NSString *)
                       grammarData resolve : (RCTPromiseResolveBlock)
-                          resolve reject : (RCTPromiseRejectBlock)reject) {
+                          resolve reject : (RCTPromiseRejectBlock)reject)
+{
   if (!language || !grammarData) {
     reject(@"invalid_params", @"Language and grammar data are required", nil);
     return;
   }
 
-  __weak RCTShikiHighlighterModule* weakSelf = self;
+  __weak RCTShikiHighlighterModule *weakSelf = self;
   dispatch_async(self->highlightQueue_, ^{
-    RCTShikiHighlighterModule* strongSelf = weakSelf;
+    RCTShikiHighlighterModule *strongSelf = weakSelf;
     if (!strongSelf)
       return;
 
@@ -208,7 +222,7 @@ RCT_EXPORT_METHOD(loadLanguage : (NSString*)language grammarData : (NSString*)
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(YES));
       });
-    } @catch (NSException* e) {
+    } @catch (NSException *e) {
       dispatch_async(dispatch_get_main_queue(), ^{
         reject(@"language_load_error", e.reason, nil);
       });
@@ -216,16 +230,18 @@ RCT_EXPORT_METHOD(loadLanguage : (NSString*)language grammarData : (NSString*)
   });
 }
 
-RCT_EXPORT_METHOD(loadTheme : (NSString*)theme themeData : (NSString*)themeData resolve : (
-    RCTPromiseResolveBlock)resolve reject : (RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
+                      themeData resolve : (RCTPromiseResolveBlock)
+                          resolve reject : (RCTPromiseRejectBlock)reject)
+{
   if (!themeData) {
     reject(@"invalid_theme", @"Theme data is null", nil);
     return;
   }
 
-  __weak RCTShikiHighlighterModule* weakSelf = self;
+  __weak RCTShikiHighlighterModule *weakSelf = self;
   dispatch_async(self->highlightQueue_, ^{
-    RCTShikiHighlighterModule* strongSelf = weakSelf;
+    RCTShikiHighlighterModule *strongSelf = weakSelf;
     if (!strongSelf)
       return;
 
@@ -236,17 +252,20 @@ RCT_EXPORT_METHOD(loadTheme : (NSString*)theme themeData : (NSString*)themeData 
       parser.parseThemeStyle(themeStr);
       strongSelf->tokenizer_->setTheme(strongSelf->currentTheme_);
 
-      NSLog(@"Theme loaded with %lu rules", (unsigned long)strongSelf->currentTheme_->rules.size());
-      for (size_t i = 0; i < std::min(size_t(5), strongSelf->currentTheme_->rules.size()); i++) {
-        const auto& rule = strongSelf->currentTheme_->rules[i];
-        NSLog(@"Rule %lu: scope=%s, color=%s", (unsigned long)i, rule.scope.c_str(),
-              rule.style.color.c_str());
+      NSLog(@"Theme loaded with %lu rules",
+            (unsigned long)strongSelf->currentTheme_->rules.size());
+      for (size_t i = 0;
+           i < std::min(size_t(5), strongSelf->currentTheme_->rules.size());
+           i++) {
+        const auto &rule = strongSelf->currentTheme_->rules[i];
+        NSLog(@"Rule %lu: scope=%s, color=%s", (unsigned long)i,
+              rule.scope.c_str(), rule.style.color.c_str());
       }
 
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(true));
       });
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
       dispatch_async(dispatch_get_main_queue(), ^{
         reject(@"theme_error", @(e.what()), nil);
       });

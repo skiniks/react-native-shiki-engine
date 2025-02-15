@@ -1,16 +1,17 @@
 #pragma once
-#include "../theme/ThemeStyle.h"
-#include "../platform/PlatformMeasurement.h"
-#include "TextMetrics.h"
 #include <cstdint>
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
+
+#include "../platform/PlatformMeasurement.h"
+#include "../theme/ThemeStyle.h"
+#include "TextMetrics.h"
 
 namespace shiki {
 
 class TextRange {
-public:
+ public:
   TextRange() : start(0), length(0) {}
   TextRange(size_t s, size_t l) : start(s), length(l) {}
   TextRange(size_t s, size_t l, const ThemeStyle& st) : start(s), length(l), style(st) {}
@@ -26,7 +27,9 @@ public:
     }
   }
 
-  bool isValid() const { return start >= 0 && length > 0; }
+  bool isValid() const {
+    return start >= 0 && length > 0;
+  }
 
   bool contains(size_t position) const {
     return position >= start && position < (start + length);
@@ -40,7 +43,9 @@ public:
     return start == other.start && length == other.length;
   }
 
-  const TextMetrics& getMetrics() const { return metrics_; }
+  const TextMetrics& getMetrics() const {
+    return metrics_;
+  }
 
   TextRange intersect(const TextRange& other) const {
     size_t newStart = std::max(start, other.start);
@@ -60,8 +65,8 @@ public:
     return TextRange(newStart, newEnd - newStart);
   }
 
-protected:
+ protected:
   TextMetrics metrics_;
 };
 
-} // namespace shiki
+}  // namespace shiki

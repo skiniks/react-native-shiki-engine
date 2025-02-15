@@ -9,19 +9,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ShikiSelectionManager : NSObject
 
-@property(nonatomic, weak) ShikiTextView* textView;
+@property(nonatomic, weak) ShikiTextView *textView;
 @property(nonatomic, assign) ShikiSelectionMode selectionMode;
-@property(nonatomic, strong, readonly) NSArray<NSValue*>* selectableRanges;
+@property(nonatomic, strong, readonly) NSArray<NSValue *> *selectableRanges;
 @property(nonatomic, assign) BOOL preserveSelectionOnUpdate;
-@property(nonatomic, strong) NSArray<NSString*>* syntaxScopes;
-@property(nonatomic, copy, nullable) void (^onScopeSelected)(NSString* scope, NSRange range);
+@property(nonatomic, strong) NSArray<NSString *> *syntaxScopes;
+@property(nonatomic, copy, nullable) void (^onScopeSelected)
+    (NSString *scope, NSRange range);
 @property(nonatomic, assign) BOOL allowsMultipleSelection;
-@property(nonatomic, strong, readonly) NSArray<NSValue*>* selectedRanges;
-@property(nonatomic, strong, readonly) ShikiSelectionHistory* selectionHistory;
+@property(nonatomic, strong, readonly) NSArray<NSValue *> *selectedRanges;
+@property(nonatomic, strong, readonly) ShikiSelectionHistory *selectionHistory;
 @property(nonatomic, assign) BOOL allowsDiscontiguousSelection;
-@property(nonatomic, copy, nullable) void (^onMultiSelectionChange)(NSArray<NSValue*>* ranges);
+@property(nonatomic, copy, nullable) void (^onMultiSelectionChange)
+    (NSArray<NSValue *> *ranges);
 
-- (instancetype)initWithTextView:(ShikiTextView*)textView;
+- (instancetype)initWithTextView:(ShikiTextView *)textView;
 
 // Selection methods
 - (void)selectRange:(NSRange)range;
@@ -32,9 +34,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)selectAllOccurrences;
 
 // Scope-based selection
-- (void)selectScope:(NSString*)scope;
+- (void)selectScope:(NSString *)scope;
 - (void)selectEnclosingScope;
-- (NSArray<NSString*>*)getScopesAtLocation:(NSUInteger)location;
+- (NSArray<NSString *> *)getScopesAtLocation:(NSUInteger)location;
 
 // Word and line selection
 - (void)selectWordAtLocation:(NSUInteger)location;
@@ -47,10 +49,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)clearSelectionState;
 
 // Syntax-aware selection
-- (void)updateSyntaxScopes:(NSArray<NSString*>*)scopes;
-- (void)selectSyntaxScope:(NSString*)scope atLocation:(NSUInteger)location;
+- (void)updateSyntaxScopes:(NSArray<NSString *> *)scopes;
+- (void)selectSyntaxScope:(NSString *)scope atLocation:(NSUInteger)location;
 - (void)expandToSyntaxScope;
-- (NSArray<NSString*>*)getSyntaxScopesAtLocation:(NSUInteger)location;
+- (NSArray<NSString *> *)getSyntaxScopesAtLocation:(NSUInteger)location;
 
 // Multi-selection methods
 - (void)addSelectionRange:(NSRange)range;
@@ -60,8 +62,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSRange)primarySelectedRange;
 
 // Search methods
-- (NSArray<NSValue*>*)findAllOccurrences:(NSString*)text
-                                 options:(NSRegularExpressionOptions)options;
+- (NSArray<NSValue *> *)findAllOccurrences:(NSString *)text
+                                   options:(NSRegularExpressionOptions)options;
 - (void)selectNextMatch;
 - (void)selectPreviousMatch;
 - (void)selectAllMatches;

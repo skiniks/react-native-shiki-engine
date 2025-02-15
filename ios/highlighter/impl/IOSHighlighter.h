@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../../../cpp/highlighter/platform/PlatformHighlighter.h"
 #include <functional>
 #include <memory>
 #include <string>
+
+#include "../../../cpp/highlighter/platform/PlatformHighlighter.h"
 
 #ifdef __OBJC__
 @class ShikiHighlighterView;
@@ -16,7 +17,7 @@ namespace shiki {
 using ViewUpdateCallback = std::function<void(const std::string&, const std::vector<PlatformStyledToken>&)>;
 
 class IOSHighlighter : public PlatformHighlighter {
-public:
+ public:
   static IOSHighlighter& getInstance();
   virtual ~IOSHighlighter() = default;
 
@@ -34,9 +35,9 @@ public:
   // iOS-specific methods
   void setUpdateCallback(ViewUpdateCallback callback);
 
-private:
+ private:
   IOSHighlighter() = default;
   ViewUpdateCallback updateCallback_;
 };
 
-} // namespace shiki
+}  // namespace shiki

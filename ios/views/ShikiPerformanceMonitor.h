@@ -13,20 +13,24 @@ typedef NS_ENUM(NSInteger, ShikiPerformanceMetric) {
 @property(nonatomic, assign) ShikiPerformanceMetric metric;
 @property(nonatomic, assign) NSTimeInterval startTime;
 @property(nonatomic, assign) NSTimeInterval duration;
-@property(nonatomic, copy) NSString* description;
-@property(nonatomic, strong) NSDictionary* metadata;
+@property(nonatomic, copy) NSString *description;
+@property(nonatomic, strong) NSDictionary *metadata;
 @end
 
 @interface ShikiPerformanceMonitor : NSObject
 
 + (instancetype)sharedMonitor;
 
-- (void)startMeasuring:(ShikiPerformanceMetric)metric description:(NSString*)description;
+- (void)startMeasuring:(ShikiPerformanceMetric)metric
+           description:(NSString *)description;
 - (void)stopMeasuring:(ShikiPerformanceMetric)metric;
-- (void)recordEvent:(ShikiPerformanceMetric)metric duration:(NSTimeInterval)duration;
-- (void)addMetadata:(NSDictionary*)metadata forMetric:(ShikiPerformanceMetric)metric;
+- (void)recordEvent:(ShikiPerformanceMetric)metric
+           duration:(NSTimeInterval)duration;
+- (void)addMetadata:(NSDictionary *)metadata
+          forMetric:(ShikiPerformanceMetric)metric;
 
-- (NSArray<ShikiPerformanceEvent*>*)getEventsForMetric:(ShikiPerformanceMetric)metric;
+- (NSArray<ShikiPerformanceEvent *> *)getEventsForMetric:
+    (ShikiPerformanceMetric)metric;
 - (void)clearEvents;
 
 @end

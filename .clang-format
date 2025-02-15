@@ -1,14 +1,91 @@
-BasedOnStyle: llvm
-Standard: c++14
+---
+BasedOnStyle: Google
+ColumnLimit: 120
 IndentWidth: 2
-ColumnLimit: 100
-SortIncludes: true
-SortUsingDeclarations: true
+TabWidth: 2
+UseTab: Never
+MaxEmptyLinesToKeep: 1
+BinPackArguments: false
+BinPackParameters: false
 PointerAlignment: Left
-ReferenceAlignment: Left
-ReflowComments: true
-BreakBeforeBraces: Attach
-BreakConstructorInitializers: BeforeColon
+IndentPPDirectives: AfterHash
+AlignTrailingComments: false
 AllowShortFunctionsOnASingleLine: Empty
-IndentCaseLabels: true
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceBeforeRangeBasedForLoopColon: true
+
+Language: Cpp
+Standard: c++17
+
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<React.*/'  # React Native headers first
+    Priority: 1
+  - Regex: '^<jsi/'     # JSI headers second
+    Priority: 2
+  - Regex: '^<.*\.h>'   # System headers with .h
+    Priority: 3
+  - Regex: '^<.*'       # Other system headers
+    Priority: 4
+  - Regex: '.*'         # Project headers
+    Priority: 5
+
+ReferenceAlignment: Left
+AlignAfterOpenBracket: BlockIndent
+AlignOperands: false
+ExperimentalAutoDetectBinPacking: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
+PenaltyBreakBeforeFirstCallParameter: 1
+AlignConsecutiveMacros: Consecutive
+ContinuationIndentWidth: 2
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterFunction: false
+  AfterClass: false
+  AfterNamespace: false
+  AfterStruct: false
+  BeforeCatch: false
+  BeforeElse: false
+  AfterExternBlock: false
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerIndentWidth: 2
+AccessModifierOffset: -1
+EmptyLineBeforeAccessModifier: LogicalBlock
+ReflowComments: true
+CommentPragmas: '^ NOLINT'
+DerivePointerAlignment: false
+SpaceAfterTemplateKeyword: true
+FixNamespaceComments: true
 NamespaceIndentation: Inner
+IndentExternBlock: AfterExternBlock
+
+StatementMacros:
+  - 'RCT_EXPORT_METHOD'
+  - 'RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD'
+  - 'RCT_EXPORT_SYNCHRONOUS_TYPED_METHOD'
+  - 'RCT_ENUM_VALUES'
+WhitespaceSensitiveMacros:
+  - 'RCT_EXPORT_MODULE'
+  - 'RCT_EXTERN_MODULE'
+
+---
+Language: ObjC
+
+ObjCBinPackProtocolList: Never
+ObjCBlockIndentWidth: 2
+ObjCBreakBeforeNestedBlockParam: true
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: true
+
+StatementMacros:
+  - 'RCT_EXPORT_METHOD'
+  - 'RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD'
+  - 'RCT_EXPORT_SYNCHRONOUS_TYPED_METHOD'
+  - 'RCT_ENUM_VALUES'
+WhitespaceSensitiveMacros:
+  - 'RCT_EXPORT_MODULE'
+  - 'RCT_EXTERN_MODULE'

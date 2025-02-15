@@ -16,44 +16,48 @@
 using namespace facebook::react;
 
 // Helper functions for bridging
-static NSString* RCTBridgingToString(const std::string& str) {
+static NSString *RCTBridgingToString(const std::string &str) {
   return @(str.c_str());
 }
 
-static std::string RCTBridgingFromString(NSString* str) {
+static std::string RCTBridgingFromString(NSString *str) {
   return str ? str.UTF8String : "";
 }
 
-static std::string RCTBridgingToString(NSDictionary* dict) {
-  NSError* error = nil;
-  NSData* jsonData = [NSJSONSerialization dataWithJSONObject:dict options:0 error:&error];
+static std::string RCTBridgingToString(NSDictionary *dict) {
+  NSError *error = nil;
+  NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict
+                                                     options:0
+                                                       error:&error];
   if (error) {
     return "";
   }
-  NSString* jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+  NSString *jsonString = [[NSString alloc] initWithData:jsonData
+                                               encoding:NSUTF8StringEncoding];
   return RCTBridgingFromString(jsonString);
 }
 
 @implementation RCTShikiHighlighterComponentView {
-  ShikiTextView* _textView;
-  LineNumberView* _lineNumberView;
+  ShikiTextView *_textView;
+  LineNumberView *_lineNumberView;
   std::shared_ptr<shiki::IOSHighlighter> _highlighter;
   std::shared_ptr<shiki::IOSHighlightRenderer> _renderer;
   BOOL _isUpdating;
   BOOL _isVisible;
   BOOL _isPendingUpdate;
-  NSOperationQueue* _updateQueue;
+  NSOperationQueue *_updateQueue;
   NSUInteger _lastContentLength;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    static const auto defaultProps = std::make_shared<const ShikiHighlighterProps>();
+    static const auto defaultProps =
+        std::make_shared<const ShikiHighlighterProps>();
     _props = defaultProps;
 
     // Get C++ singletons
-    _highlighter =
-        std::make_shared<shiki::IOSHighlighter>(shiki::IOSHighlighter::getInstance());
+    _highlighter = std::make_shared<shiki::IOSHighlighter>(
+        shiki::IOSHighlighter::getInstance());
 
     // Create an empty shared_ptr and alias it to the singleton instance
     _renderer = std::shared_ptr<shiki::IOSHighlightRenderer>(
@@ -68,16 +72,16 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
     viewConfig.selectable = YES;
 
     // Create text view through C++
-    void* nativeView = _renderer->createView(viewConfig);
-    _textView = (__bridge ShikiTextView*)nativeView;
+    void *nativeView = _renderer->createView(viewConfig);
+    _textView = (__bridge ShikiTextView *)nativeView;
 
     // Configure selection handling
     __weak __typeof(self) weakSelf = self;
-    _textView.onSelectionChange = ^(NSDictionary* selection) {
+    _textView.onSelectionChange = ^(NSDictionary *selection) {
       [weakSelf handleSelectionChange:selection];
     };
 
-    _textView.onCopy = ^(NSString* copiedText) {
+    _textView.onCopy = ^(NSString *copiedText) {
       [weakSelf handleCopy:copiedText];
     };
 
@@ -96,25 +100,27 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
 
 - (void)dealloc {
   if (_textView) {
-    _renderer->destroyView((__bridge void*)_textView);
+    _renderer->destroyView((__bridge void *)_textView);
     _textView = nil;
   }
 }
 
 #pragma mark - Selection Handling
 
-- (void)handleSelectionChange:(NSDictionary*)selection {
+- (void)handleSelectionChange:(NSDictionary *)selection {
   if (_eventEmitter) {
     std::dynamic_pointer_cast<const ShikiHighlighterEventEmitter>(_eventEmitter)
         ->dispatchEvent("selectionChange",
-                        folly::dynamic::object("selection", RCTBridgingToString(selection)));
+                        folly::dynamic::object("selection",
+                                               RCTBridgingToString(selection)));
   }
 }
 
-- (void)handleCopy:(NSString*)copiedText {
+- (void)handleCopy:(NSString *)copiedText {
   if (_eventEmitter) {
     std::dynamic_pointer_cast<const ShikiHighlighterEventEmitter>(_eventEmitter)
-        ->dispatchEvent("copy", folly::dynamic::object("text", RCTBridgingFromString(copiedText)));
+        ->dispatchEvent("copy", folly::dynamic::object(
+                                    "text", RCTBridgingFromString(copiedText)));
   }
 }
 
@@ -132,7 +138,7 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
   [_textView selectLine:line];
 }
 
-- (void)selectScope:(NSString*)scope {
+- (void)selectScope:(NSString *)scope {
   [_textView selectScope:scope];
 }
 
@@ -143,14 +149,17 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
 #pragma mark - RCTComponentViewProtocol
 
 + (ComponentDescriptorProvider)componentDescriptorProvider {
-  return concreteComponentDescriptorProvider<ShikiHighlighterComponentDescriptor>();
+  return concreteComponentDescriptorProvider<
+      ShikiHighlighterComponentDescriptor>();
 }
 
-- (void)updateProps:(const Props::Shared&)props oldProps:(const Props::Shared&)oldProps {
+- (void)updateProps:(const Props::Shared &)props
+           oldProps:(const Props::Shared &)oldProps {
   [super updateProps:props oldProps:oldProps];
 
-  const auto& newHighlighterProps = *std::static_pointer_cast<const ShikiHighlighterProps>(props);
-  const auto& oldHighlighterProps =
+  const auto &newHighlighterProps =
+      *std::static_pointer_cast<const ShikiHighlighterProps>(props);
+  const auto &oldHighlighterProps =
       *std::static_pointer_cast<const ShikiHighlighterProps>(oldProps);
 
   shiki::ViewConfig config;
@@ -160,9 +169,10 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
   config.scrollEnabled = YES;
   config.selectable = YES;
 
-  // Update view with empty tokens and text for now - they'll be updated in highlight
+  // Update view with empty tokens and text for now - they'll be updated in
+  // highlight
   std::vector<shiki::Token> emptyTokens;
-  _renderer->updateView((__bridge void*)_textView, emptyTokens, "");
+  _renderer->updateView((__bridge void *)_textView, emptyTokens, "");
 
   // Handle highlighting updates
   if (newHighlighterProps.text != oldHighlighterProps.text ||
@@ -175,12 +185,14 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
 
 #pragma mark - Private
 
-- (void)updateHighlightingWithProps:(const ShikiHighlighterProps&)props {
-  NSLog(@"[ShikiDebug] Starting highlighting update with language: %s, theme: %s",
-        props.language.c_str(), props.theme.c_str());
+- (void)updateHighlightingWithProps:(const ShikiHighlighterProps &)props {
+  NSLog(
+      @"[ShikiDebug] Starting highlighting update with language: %s, theme: %s",
+      props.language.c_str(), props.theme.c_str());
 
   if (props.text.empty() || props.language.empty() || props.theme.empty()) {
-    NSLog(@"[ShikiDebug] Missing required properties - text: %d, language: %d, theme: %d",
+    NSLog(@"[ShikiDebug] Missing required properties - text: %d, language: %d, "
+          @"theme: %d",
           !props.text.empty(), !props.language.empty(), !props.theme.empty());
     _textView.text = @(props.text.c_str());
     return;
@@ -208,7 +220,7 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
   _lastContentLength = contentLength;
 
   __weak __typeof(self) weakSelf = self;
-  NSOperation* updateOperation = [NSBlockOperation blockOperationWithBlock:^{
+  NSOperation *updateOperation = [NSBlockOperation blockOperationWithBlock:^{
     @try {
       __strong __typeof(weakSelf) strongSelf = weakSelf;
       if (!strongSelf) {
@@ -230,9 +242,10 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
 
       // Log detailed token information for debugging
       for (size_t i = 0; i < tokens.size(); i++) {
-        const auto& token = tokens[i];
-        NSString* tokenText =
-            [NSString stringWithUTF8String:props.text.substr(token.start, token.length).c_str()];
+        const auto &token = tokens[i];
+        NSString *tokenText = [NSString
+            stringWithUTF8String:props.text.substr(token.start, token.length)
+                                     .c_str()];
         NSLog(@"[ShikiDebug] Token %zu: \n"
                "  Text: '%@'\n"
                "  Start: %zu\n"
@@ -246,8 +259,8 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
                "  Underline: %d",
               i, tokenText, token.start, token.length, token.scope.c_str(),
               token.style.color.c_str(), token.style.backgroundColor.c_str(),
-              token.style.fontStyle.c_str(), token.style.bold, token.style.italic,
-              token.style.underline);
+              token.style.fontStyle.c_str(), token.style.bold,
+              token.style.italic, token.style.underline);
       }
 
       dispatch_async(dispatch_get_main_queue(), ^{
@@ -257,75 +270,91 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
         }
 
         NSLog(@"[ShikiDebug] Setting content without highlighting");
-        [strongSelf->_textView setContentWithoutHighlighting:@(props.text.c_str())];
+        [strongSelf->_textView
+            setContentWithoutHighlighting:@(props.text.c_str())];
 
         NSLog(@"[ShikiDebug] Beginning batch updates");
         [strongSelf->_textView beginBatchUpdates];
 
         // Apply tokens to text view using NSAttributedString
-        NSMutableAttributedString* attributedString =
-            [[NSMutableAttributedString alloc] initWithString:@(props.text.c_str())];
+        NSMutableAttributedString *attributedString =
+            [[NSMutableAttributedString alloc]
+                initWithString:@(props.text.c_str())];
 
         // Set background color for the entire text and default font
-        UIColor* backgroundColor = [UIColor colorWithRed:0.157
-                                                   green:0.165
-                                                    blue:0.212
-                                                   alpha:1.0]; // #282A36 Dracula background
-        UIColor* defaultColor = [UIColor colorWithRed:0.973
-                                                green:0.973
-                                                 blue:0.949
-                                                alpha:1.0]; // #F8F8F2 Dracula foreground
-        UIFont* defaultFont = [UIFont fontWithName:@"Menlo" size:12.0];
+        UIColor *backgroundColor =
+            [UIColor colorWithRed:0.157
+                            green:0.165
+                             blue:0.212
+                            alpha:1.0]; // #282A36 Dracula background
+        UIColor *defaultColor =
+            [UIColor colorWithRed:0.973
+                            green:0.973
+                             blue:0.949
+                            alpha:1.0]; // #F8F8F2 Dracula foreground
+        UIFont *defaultFont = [UIFont fontWithName:@"Menlo" size:12.0];
 
-        NSLog(@"[ShikiDebug] Setting default styles - bg: %@, fg: %@, font: %@", backgroundColor,
-              defaultColor, defaultFont);
+        NSLog(@"[ShikiDebug] Setting default styles - bg: %@, fg: %@, font: %@",
+              backgroundColor, defaultColor, defaultFont);
 
-        [attributedString addAttributes:@{
-          NSForegroundColorAttributeName : defaultColor,
-          NSFontAttributeName : defaultFont
-        }
-                                  range:NSMakeRange(0, attributedString.length)];
+        [attributedString
+            addAttributes:@{
+              NSForegroundColorAttributeName : defaultColor,
+              NSFontAttributeName : defaultFont
+            }
+                    range:NSMakeRange(0, attributedString.length)];
 
         strongSelf->_textView.backgroundColor = backgroundColor;
 
-        for (const auto& token : tokens) {
+        for (const auto &token : tokens) {
           if (token.start + token.length > attributedString.length) {
-            NSLog(@"Warning: Token range (%zu, %zu) exceeds string length %lu", token.start,
-                  token.length, (unsigned long)attributedString.length);
+            NSLog(@"Warning: Token range (%zu, %zu) exceeds string length %lu",
+                  token.start, token.length,
+                  (unsigned long)attributedString.length);
             continue;
           }
 
           NSRange range = NSMakeRange(token.start, token.length);
-          UIColor* color = defaultColor;
+          UIColor *color = defaultColor;
 
           // Convert hex color to UIColor
           if (!token.style.color.empty()) {
-            NSString* hexColor = @(token.style.color.c_str());
-            NSLog(@"Processing token at range %@: color=%@", NSStringFromRange(range), hexColor);
+            NSString *hexColor = @(token.style.color.c_str());
+            NSLog(@"Processing token at range %@: color=%@",
+                  NSStringFromRange(range), hexColor);
 
             // Remove '#' if present and standardize to 6 characters
-            NSString* cleanHex =
-                [hexColor hasPrefix:@"#"] ? [hexColor substringFromIndex:1] : hexColor;
+            NSString *cleanHex = [hexColor hasPrefix:@"#"]
+                                     ? [hexColor substringFromIndex:1]
+                                     : hexColor;
             if (cleanHex.length == 3) {
               // Convert 3-digit hex to 6-digit
-              cleanHex = [NSString
-                  stringWithFormat:@"%C%C%C%C%C%C", [cleanHex characterAtIndex:0],
-                                   [cleanHex characterAtIndex:0], [cleanHex characterAtIndex:1],
-                                   [cleanHex characterAtIndex:1], [cleanHex characterAtIndex:2],
-                                   [cleanHex characterAtIndex:2]];
+              cleanHex =
+                  [NSString stringWithFormat:@"%C%C%C%C%C%C",
+                                             [cleanHex characterAtIndex:0],
+                                             [cleanHex characterAtIndex:0],
+                                             [cleanHex characterAtIndex:1],
+                                             [cleanHex characterAtIndex:1],
+                                             [cleanHex characterAtIndex:2],
+                                             [cleanHex characterAtIndex:2]];
             }
 
             if (cleanHex.length == 6) {
               unsigned int colorValue = 0;
-              NSScanner* scanner = [NSScanner scannerWithString:cleanHex];
+              NSScanner *scanner = [NSScanner scannerWithString:cleanHex];
               if ([scanner scanHexInt:&colorValue]) {
                 CGFloat red = ((colorValue & 0xFF0000) >> 16) / 255.0;
                 CGFloat green = ((colorValue & 0x00FF00) >> 8) / 255.0;
                 CGFloat blue = (colorValue & 0x0000FF) / 255.0;
-                color = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
-                NSLog(@"Successfully parsed color: r=%.2f g=%.2f b=%.2f", red, green, blue);
+                color = [UIColor colorWithRed:red
+                                        green:green
+                                         blue:blue
+                                        alpha:1.0];
+                NSLog(@"Successfully parsed color: r=%.2f g=%.2f b=%.2f", red,
+                      green, blue);
               } else {
-                NSLog(@"Failed to parse hex color: %@, using default", cleanHex);
+                NSLog(@"Failed to parse hex color: %@, using default",
+                      cleanHex);
                 color = defaultColor;
               }
             } else {
@@ -337,7 +366,7 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
             color = defaultColor;
           }
 
-          UIFont* font = defaultFont;
+          UIFont *font = defaultFont;
           if (token.style.bold || token.style.italic) {
             UIFontDescriptorSymbolicTraits traits = 0;
             if (token.style.bold)
@@ -345,30 +374,34 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
             if (token.style.italic)
               traits |= UIFontDescriptorTraitItalic;
 
-            UIFontDescriptor* descriptor =
+            UIFontDescriptor *descriptor =
                 [font.fontDescriptor fontDescriptorWithSymbolicTraits:traits];
             if (descriptor) {
               font = [UIFont fontWithDescriptor:descriptor size:12.0];
             }
           }
 
-          NSMutableDictionary* attributes = [NSMutableDictionary dictionary];
+          NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
           [attributes setObject:color forKey:NSForegroundColorAttributeName];
           [attributes setObject:font forKey:NSFontAttributeName];
 
           // Only set background color if explicitly specified in the theme
           if (!token.style.backgroundColor.empty()) {
-            NSString* bgHexColor = @(token.style.backgroundColor.c_str());
-            NSString* cleanBgHex =
-                [bgHexColor hasPrefix:@"#"] ? [bgHexColor substringFromIndex:1] : bgHexColor;
+            NSString *bgHexColor = @(token.style.backgroundColor.c_str());
+            NSString *cleanBgHex = [bgHexColor hasPrefix:@"#"]
+                                       ? [bgHexColor substringFromIndex:1]
+                                       : bgHexColor;
             if (cleanBgHex.length == 6) {
               unsigned int bgColorValue = 0;
-              NSScanner* scanner = [NSScanner scannerWithString:cleanBgHex];
+              NSScanner *scanner = [NSScanner scannerWithString:cleanBgHex];
               if ([scanner scanHexInt:&bgColorValue]) {
                 CGFloat red = ((bgColorValue & 0xFF0000) >> 16) / 255.0;
                 CGFloat green = ((bgColorValue & 0x00FF00) >> 8) / 255.0;
                 CGFloat blue = (bgColorValue & 0x0000FF) / 255.0;
-                [attributes setObject:[UIColor colorWithRed:red green:green blue:blue alpha:1.0]
+                [attributes setObject:[UIColor colorWithRed:red
+                                                      green:green
+                                                       blue:blue
+                                                      alpha:1.0]
                                forKey:NSBackgroundColorAttributeName];
               }
             }
@@ -381,7 +414,7 @@ static std::string RCTBridgingToString(NSDictionary* dict) {
         [strongSelf->_textView endBatchUpdates];
         [strongSelf->_textView resumeUpdates];
       });
-    } @catch (NSException* exception) {
+    } @catch (NSException *exception) {
       NSLog(@"Error highlighting code: %@", exception);
     }
   }];

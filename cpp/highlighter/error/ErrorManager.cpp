@@ -1,4 +1,5 @@
 #include "ErrorManager.h"
+
 #include <sstream>
 
 namespace shiki {
@@ -39,13 +40,11 @@ void ErrorManager::reportError(const ErrorInfo& error) {
 }
 
 void ErrorManager::notifyJSLayer(const ErrorInfo& error) {
-  if (!bridgeErrorCallback_)
-    return;
+  if (!bridgeErrorCallback_) return;
 
   std::stringstream ss;
-  ss << "{ \"code\": " << static_cast<int>(error.code) << ", \"severity\": \""
-     << static_cast<int>(error.severity) << "\", \"message\": \"" << error.message
-     << "\", \"context\": \"" << error.context
+  ss << "{ \"code\": " << static_cast<int>(error.code) << ", \"severity\": \"" << static_cast<int>(error.severity)
+     << "\", \"message\": \"" << error.message << "\", \"context\": \"" << error.context
      << "\", \"requiresReset\": " << (error.requiresReset ? "true" : "false") << " }";
 
   bridgeErrorCallback_(ss.str());
@@ -85,4 +84,4 @@ void ErrorManager::reset() {
   }
 }
 
-} // namespace shiki
+}  // namespace shiki

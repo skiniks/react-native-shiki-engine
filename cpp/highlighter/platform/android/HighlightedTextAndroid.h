@@ -1,12 +1,14 @@
 #pragma once
-#include "../../text/HighlightedText.h"
 #include <jni.h>
+
 #include <string>
+
+#include "../../text/HighlightedText.h"
 
 namespace shiki {
 
 class HighlightedTextAndroid final : public HighlightedText {
-public:
+ public:
   explicit HighlightedTextAndroid(jobject textView, JNIEnv* env);
   ~HighlightedTextAndroid() override;
 
@@ -14,7 +16,7 @@ public:
   void clearHighlighting() override;
   void measureRange(TextRange& range) override;
 
-private:
+ private:
   jobject textView_;
   JNIEnv* env_;
   jmethodID setTextMethod_;
@@ -24,4 +26,4 @@ private:
   void applyStyle(const ThemeStyle& style, jint start, jint length);
 };
 
-} // namespace shiki
+}  // namespace shiki

@@ -1,27 +1,28 @@
 #pragma once
-#include "../core/Constants.h"
-#include "../utils/ScopedResource.h"
-#include "MemoryTracker.h"
 #include <atomic>
 #include <functional>
 #include <mutex>
 #include <string>
 #include <vector>
 
+#include "../core/Constants.h"
+#include "../utils/ScopedResource.h"
+#include "MemoryTracker.h"
+
 #ifdef __APPLE__
-#include <dispatch/dispatch.h>
+#  include <dispatch/dispatch.h>
 #endif
 
 namespace shiki {
 
 namespace text {
-  static constexpr size_t MAX_TEXT_SIZE = 1024 * 1024; // 1MB
+  static constexpr size_t MAX_TEXT_SIZE = 1024 * 1024;  // 1MB
 }
 
 class MemoryManager {
-public:
-  static constexpr size_t LOW_MEMORY_THRESHOLD = 50 * 1024 * 1024;       // 50MB
-  static constexpr size_t CRITICAL_MEMORY_THRESHOLD = 100 * 1024 * 1024; // 100MB
+ public:
+  static constexpr size_t LOW_MEMORY_THRESHOLD = 50 * 1024 * 1024;  // 50MB
+  static constexpr size_t CRITICAL_MEMORY_THRESHOLD = 100 * 1024 * 1024;  // 100MB
 
   static MemoryManager& getInstance() {
     static MemoryManager instance;
@@ -86,13 +87,14 @@ public:
     return text.length() <= text::MAX_TEXT_SIZE;
   }
 
-  template <typename T> static void limitRanges(std::vector<T>& ranges) {
+  template <typename T>
+  static void limitRanges(std::vector<T>& ranges) {
     if (ranges.size() > text::MAX_RANGES) {
       ranges.resize(text::MAX_RANGES);
     }
   }
 
-private:
+ private:
   MemoryManager() {
     initializePlatformSignals();
   }
@@ -116,4 +118,4 @@ private:
   void checkMemoryPressure();
 };
 
-} // namespace shiki
+}  // namespace shiki

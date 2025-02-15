@@ -1,18 +1,20 @@
 #include "OnigurumaRegex.h"
-#include "OnigurumaContext.h"
-#include "../highlighter/cache/PatternCache.h"
-#include "../highlighter/memory/MemoryTracker.h"
-#include "../highlighter/utils/OnigurumaPtr.h"
+
 #include <algorithm>
 #include <cstring>
 #include <new>
 #include <vector>
 
+#include "../highlighter/cache/PatternCache.h"
+#include "../highlighter/memory/MemoryTracker.h"
+#include "../highlighter/utils/OnigurumaPtr.h"
+#include "OnigurumaContext.h"
+
 using namespace shiki;
 
 /** Rough estimate of regex pattern memory usage. Base + pattern size. */
 static size_t estimate_pattern_memory(const char* pattern, regex_t* regex) {
-  return strlen(pattern) + 1024; // Base size for regex structure
+  return strlen(pattern) + 1024;  // Base size for regex structure
 }
 
 /** Creates UTF-8 regex scanner with pattern cache. nullptr on failure. */
@@ -29,7 +31,7 @@ OnigurumaContext* create_scanner(const char** patterns, int pattern_count, size_
     context->impl = new OnigurumaContextImpl();
     context->pattern_count = pattern_count;
     context->regexes = new regex_t*[static_cast<size_t>(pattern_count)];
-    context->region = createRegion().release(); // Use our smart pointer factory
+    context->region = createRegion().release();  // Use our smart pointer factory
 
     auto& cache = PatternCache::getInstance();
     auto& memTracker = MemoryTracker::getInstance();
@@ -38,7 +40,7 @@ OnigurumaContext* create_scanner(const char** patterns, int pattern_count, size_
       regex_t* regex = cache.getCachedPattern(patterns[i]);
 
       if (!regex) {
-        auto newRegex = createRegex(patterns[i]); // Use our smart pointer factory
+        auto newRegex = createRegex(patterns[i]);  // Use our smart pointer factory
         if (!newRegex) {
           return nullptr;
         }
@@ -72,19 +74,21 @@ OnigurumaResult* find_next_match(OnigurumaContext* context, const char* text, in
     OnigRegion* region = context->region;
     onig_region_clear(region);
 
-    int result = onig_search(context->regexes[i],
-                           (const OnigUChar*)text,
-                           (const OnigUChar*)(text + strlen(text)),
-                           (const OnigUChar*)(text + start_pos),
-                           (const OnigUChar*)(text + strlen(text)),
-                           region, ONIG_OPTION_NONE);
+    int result = onig_search(
+      context->regexes[i],
+      (const OnigUChar*)text,
+      (const OnigUChar*)(text + strlen(text)),
+      (const OnigUChar*)(text + start_pos),
+      (const OnigUChar*)(text + strlen(text)),
+      region,
+      ONIG_OPTION_NONE
+    );
 
     if (result >= 0) {
       int match_pos = region->beg[0];
       int match_length = region->end[0] - region->beg[0];
 
-      if (!best_result || match_pos < best_pos ||
-          (match_pos == best_pos && match_length > best_length)) {
+      if (!best_result || match_pos < best_pos || (match_pos == best_pos && match_length > best_length)) {
         auto new_result = std::make_unique<OnigurumaResult>();
         new_result->pattern_index = i;
         new_result->match_start = match_pos;

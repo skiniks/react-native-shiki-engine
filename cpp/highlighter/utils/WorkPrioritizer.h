@@ -1,6 +1,4 @@
 #pragma once
-#include "../core/Constants.h"
-#include "../memory/MemoryManager.h"
 #include <atomic>
 #include <chrono>
 #include <functional>
@@ -11,16 +9,14 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../core/Constants.h"
+#include "../memory/MemoryManager.h"
+
 namespace shiki {
 
 class ConcurrencyUtil;
 
-enum class WorkPriority {
-  LOW = 0,
-  NORMAL = 1,
-  HIGH = 2,
-  CRITICAL = 3
-};
+enum class WorkPriority { LOW = 0, NORMAL = 1, HIGH = 2, CRITICAL = 3 };
 
 struct WorkItem {
   std::function<void()> task;
@@ -28,16 +24,15 @@ struct WorkItem {
   std::chrono::steady_clock::time_point timestamp;
   size_t estimatedCost;  // Estimated memory/CPU cost
   std::string category;  // For tracking and analytics
-  bool isVisible;        // Whether the work affects visible content
+  bool isVisible;  // Whether the work affects visible content
 
-  WorkItem(std::function<void()> t, WorkPriority p, size_t cost,
-           std::string cat, bool visible = false)
-    : task(std::move(t))
-    , priority(p)
-    , timestamp(std::chrono::steady_clock::now())
-    , estimatedCost(cost)
-    , category(std::move(cat))
-    , isVisible(visible) {}
+  WorkItem(std::function<void()> t, WorkPriority p, size_t cost, std::string cat, bool visible = false)
+    : task(std::move(t)),
+      priority(p),
+      timestamp(std::chrono::steady_clock::now()),
+      estimatedCost(cost),
+      category(std::move(cat)),
+      isVisible(visible) {}
 
   // Compare work items based on priority and age
   bool operator<(const WorkItem& other) const {
@@ -49,7 +44,7 @@ struct WorkItem {
 };
 
 class WorkPrioritizer {
-public:
+ public:
   static WorkPrioritizer& getInstance() {
     static WorkPrioritizer instance;
     return instance;
@@ -66,8 +61,12 @@ public:
   void onCriticalMemoryPressure();
 
   // Configuration
-  void setMaxConcurrentWork(size_t max) { maxConcurrentWork_ = max; }
-  void setMemoryThreshold(size_t threshold) { memoryThreshold_ = threshold; }
+  void setMaxConcurrentWork(size_t max) {
+    maxConcurrentWork_ = max;
+  }
+  void setMemoryThreshold(size_t threshold) {
+    memoryThreshold_ = threshold;
+  }
 
   // Analytics
   struct WorkMetrics {
@@ -82,7 +81,7 @@ public:
 
   WorkMetrics getMetrics() const;
 
-private:
+ private:
   WorkPrioritizer();
   ~WorkPrioritizer();
 
@@ -96,7 +95,7 @@ private:
 
   // Configuration
   std::atomic<size_t> maxConcurrentWork_{4};
-  std::atomic<size_t> memoryThreshold_{100 * 1024 * 1024}; // 100MB
+  std::atomic<size_t> memoryThreshold_{100 * 1024 * 1024};  // 100MB
 
   // Category tracking
   std::unordered_map<std::string, size_t> categoryWorkCounts_;
@@ -117,4 +116,4 @@ private:
   void dropLowPriorityWork();
 };
 
-} // namespace shiki
+}  // namespace shiki

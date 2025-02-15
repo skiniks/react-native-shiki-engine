@@ -1,18 +1,21 @@
 #include "ShikiTokenizer.h"
-#include "../cache/CacheManager.h"
-#include "../cache/StyleCache.h"
-#include "../utils/ScopedResource.h"
-#include "../utils/WorkPrioritizer.h"
+
+#include <oniguruma.h>
+#include <xxhash.h>
+
 #include <algorithm>
 #include <iostream>
 #include <map>
-#include <oniguruma.h>
+#include <mutex>
 #include <sstream>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <mutex>
-#include <xxhash.h>
+
+#include "../cache/CacheManager.h"
+#include "../cache/StyleCache.h"
+#include "../utils/ScopedResource.h"
+#include "../utils/WorkPrioritizer.h"
 
 namespace shiki {
 
@@ -23,7 +26,7 @@ namespace {
       onig_region_free(region, 1);
     }
   }
-} // anonymous namespace
+}  // anonymous namespace
 
 ShikiTokenizer& ShikiTokenizer::getInstance() {
   static ShikiTokenizer instance;
@@ -50,9 +53,9 @@ void ShikiTokenizer::setTheme(std::shared_ptr<Theme> theme) {
   // Configure line numbers if theme has line number styles
   if (theme_) {
     LineNumbers::Config config;
-    config.show = true; // Can be made configurable
+    config.show = true;  // Can be made configurable
     config.style = theme_->getLineNumberStyle();
-    config.fontSize = 12.0f; // Can be made configurable
+    config.fontSize = 12.0f;  // Can be made configurable
     lineNumbers_ = std::make_unique<LineNumbers>(config);
   }
 }
@@ -62,8 +65,7 @@ void ShikiTokenizer::clearCompiledPatterns() {
 }
 
 void ShikiTokenizer::compilePatterns() {
-  if (!grammar_)
-    return;
+  if (!grammar_) return;
 
   const auto& patterns = grammar_->getPatterns();
   compiledPatterns_.reserve(patterns.size());
@@ -73,8 +75,7 @@ void ShikiTokenizer::compilePatterns() {
     CompiledPattern compiled;
 
     // Skip patterns without a match
-    if (pattern.match.empty())
-      continue;
+    if (pattern.match.empty()) continue;
 
     // Special handling for comment patterns
     bool isComment = pattern.name.find("comment") != std::string::npos;
@@ -85,9 +86,15 @@ void ShikiTokenizer::compilePatterns() {
     }
 
     regex_t* regex = nullptr;
-    int result = onig_new(&regex, (OnigUChar*)pattern.match.c_str(),
-                          (OnigUChar*)(pattern.match.c_str() + pattern.match.length()), options,
-                          ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
+    int result = onig_new(
+      &regex,
+      (OnigUChar*)pattern.match.c_str(),
+      (OnigUChar*)(pattern.match.c_str() + pattern.match.length()),
+      options,
+      ONIG_ENCODING_UTF8,
+      ONIG_SYNTAX_DEFAULT,
+      &einfo
+    );
 
     if (result == ONIG_NORMAL) {
       compiled.regex.reset(regex);
@@ -108,8 +115,7 @@ bool isMoreSpecific(const std::string& scope1, const std::string& scope2) {
   return scope1.find(scope2) != std::string::npos && scope1.length() > scope2.length();
 }
 
-std::vector<Token> convertRangesToTokens(const std::vector<TextRange>& ranges,
-                                         const std::string& code) {
+std::vector<Token> convertRangesToTokens(const std::vector<TextRange>& ranges, const std::string& code) {
   std::vector<Token> tokens;
   tokens.reserve(ranges.size());
 
@@ -176,8 +182,7 @@ void ShikiTokenizer::cacheTokens(const std::string& text, const std::vector<Toke
   }
 
   // Add to cache
-  tokenCache_.insert_or_assign(hash,
-    TokenCacheEntry(tokens, hash, ++cacheTimestamp_));
+  tokenCache_.insert_or_assign(hash, TokenCacheEntry(tokens, hash, ++cacheTimestamp_));
 }
 
 void ShikiTokenizer::evictOldestTokenCache() {
@@ -216,8 +221,7 @@ std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
   processPatterns(grammar_->getPatterns(), code, tokens, scopeStack);
 
   // Sort tokens by position
-  std::sort(tokens.begin(), tokens.end(),
-            [](const Token& a, const Token& b) { return a.start < b.start; });
+  std::sort(tokens.begin(), tokens.end(), [](const Token& a, const Token& b) { return a.start < b.start; });
 
   // Resolve theme styles for all tokens
   resolveStyles(tokens);
@@ -272,13 +276,15 @@ std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
   // Log scope color mapping (sample of important scopes)
   std::cout << "\n[INFO] Scope color mapping (sample):" << std::endl;
   std::vector<std::pair<std::string, std::pair<size_t, std::string>>> sortedScopes(
-      scopeColorMap.begin(), scopeColorMap.end());
-  std::sort(sortedScopes.begin(), sortedScopes.end(),
-            [](const auto& a, const auto& b) { return a.second.first > b.second.first; });
+    scopeColorMap.begin(),
+    scopeColorMap.end()
+  );
+  std::sort(sortedScopes.begin(), sortedScopes.end(), [](const auto& a, const auto& b) {
+    return a.second.first > b.second.first;
+  });
 
-  const std::vector<std::string> importantScopeKeywords = {
-      "comment", "string", "keyword",  "function", "variable",
-      "type",    "macro",  "constant", "operator", "punctuation"};
+  const std::vector<std::string> importantScopeKeywords =
+    {"comment", "string", "keyword", "function", "variable", "type", "macro", "constant", "operator", "punctuation"};
 
   size_t samplesShown = 0;
   for (const auto& [scope, info] : sortedScopes) {
@@ -299,82 +305,95 @@ std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
   // Log default colored scopes
   if (!defaultColoredByScope.empty()) {
     std::cout << "\n[INFO] Default colored scopes (" << defaultForeground << "):" << std::endl;
-    std::vector<std::pair<std::string, size_t>> defaultColoredSorted(defaultColoredByScope.begin(),
-                                                                     defaultColoredByScope.end());
-    std::sort(defaultColoredSorted.begin(), defaultColoredSorted.end(),
-              [](const auto& a, const auto& b) { return a.second > b.second; });
+    std::vector<std::pair<std::string, size_t>> defaultColoredSorted(
+      defaultColoredByScope.begin(),
+      defaultColoredByScope.end()
+    );
+    std::sort(defaultColoredSorted.begin(), defaultColoredSorted.end(), [](const auto& a, const auto& b) {
+      return a.second > b.second;
+    });
 
     for (size_t i = 0; i < std::min(size_t(5), defaultColoredSorted.size()); i++) {
-      std::cout << "  " << defaultColoredSorted[i].first << ": " << defaultColoredSorted[i].second
-                << " tokens" << std::endl;
+      std::cout << "  " << defaultColoredSorted[i].first << ": " << defaultColoredSorted[i].second << " tokens"
+                << std::endl;
     }
   }
 
   // Log truly uncolored scopes if any
   if (!uncoloredByScope.empty()) {
     std::cout << "\n[WARN] Truly uncolored scopes (no color assigned):" << std::endl;
-    std::vector<std::pair<std::string, size_t>> uncoloredSorted(uncoloredByScope.begin(),
-                                                                uncoloredByScope.end());
-    std::sort(uncoloredSorted.begin(), uncoloredSorted.end(),
-              [](const auto& a, const auto& b) { return a.second > b.second; });
+    std::vector<std::pair<std::string, size_t>> uncoloredSorted(uncoloredByScope.begin(), uncoloredByScope.end());
+    std::sort(uncoloredSorted.begin(), uncoloredSorted.end(), [](const auto& a, const auto& b) {
+      return a.second > b.second;
+    });
 
     for (size_t i = 0; i < std::min(size_t(5), uncoloredSorted.size()); i++) {
-      std::cout << "  " << uncoloredSorted[i].first << ": " << uncoloredSorted[i].second
-                << " tokens" << std::endl;
+      std::cout << "  " << uncoloredSorted[i].first << ": " << uncoloredSorted[i].second << " tokens" << std::endl;
     }
   }
 
   return tokens;
 }
 
-void ShikiTokenizer::processPatterns(const std::vector<GrammarPattern>& patterns,
-                                     const std::string& code, std::vector<Token>& tokens,
-                                     std::vector<std::string>& scopeStack) {
+void ShikiTokenizer::processPatterns(
+  const std::vector<GrammarPattern>& patterns,
+  const std::string& code,
+  std::vector<Token>& tokens,
+  std::vector<std::string>& scopeStack
+) {
   const char* str = code.c_str();
   const char* end = str + code.length();
   const char* start = str;
 
   // Only add base scope once at the start if not already present
-  if (grammar_ && !grammar_->scopeName.empty() &&
-      (scopeStack.empty() || scopeStack[0] != grammar_->scopeName)) {
+  if (grammar_ && !grammar_->scopeName.empty() && (scopeStack.empty() || scopeStack[0] != grammar_->scopeName)) {
     scopeStack.insert(scopeStack.begin(), grammar_->scopeName);
   }
 
   while (start < end) {
     const GrammarPattern* bestPattern = nullptr;
-    std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> bestRegion(nullptr,
-                                                                         onigRegionDeleter);
+    std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> bestRegion(nullptr, onigRegionDeleter);
     size_t bestPosition = std::string::npos;
 
     // Try each pattern at the current position
     for (const auto& pattern : patterns) {
-      if (pattern.match.empty())
-        continue;
+      if (pattern.match.empty()) continue;
 
       OnigErrorInfo einfo;
       regex_t* regex;
-      int r = onig_new(&regex, (const UChar*)pattern.match.c_str(),
-                       (const UChar*)(pattern.match.c_str() + pattern.match.length()),
-                       ONIG_OPTION_CAPTURE_GROUP, ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
+      int r = onig_new(
+        &regex,
+        (const UChar*)pattern.match.c_str(),
+        (const UChar*)(pattern.match.c_str() + pattern.match.length()),
+        ONIG_OPTION_CAPTURE_GROUP,
+        ONIG_ENCODING_UTF8,
+        ONIG_SYNTAX_DEFAULT,
+        &einfo
+      );
 
       if (r != ONIG_NORMAL) {
         continue;
       }
 
       std::unique_ptr<regex_t, void (*)(regex_t*)> regexGuard(regex, onig_free);
-      std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> region(onig_region_new(),
-                                                                       onigRegionDeleter);
+      std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> region(onig_region_new(), onigRegionDeleter);
 
-      r = onig_search(regex, (const UChar*)str, (const UChar*)end, (const UChar*)start,
-                      (const UChar*)end, region.get(), ONIG_OPTION_NONE);
+      r = onig_search(
+        regex,
+        (const UChar*)str,
+        (const UChar*)end,
+        (const UChar*)start,
+        (const UChar*)end,
+        region.get(),
+        ONIG_OPTION_NONE
+      );
 
-      if (r >= 0) { // Match found
+      if (r >= 0) {  // Match found
         size_t position = region->beg[0];
         if (bestPosition == std::string::npos || position < bestPosition) {
           bestPosition = position;
           bestPattern = &pattern;
-          std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> newRegion(onig_region_new(),
-                                                                              onigRegionDeleter);
+          std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> newRegion(onig_region_new(), onigRegionDeleter);
           onig_region_copy(newRegion.get(), region.get());
           bestRegion = std::move(newRegion);
         }
@@ -413,7 +432,7 @@ void ShikiTokenizer::processPatterns(const std::vector<GrammarPattern>& patterns
         // Create token for the comment marker (//)
         Token markerToken;
         markerToken.start = bestRegion->beg[0];
-        markerToken.length = 2; // Length of "//"
+        markerToken.length = 2;  // Length of "//"
         for (const auto& scope : scopeStack) {
           markerToken.addScope(scope);
         }
@@ -424,7 +443,7 @@ void ShikiTokenizer::processPatterns(const std::vector<GrammarPattern>& patterns
         // Create token for the comment text
         if (bestRegion->end[0] - bestRegion->beg[0] > 2) {
           Token textToken;
-          textToken.start = bestRegion->beg[0] + 2; // Start after "//"
+          textToken.start = bestRegion->beg[0] + 2;  // Start after "//"
           textToken.length = bestRegion->end[0] - bestRegion->beg[0] - 2;
           for (const auto& scope : scopeStack) {
             textToken.addScope(scope);
@@ -438,8 +457,8 @@ void ShikiTokenizer::processPatterns(const std::vector<GrammarPattern>& patterns
           for (const auto& capture_entry : bestPattern->captures) {
             int index = capture_entry.first;
             const std::string& name = capture_entry.second;
-            if (index < bestRegion->num_regs && !name.empty() &&
-                bestRegion->beg[index] < code.length() && bestRegion->end[index] <= code.length()) {
+            if (index < bestRegion->num_regs && !name.empty() && bestRegion->beg[index] < code.length() &&
+                bestRegion->end[index] <= code.length()) {
               Token captureToken;
               captureToken.start = bestRegion->beg[index];
               captureToken.length = bestRegion->end[index] - bestRegion->beg[index];
@@ -521,8 +540,7 @@ void ShikiTokenizer::processPatterns(const std::vector<GrammarPattern>& patterns
 }
 
 void ShikiTokenizer::resolveStyles(std::vector<Token>& tokens) {
-  if (!theme_)
-    return;
+  if (!theme_) return;
 
   // Use parallel resolution for large documents (>1000 tokens)
   if (tokens.size() > 1000 && concurrencyUtil_) {
@@ -540,15 +558,15 @@ void ShikiTokenizer::resolveStyles(std::vector<Token>& tokens) {
   auto metrics = styleCache.getMetrics();
   std::cout << "[INFO] Style resolution stats:" << std::endl
             << "  - Resolved styles: " << resolvedCount << "/" << tokens.size() << " tokens" << std::endl
-            << "  - Cache hits: " << cacheHits << " ("
-            << (tokens.size() > 0 ? (cacheHits * 100.0 / tokens.size()) : 0) << "%)" << std::endl
+            << "  - Cache hits: " << cacheHits << " (" << (tokens.size() > 0 ? (cacheHits * 100.0 / tokens.size()) : 0)
+            << "%)" << std::endl
             << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
-            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/"
-            << metrics.maxSize / 1024 << "KB" << std::endl;
+            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/" << metrics.maxSize / 1024 << "KB"
+            << std::endl;
 }
 
 void ShikiTokenizer::resolveStylesParallel(std::vector<Token>& tokens) {
-  const size_t batchSize = 250; // Process 250 tokens per batch
+  const size_t batchSize = 250;  // Process 250 tokens per batch
   const size_t numBatches = (tokens.size() + batchSize - 1) / batchSize;
 
   std::vector<std::promise<std::pair<size_t, size_t>>> promises(numBatches);
@@ -612,18 +630,18 @@ void ShikiTokenizer::resolveStylesParallel(std::vector<Token>& tokens) {
             << "  - Cache hits: " << totalCacheHits << " ("
             << (tokens.size() > 0 ? (totalCacheHits * 100.0 / tokens.size()) : 0) << "%)" << std::endl
             << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
-            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/"
-            << metrics.maxSize / 1024 << "KB" << std::endl
+            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/" << metrics.maxSize / 1024 << "KB"
+            << std::endl
             << "  - Batches: " << numBatches << std::endl;
 }
 
 void ShikiTokenizer::resolveStylesBatch(
-    std::vector<Token>::iterator start,
-    std::vector<Token>::iterator end,
-    shiki::StyleCache& styleCache,
-    size_t& resolvedCount,
-    size_t& cacheHits) {
-
+  std::vector<Token>::iterator start,
+  std::vector<Token>::iterator end,
+  shiki::StyleCache& styleCache,
+  size_t& resolvedCount,
+  size_t& cacheHits
+) {
   for (auto it = start; it != end; ++it) {
     auto& token = *it;
     // Try combined scope first from cache
@@ -745,8 +763,7 @@ std::vector<Token> ShikiTokenizer::tokenizeParallel(const std::string& code, siz
   return mergeTokens(results);
 }
 
-std::vector<Token> ShikiTokenizer::tokenizeBatch(const std::string& code, size_t start,
-                                                 size_t length) {
+std::vector<Token> ShikiTokenizer::tokenizeBatch(const std::string& code, size_t start, size_t length) {
   std::vector<Token> tokens;
   size_t end = start + length;
   size_t pos = start;
@@ -756,19 +773,22 @@ std::vector<Token> ShikiTokenizer::tokenizeBatch(const std::string& code, size_t
     size_t bestMatchLength = 0;
     const CompiledPattern* bestPattern = nullptr;
     OnigRegion* bestRegion = onig_region_new();
-    std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> bestRegionGuard(bestRegion,
-                                                                              onigRegionDeleter);
+    std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> bestRegionGuard(bestRegion, onigRegionDeleter);
 
     // Find the best matching pattern at this position
     for (const auto& compiled : compiledPatterns_) {
       OnigRegion* region = onig_region_new();
-      std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> regionGuard(region,
-                                                                            onigRegionDeleter);
+      std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> regionGuard(region, onigRegionDeleter);
 
-      if (onig_search(compiled.regex.get(), (OnigUChar*)code.c_str(),
-                      (OnigUChar*)(code.c_str() + code.length()), (OnigUChar*)(code.c_str() + pos),
-                      (OnigUChar*)(code.c_str() + code.length()), region, ONIG_OPTION_NONE) >= 0) {
-
+      if (onig_search(
+            compiled.regex.get(),
+            (OnigUChar*)code.c_str(),
+            (OnigUChar*)(code.c_str() + code.length()),
+            (OnigUChar*)(code.c_str() + pos),
+            (OnigUChar*)(code.c_str() + code.length()),
+            region,
+            ONIG_OPTION_NONE
+          ) >= 0) {
         size_t matchLength = region->end[0] - region->beg[0];
         if (!matched || matchLength > bestMatchLength) {
           matched = true;
@@ -806,8 +826,7 @@ std::vector<Token> ShikiTokenizer::mergeTokens(std::vector<std::vector<Token>>& 
 
   // Merge all tokens
   for (auto& batch : batchResults) {
-    merged.insert(merged.end(), std::make_move_iterator(batch.begin()),
-                  std::make_move_iterator(batch.end()));
+    merged.insert(merged.end(), std::make_move_iterator(batch.begin()), std::make_move_iterator(batch.end()));
   }
 
   // Sort by position
@@ -817,8 +836,7 @@ std::vector<Token> ShikiTokenizer::mergeTokens(std::vector<std::vector<Token>>& 
 }
 
 bool ShikiTokenizer::isPatternBoundary(const std::string& code, size_t pos) {
-  if (pos >= code.length())
-    return true;
+  if (pos >= code.length()) return true;
 
   // Simple heuristic: whitespace or common delimiters are safe boundaries
   static const std::string delimiters = " \t\n\r.,;(){}[]<>\"'";
@@ -826,14 +844,17 @@ bool ShikiTokenizer::isPatternBoundary(const std::string& code, size_t pos) {
 }
 
 ThemeStyle ShikiTokenizer::resolveStyle(const std::string& scope) const {
-  if (!theme_)
-    return ThemeStyle();
+  if (!theme_) return ThemeStyle();
   return theme_->resolveStyle(scope);
 }
 
-bool ShikiTokenizer::findBestMatch(const std::string& code, size_t pos,
-                                   const std::vector<OnigRegex>& regexes, OnigRegion* bestRegion,
-                                   size_t& bestRegexIndex) {
+bool ShikiTokenizer::findBestMatch(
+  const std::string& code,
+  size_t pos,
+  const std::vector<OnigRegex>& regexes,
+  OnigRegion* bestRegion,
+  size_t& bestRegexIndex
+) {
   int bestPosition = -1;
   bestRegexIndex = 0;
 
@@ -841,10 +862,15 @@ bool ShikiTokenizer::findBestMatch(const std::string& code, size_t pos,
   std::unique_ptr<OnigRegion, OnigRegionDeleter> regionGuard(region);
 
   for (size_t i = 0; i < regexes.size(); ++i) {
-    if (onig_search(regexes[i], (OnigUChar*)code.c_str(),
-                    (OnigUChar*)(code.c_str() + code.length()), (OnigUChar*)(code.c_str() + pos),
-                    (OnigUChar*)(code.c_str() + code.length()), region, ONIG_OPTION_NONE) >= 0) {
-
+    if (onig_search(
+          regexes[i],
+          (OnigUChar*)code.c_str(),
+          (OnigUChar*)(code.c_str() + code.length()),
+          (OnigUChar*)(code.c_str() + pos),
+          (OnigUChar*)(code.c_str() + code.length()),
+          region,
+          ONIG_OPTION_NONE
+        ) >= 0) {
       if (bestPosition == -1 || region->beg[0] < static_cast<size_t>(bestPosition)) {
         bestPosition = region->beg[0];
         bestRegexIndex = i;
@@ -891,12 +917,9 @@ bool isScopeMatch(const std::string& ruleScope, const std::string& tokenScope) {
     }
   }
 
-  if (isCommentRule && isCommentToken)
-    return true;
-  if (ruleScope == tokenScope)
-    return true;
-  if (tokenScope.find(ruleScope + ".") == 0)
-    return true;
+  if (isCommentRule && isCommentToken) return true;
+  if (ruleScope == tokenScope) return true;
+  if (tokenScope.find(ruleScope + ".") == 0) return true;
 
   if (ruleParts.size() > 1) {
     for (const auto& rulePart : ruleParts) {
@@ -907,8 +930,7 @@ bool isScopeMatch(const std::string& ruleScope, const std::string& tokenScope) {
           break;
         }
       }
-      if (!found)
-        return false;
+      if (!found) return false;
     }
     return true;
   }
@@ -924,8 +946,8 @@ void shiki::OnigRegexDeleter::operator()(regex_t* r) const {
 
 void shiki::OnigRegionDeleter::operator()(OnigRegion* r) const {
   if (r) {
-    onig_region_free(r, 1); // 1 means free the region itself too
+    onig_region_free(r, 1);  // 1 means free the region itself too
   }
 }
 
-} // namespace shiki
+}  // namespace shiki

@@ -1,18 +1,24 @@
-#include "../../../cpp/engine/OnigurumaRegex.h"
+#include <jsi/jsi.h>
+
 #include <android/log.h>
 #include <fbjni/fbjni.h>
 #include <jni.h>
-#include <jsi/jsi.h>
+
+#include "../../../cpp/engine/OnigurumaRegex.h"
 
 using namespace facebook::jni;
 using namespace facebook::jsi;
 
-#define TAG "ShikiEngine"
+#define TAG       "ShikiEngine"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
 
 extern "C" JNIEXPORT jdouble JNICALL Java_com_shikiengine_ShikiEngineModule_createScanner(
-    JNIEnv* env, jobject thiz, jobjectArray patterns, jdouble maxCacheSize) {
+  JNIEnv* env,
+  jobject thiz,
+  jobjectArray patterns,
+  jdouble maxCacheSize
+) {
   try {
     jsize length = env->GetArrayLength(patterns);
     std::vector<std::string> patternStrings;
@@ -30,8 +36,7 @@ extern "C" JNIEXPORT jdouble JNICALL Java_com_shikiengine_ShikiEngineModule_crea
       env->DeleteLocalRef(str);
     }
 
-    OnigurumaContext* context =
-        create_scanner(patternPtrs.data(), length, static_cast<size_t>(maxCacheSize));
+    OnigurumaContext* context = create_scanner(patternPtrs.data(), length, static_cast<size_t>(maxCacheSize));
     if (!context) {
       LOGE("Failed to create scanner");
       return -1;
@@ -47,7 +52,12 @@ extern "C" JNIEXPORT jdouble JNICALL Java_com_shikiengine_ShikiEngineModule_crea
 }
 
 extern "C" JNIEXPORT jobject JNICALL Java_com_shikiengine_ShikiEngineModule_findNextMatchSync(
-    JNIEnv* env, jobject thiz, jdouble scannerId, jstring text, jdouble startPosition) {
+  JNIEnv* env,
+  jobject thiz,
+  jdouble scannerId,
+  jstring text,
+  jdouble startPosition
+) {
   try {
     uint64_t ptr = static_cast<uint64_t>(scannerId);
     OnigurumaContext* context = reinterpret_cast<OnigurumaContext*>(ptr);
@@ -72,24 +82,24 @@ extern "C" JNIEXPORT jobject JNICALL Java_com_shikiengine_ShikiEngineModule_find
     // Get the putInt and putArray methods
     jmethodID putInt = env->GetMethodID(writableMapClass, "putInt", "(Ljava/lang/String;I)V");
     jmethodID putArray =
-        env->GetMethodID(writableMapClass, "putArray",
-                         "(Ljava/lang/String;Lcom/facebook/react/bridge/WritableArray;)V");
+      env->GetMethodID(writableMapClass, "putArray", "(Ljava/lang/String;Lcom/facebook/react/bridge/WritableArray;)V");
 
     // Create capture indices array
     jclass writableArrayClass = env->FindClass("com/facebook/react/bridge/WritableNativeArray");
     jmethodID arrayConstructor = env->GetMethodID(writableArrayClass, "<init>", "()V");
     jobject captureIndices = env->NewObject(writableArrayClass, arrayConstructor);
-    jmethodID pushMap = env->GetMethodID(writableArrayClass, "pushMap",
-                                         "(Lcom/facebook/react/bridge/WritableMap;)V");
+    jmethodID pushMap = env->GetMethodID(writableArrayClass, "pushMap", "(Lcom/facebook/react/bridge/WritableMap;)V");
 
     for (int i = 0; i < result->capture_count / 2; i++) {
       jobject capture = env->NewObject(writableMapClass, constructor);
-      env->CallVoidMethod(capture, putInt, env->NewStringUTF("start"),
-                          result->capture_indices[i * 2]);
-      env->CallVoidMethod(capture, putInt, env->NewStringUTF("end"),
-                          result->capture_indices[i * 2 + 1]);
-      env->CallVoidMethod(capture, putInt, env->NewStringUTF("length"),
-                          result->capture_indices[i * 2 + 1] - result->capture_indices[i * 2]);
+      env->CallVoidMethod(capture, putInt, env->NewStringUTF("start"), result->capture_indices[i * 2]);
+      env->CallVoidMethod(capture, putInt, env->NewStringUTF("end"), result->capture_indices[i * 2 + 1]);
+      env->CallVoidMethod(
+        capture,
+        putInt,
+        env->NewStringUTF("length"),
+        result->capture_indices[i * 2 + 1] - result->capture_indices[i * 2]
+      );
       env->CallVoidMethod(captureIndices, pushMap, capture);
       env->DeleteLocalRef(capture);
     }
@@ -106,8 +116,8 @@ extern "C" JNIEXPORT jobject JNICALL Java_com_shikiengine_ShikiEngineModule_find
   }
 }
 
-extern "C" JNIEXPORT void JNICALL Java_com_shikiengine_ShikiEngineModule_destroyScanner(
-    JNIEnv* env, jobject thiz, jdouble scannerId) {
+extern "C" JNIEXPORT void JNICALL
+Java_com_shikiengine_ShikiEngineModule_destroyScanner(JNIEnv* env, jobject thiz, jdouble scannerId) {
   try {
     uint64_t ptr = static_cast<uint64_t>(scannerId);
     OnigurumaContext* context = reinterpret_cast<OnigurumaContext*>(ptr);

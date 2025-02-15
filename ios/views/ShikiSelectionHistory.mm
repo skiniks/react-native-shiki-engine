@@ -4,8 +4,8 @@
 
 + (instancetype)stateWithRange:(NSRange)range
                           mode:(ShikiSelectionMode)mode
-                         scope:(nullable NSString*)scope {
-  ShikiSelectionState* state = [[ShikiSelectionState alloc] init];
+                         scope:(nullable NSString *)scope {
+  ShikiSelectionState *state = [[ShikiSelectionState alloc] init];
   state.range = range;
   state.mode = mode;
   state.scope = scope;
@@ -15,8 +15,8 @@
 @end
 
 @implementation ShikiSelectionHistory {
-  NSMutableArray<ShikiSelectionState*>* _undoStack;
-  NSMutableArray<ShikiSelectionState*>* _redoStack;
+  NSMutableArray<ShikiSelectionState *> *_undoStack;
+  NSMutableArray<ShikiSelectionState *> *_redoStack;
 }
 
 - (instancetype)init {
@@ -28,7 +28,7 @@
   return self;
 }
 
-- (void)pushState:(ShikiSelectionState*)state {
+- (void)pushState:(ShikiSelectionState *)state {
   [_undoStack addObject:state];
   [_redoStack removeAllObjects];
 
@@ -37,22 +37,22 @@
   }
 }
 
-- (nullable ShikiSelectionState*)undo {
+- (nullable ShikiSelectionState *)undo {
   if (_undoStack.count == 0)
     return nil;
 
-  ShikiSelectionState* state = [_undoStack lastObject];
+  ShikiSelectionState *state = [_undoStack lastObject];
   [_undoStack removeLastObject];
   [_redoStack addObject:state];
 
   return state;
 }
 
-- (nullable ShikiSelectionState*)redo {
+- (nullable ShikiSelectionState *)redo {
   if (_redoStack.count == 0)
     return nil;
 
-  ShikiSelectionState* state = [_redoStack lastObject];
+  ShikiSelectionState *state = [_redoStack lastObject];
   [_redoStack removeLastObject];
   [_undoStack addObject:state];
 

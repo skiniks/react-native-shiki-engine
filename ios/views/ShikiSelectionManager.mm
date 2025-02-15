@@ -5,31 +5,31 @@
 
 @interface ShikiSelectionManager ()
 
-@property(nonatomic, strong) NSMutableArray<NSValue*>* mutableSelectableRanges;
-@property(nonatomic, strong) NSMutableArray<NSValue*>* mutableSelectedRanges;
+@property(nonatomic, strong) NSMutableArray<NSValue *> *mutableSelectableRanges;
+@property(nonatomic, strong) NSMutableArray<NSValue *> *mutableSelectedRanges;
 
-- (void)expandWordSelection:(NSValue*)selection;
-- (void)expandLineSelection:(NSValue*)selection;
-- (void)expandScopeSelection:(NSValue*)selection;
+- (void)expandWordSelection:(NSValue *)selection;
+- (void)expandLineSelection:(NSValue *)selection;
+- (void)expandScopeSelection:(NSValue *)selection;
 
 @end
 
 @implementation ShikiSelectionManager {
   NSRange _lastSelection;
-  NSMutableDictionary<NSString*, NSArray<NSValue*>*>* _scopedRanges;
-  NSMutableDictionary<NSString*, NSArray<NSValue*>*>* _syntaxScopeRanges;
-  NSArray<NSString*>* _syntaxScopes;
-  void (^_onScopeSelected)(NSString* scope, NSRange range);
+  NSMutableDictionary<NSString *, NSArray<NSValue *> *> *_scopedRanges;
+  NSMutableDictionary<NSString *, NSArray<NSValue *> *> *_syntaxScopeRanges;
+  NSArray<NSString *> *_syntaxScopes;
+  void (^_onScopeSelected)(NSString *scope, NSRange range);
   NSRange _primarySelection;
   BOOL _allowsMultipleSelection;
-  ShikiSelectionHistory* _selectionHistory;
-  NSArray<NSValue*>* _searchResults;
+  ShikiSelectionHistory *_selectionHistory;
+  NSArray<NSValue *> *_searchResults;
   NSInteger _currentSearchIndex;
   BOOL _allowsDiscontiguousSelection;
-  void (^_onMultiSelectionChange)(NSArray<NSValue*>* ranges);
+  void (^_onMultiSelectionChange)(NSArray<NSValue *> *ranges);
 }
 
-- (instancetype)initWithTextView:(ShikiTextView*)textView {
+- (instancetype)initWithTextView:(ShikiTextView *)textView {
   if (self = [super init]) {
     _textView = textView;
     _selectionMode = ShikiSelectionModeNormal;
@@ -49,47 +49,49 @@
 
 #pragma mark - Property Getters
 
-- (NSArray<NSValue*>*)selectableRanges {
+- (NSArray<NSValue *> *)selectableRanges {
   return [_mutableSelectableRanges copy];
 }
 
-- (NSArray<NSValue*>*)selectedRanges {
+- (NSArray<NSValue *> *)selectedRanges {
   return [_mutableSelectedRanges copy];
 }
 
 #pragma mark - Private Selection Methods
 
-- (void)expandWordSelection:(NSValue*)selection {
+- (void)expandWordSelection:(NSValue *)selection {
   if (!_textView)
     return;
 
   NSRange range = [selection rangeValue];
-  NSString* text = _textView.text;
+  NSString *text = _textView.text;
 
   // Find word boundaries
-  NSCharacterSet* wordSet = [NSCharacterSet alphanumericCharacterSet];
+  NSCharacterSet *wordSet = [NSCharacterSet alphanumericCharacterSet];
 
   // Search backward for start
   NSInteger start = range.location;
-  while (start > 0 && [wordSet characterIsMember:[text characterAtIndex:start - 1]]) {
+  while (start > 0 &&
+         [wordSet characterIsMember:[text characterAtIndex:start - 1]]) {
     start--;
   }
 
   // Search forward for end
   NSInteger end = NSMaxRange(range);
-  while (end < text.length && [wordSet characterIsMember:[text characterAtIndex:end]]) {
+  while (end < text.length &&
+         [wordSet characterIsMember:[text characterAtIndex:end]]) {
     end++;
   }
 
   [self selectRange:NSMakeRange(start, end - start)];
 }
 
-- (void)expandLineSelection:(NSValue*)selection {
+- (void)expandLineSelection:(NSValue *)selection {
   if (!_textView)
     return;
 
   NSRange range = [selection rangeValue];
-  NSString* text = _textView.text;
+  NSString *text = _textView.text;
 
   // Get the line range containing the selection
   NSRange lineRange = [text lineRangeForRange:range];
@@ -98,7 +100,8 @@
   if (NSEqualRanges(lineRange, range)) {
     NSUInteger nextLineStart = NSMaxRange(lineRange);
     if (nextLineStart < text.length) {
-      NSRange nextLineRange = [text lineRangeForRange:NSMakeRange(nextLineStart, 0)];
+      NSRange nextLineRange =
+          [text lineRangeForRange:NSMakeRange(nextLineStart, 0)];
       lineRange = NSUnionRange(lineRange, nextLineRange);
     }
   }
@@ -106,7 +109,7 @@
   [self selectRange:lineRange];
 }
 
-- (void)expandScopeSelection:(NSValue*)selection {
+- (void)expandScopeSelection:(NSValue *)selection {
   if (!_textView)
     return;
 
@@ -114,18 +117,20 @@
   NSUInteger location = range.location;
 
   // Get all scopes at the current location
-  NSArray<NSString*>* scopes = [self getSyntaxScopesAtLocation:location];
+  NSArray<NSString *> *scopes = [self getSyntaxScopesAtLocation:location];
 
   // Find the next larger scope that contains the current selection
   NSRange bestRange = range;
-  NSString* bestScope = nil;
+  NSString *bestScope = nil;
 
-  for (NSString* scope in scopes) {
-    NSMutableArray* ranges = [NSMutableArray arrayWithArray:_syntaxScopeRanges[scope]];
-    for (NSValue* rangeValue in ranges) {
+  for (NSString *scope in scopes) {
+    NSMutableArray *ranges =
+        [NSMutableArray arrayWithArray:_syntaxScopeRanges[scope]];
+    for (NSValue *rangeValue in ranges) {
       NSRange scopeRange = [rangeValue rangeValue];
       if (NSLocationInRange(range.location, scopeRange) &&
-          NSLocationInRange(NSMaxRange(range), scopeRange) && scopeRange.length > range.length) {
+          NSLocationInRange(NSMaxRange(range), scopeRange) &&
+          scopeRange.length > range.length) {
         if (!bestScope || scopeRange.length < bestRange.length) {
           bestRange = scopeRange;
           bestScope = scope;
@@ -149,18 +154,20 @@
     return;
 
   NSRange currentSelection = _textView.selectedRange;
-  NSString* selectedText = [_textView.text substringWithRange:currentSelection];
+  NSString *selectedText = [_textView.text substringWithRange:currentSelection];
 
   if (selectedText.length == 0)
     return;
 
   // Find all occurrences
-  NSMutableArray<NSValue*>* occurrences = [NSMutableArray array];
-  NSString* text = _textView.text;
+  NSMutableArray<NSValue *> *occurrences = [NSMutableArray array];
+  NSString *text = _textView.text;
   NSRange searchRange = NSMakeRange(0, text.length);
 
   while (searchRange.location < text.length) {
-    NSRange foundRange = [text rangeOfString:selectedText options:0 range:searchRange];
+    NSRange foundRange = [text rangeOfString:selectedText
+                                     options:0
+                                       range:searchRange];
 
     if (foundRange.location == NSNotFound)
       break;
@@ -182,7 +189,7 @@
     return;
 
   NSRange currentSelection = _textView.selectedRange;
-  NSString* selectedText = [_textView.text substringWithRange:currentSelection];
+  NSString *selectedText = [_textView.text substringWithRange:currentSelection];
 
   if (selectedText.length == 0)
     return;
@@ -198,7 +205,8 @@
   } else {
     // Wrap around to last occurrence
     searchRange =
-        NSMakeRange(currentSelection.location, _textView.text.length - currentSelection.location);
+        NSMakeRange(currentSelection.location,
+                    _textView.text.length - currentSelection.location);
     previousRange = [_textView.text rangeOfString:selectedText
                                           options:NSBackwardsSearch
                                             range:searchRange];
@@ -213,22 +221,27 @@
     return;
 
   NSRange currentSelection = _textView.selectedRange;
-  NSString* selectedText = [_textView.text substringWithRange:currentSelection];
+  NSString *selectedText = [_textView.text substringWithRange:currentSelection];
 
   if (selectedText.length == 0)
     return;
 
   // Search forward from end of current selection
-  NSRange searchRange = NSMakeRange(NSMaxRange(currentSelection),
-                                    _textView.text.length - NSMaxRange(currentSelection));
-  NSRange nextRange = [_textView.text rangeOfString:selectedText options:0 range:searchRange];
+  NSRange searchRange =
+      NSMakeRange(NSMaxRange(currentSelection),
+                  _textView.text.length - NSMaxRange(currentSelection));
+  NSRange nextRange = [_textView.text rangeOfString:selectedText
+                                            options:0
+                                              range:searchRange];
 
   if (nextRange.location != NSNotFound) {
     [self selectRange:nextRange];
   } else {
     // Wrap around to first occurrence
     searchRange = NSMakeRange(0, currentSelection.location);
-    nextRange = [_textView.text rangeOfString:selectedText options:0 range:searchRange];
+    nextRange = [_textView.text rangeOfString:selectedText
+                                      options:0
+                                        range:searchRange];
     if (nextRange.location != NSNotFound) {
       [self selectRange:nextRange];
     }
@@ -241,26 +254,30 @@
   if (!_textView)
     return;
 
-  [[ShikiPerformanceMonitor sharedMonitor] startMeasuring:ShikiPerformanceMetricSelectionChange
-                                              description:@"Selection range change"];
+  [[ShikiPerformanceMonitor sharedMonitor]
+      startMeasuring:ShikiPerformanceMetricSelectionChange
+         description:@"Selection range change"];
 
-  [[ShikiPerformanceMonitor sharedMonitor] addMetadata:@{
-    @"range" : [NSValue valueWithRange:range],
-    @"mode" : @(_selectionMode),
-    @"isMultiSelect" : @(_allowsMultipleSelection)
-  }
-                                             forMetric:ShikiPerformanceMetricSelectionChange];
+  [[ShikiPerformanceMonitor sharedMonitor]
+      addMetadata:@{
+        @"range" : [NSValue valueWithRange:range],
+        @"mode" : @(_selectionMode),
+        @"isMultiSelect" : @(_allowsMultipleSelection)
+      }
+        forMetric:ShikiPerformanceMetricSelectionChange];
 
   // Save state before changing selection
-  [_selectionHistory pushState:[ShikiSelectionState stateWithRange:_textView.selectedRange
-                                                              mode:_selectionMode
-                                                             scope:nil]];
+  [_selectionHistory
+      pushState:[ShikiSelectionState stateWithRange:_textView.selectedRange
+                                               mode:_selectionMode
+                                              scope:nil]];
 
   _lastSelection = range;
   _textView.selectedRange = range;
   [_textView scrollRangeToVisible:range];
 
-  [[ShikiPerformanceMonitor sharedMonitor] stopMeasuring:ShikiPerformanceMetricSelectionChange];
+  [[ShikiPerformanceMonitor sharedMonitor]
+      stopMeasuring:ShikiPerformanceMetricSelectionChange];
 }
 
 - (void)expandSelection {
@@ -270,17 +287,17 @@
   NSRange currentSelection = _textView.selectedRange;
 
   switch (_selectionMode) {
-    case ShikiSelectionModeWord:
-      [self expandWordSelection:[NSValue valueWithRange:currentSelection]];
-      break;
-    case ShikiSelectionModeLine:
-      [self expandLineSelection:[NSValue valueWithRange:currentSelection]];
-      break;
-    case ShikiSelectionModeScope:
-      [self expandScopeSelection:[NSValue valueWithRange:currentSelection]];
-      break;
-    default:
-      break;
+  case ShikiSelectionModeWord:
+    [self expandWordSelection:[NSValue valueWithRange:currentSelection]];
+    break;
+  case ShikiSelectionModeLine:
+    [self expandLineSelection:[NSValue valueWithRange:currentSelection]];
+    break;
+  case ShikiSelectionModeScope:
+    [self expandScopeSelection:[NSValue valueWithRange:currentSelection]];
+    break;
+  default:
+    break;
   }
 }
 
@@ -292,7 +309,7 @@
   NSRange newRange = currentSelection;
 
   // Find the largest contained range
-  for (NSValue* rangeValue in _mutableSelectableRanges) {
+  for (NSValue *rangeValue in _mutableSelectableRanges) {
     NSRange range = [rangeValue rangeValue];
     if (NSLocationInRange(range.location, currentSelection) &&
         NSLocationInRange(NSMaxRange(range), currentSelection) &&
@@ -308,8 +325,8 @@
 
 #pragma mark - Scope Selection
 
-- (void)selectScope:(NSString*)scope {
-  NSArray<NSValue*>* ranges = _scopedRanges[scope];
+- (void)selectScope:(NSString *)scope {
+  NSArray<NSValue *> *ranges = _scopedRanges[scope];
   if (ranges.count > 0) {
     [self selectRange:[ranges.firstObject rangeValue]];
   }
@@ -323,7 +340,7 @@
   NSRange enclosingRange = currentSelection;
 
   // Find the smallest enclosing range
-  for (NSValue* rangeValue in _mutableSelectableRanges) {
+  for (NSValue *rangeValue in _mutableSelectableRanges) {
     NSRange range = [rangeValue rangeValue];
     if (NSLocationInRange(currentSelection.location, range) &&
         NSLocationInRange(NSMaxRange(currentSelection), range) &&
@@ -346,20 +363,22 @@
   if (!_textView || location >= _textView.text.length)
     return;
 
-  NSString* text = _textView.text;
+  NSString *text = _textView.text;
 
   // Find word boundaries
-  NSCharacterSet* wordSet = [NSCharacterSet alphanumericCharacterSet];
+  NSCharacterSet *wordSet = [NSCharacterSet alphanumericCharacterSet];
 
   // Search backward for start
   NSInteger start = location;
-  while (start > 0 && [wordSet characterIsMember:[text characterAtIndex:start - 1]]) {
+  while (start > 0 &&
+         [wordSet characterIsMember:[text characterAtIndex:start - 1]]) {
     start--;
   }
 
   // Search forward for end
   NSInteger end = location;
-  while (end < text.length && [wordSet characterIsMember:[text characterAtIndex:end]]) {
+  while (end < text.length &&
+         [wordSet characterIsMember:[text characterAtIndex:end]]) {
     end++;
   }
 
@@ -370,7 +389,7 @@
   if (!_textView || location >= _textView.text.length)
     return;
 
-  NSString* text = _textView.text;
+  NSString *text = _textView.text;
   NSRange lineRange = [text lineRangeForRange:NSMakeRange(location, 0)];
   [self selectRange:lineRange];
 }
@@ -395,7 +414,7 @@
   [_scopedRanges removeAllObjects];
 }
 
-- (void)updateSyntaxScopes:(NSArray<NSString*>*)scopes {
+- (void)updateSyntaxScopes:(NSArray<NSString *> *)scopes {
   _syntaxScopes = [scopes copy];
   [self updateSyntaxScopeRanges];
 }
@@ -406,27 +425,29 @@
   if (!_textView || !_syntaxScopes)
     return;
 
-  NSAttributedString* text = _textView.attributedText;
+  NSAttributedString *text = _textView.attributedText;
   if (!text)
     return;
 
   [text enumerateAttributesInRange:NSMakeRange(0, text.length)
                            options:0
-                        usingBlock:^(NSDictionary<NSAttributedStringKey, id>* _Nonnull attrs,
-                                     NSRange range, BOOL* _Nonnull stop) {
-                          NSString* scope = attrs[@"syntax_scope"];
+                        usingBlock:^(NSDictionary<NSAttributedStringKey, id>
+                                         *_Nonnull attrs,
+                                     NSRange range, BOOL *_Nonnull stop) {
+                          NSString *scope = attrs[@"syntax_scope"];
                           if (scope) {
-                            NSMutableArray* ranges =
-                                [_syntaxScopeRanges[scope] mutableCopy] ?: [NSMutableArray new];
+                            NSMutableArray *ranges =
+                                [_syntaxScopeRanges[scope] mutableCopy]
+                                    ?: [NSMutableArray new];
                             _syntaxScopeRanges[scope] = ranges;
                             [ranges addObject:[NSValue valueWithRange:range]];
                           }
                         }];
 }
 
-- (void)selectSyntaxScope:(NSString*)scope atLocation:(NSUInteger)location {
-  NSArray<NSValue*>* ranges = _syntaxScopeRanges[scope];
-  for (NSValue* rangeValue in ranges) {
+- (void)selectSyntaxScope:(NSString *)scope atLocation:(NSUInteger)location {
+  NSArray<NSValue *> *ranges = _syntaxScopeRanges[scope];
+  for (NSValue *rangeValue in ranges) {
     NSRange range = [rangeValue rangeValue];
     if (NSLocationInRange(location, range)) {
       [self selectRange:range];
@@ -445,19 +466,20 @@
   NSRange currentSelection = _textView.selectedRange;
   NSUInteger location = currentSelection.location;
 
-  NSArray<NSString*>* scopes = [self getSyntaxScopesAtLocation:location];
+  NSArray<NSString *> *scopes = [self getSyntaxScopesAtLocation:location];
   if (scopes.count == 0)
     return;
 
   // Find the smallest enclosing syntax scope
   NSRange bestRange = currentSelection;
-  NSString* bestScope = nil;
+  NSString *bestScope = nil;
 
-  for (NSString* scope in scopes) {
-    NSArray<NSValue*>* ranges = _syntaxScopeRanges[scope];
-    for (NSValue* rangeValue in ranges) {
+  for (NSString *scope in scopes) {
+    NSArray<NSValue *> *ranges = _syntaxScopeRanges[scope];
+    for (NSValue *rangeValue in ranges) {
       NSRange range = [rangeValue rangeValue];
-      if (NSLocationInRange(location, range) && (!bestScope || range.length < bestRange.length)) {
+      if (NSLocationInRange(location, range) &&
+          (!bestScope || range.length < bestRange.length)) {
         bestRange = range;
         bestScope = scope;
       }
@@ -472,15 +494,16 @@
   }
 }
 
-- (NSArray<NSString*>*)getSyntaxScopesAtLocation:(NSUInteger)location {
+- (NSArray<NSString *> *)getSyntaxScopesAtLocation:(NSUInteger)location {
   if (!_textView)
     return @[];
 
-  NSMutableArray<NSString*>* scopes = [NSMutableArray new];
+  NSMutableArray<NSString *> *scopes = [NSMutableArray new];
 
   [_syntaxScopeRanges
-      enumerateKeysAndObjectsUsingBlock:^(NSString* scope, NSArray<NSValue*>* ranges, BOOL* stop) {
-        for (NSValue* rangeValue in ranges) {
+      enumerateKeysAndObjectsUsingBlock:^(
+          NSString *scope, NSArray<NSValue *> *ranges, BOOL *stop) {
+        for (NSValue *rangeValue in ranges) {
           if (NSLocationInRange(location, [rangeValue rangeValue])) {
             [scopes addObject:scope];
             break;
@@ -499,7 +522,7 @@
 
   // Add new range if it doesn't overlap with existing ones
   BOOL canAdd = YES;
-  for (NSValue* existingRange in _mutableSelectedRanges) {
+  for (NSValue *existingRange in _mutableSelectedRanges) {
     if (NSIntersectionRange([existingRange rangeValue], range).length > 0) {
       canAdd = NO;
       break;
@@ -547,22 +570,32 @@
 
   // For multiple selection, handle discontiguous selection
   if (_allowsMultipleSelection && _allowsDiscontiguousSelection) {
-    NSMutableAttributedString* text =
-        [[NSMutableAttributedString alloc] initWithAttributedString:_textView.attributedText];
+    NSMutableAttributedString *text = [[NSMutableAttributedString alloc]
+        initWithAttributedString:_textView.attributedText];
 
     // Clear existing selection attributes
-    [text removeAttribute:NSBackgroundColorAttributeName range:NSMakeRange(0, text.length)];
+    [text removeAttribute:NSBackgroundColorAttributeName
+                    range:NSMakeRange(0, text.length)];
 
     // Apply selection highlighting
-    UIColor* selectionColor = [UIColor colorWithRed:0.0 green:0.0 blue:1.0 alpha:0.2];
-    UIColor* primarySelectionColor = [UIColor colorWithRed:0.0 green:0.0 blue:1.0 alpha:0.4];
+    UIColor *selectionColor = [UIColor colorWithRed:0.0
+                                              green:0.0
+                                               blue:1.0
+                                              alpha:0.2];
+    UIColor *primarySelectionColor = [UIColor colorWithRed:0.0
+                                                     green:0.0
+                                                      blue:1.0
+                                                     alpha:0.4];
 
-    for (NSValue* rangeValue in _mutableSelectedRanges) {
+    for (NSValue *rangeValue in _mutableSelectedRanges) {
       NSRange range = [rangeValue rangeValue];
-      UIColor* color =
-          NSEqualRanges(range, _primarySelection) ? primarySelectionColor : selectionColor;
+      UIColor *color = NSEqualRanges(range, _primarySelection)
+                           ? primarySelectionColor
+                           : selectionColor;
 
-      [text addAttribute:NSBackgroundColorAttributeName value:color range:range];
+      [text addAttribute:NSBackgroundColorAttributeName
+                   value:color
+                   range:range];
     }
 
     _textView.attributedText = text;
@@ -571,18 +604,19 @@
 
 #pragma mark - Search Support
 
-- (NSArray<NSValue*>*)findAllOccurrences:(NSString*)text
-                                 options:(NSRegularExpressionOptions)options {
+- (NSArray<NSValue *> *)findAllOccurrences:(NSString *)text
+                                   options:(NSRegularExpressionOptions)options {
   if (!_textView || !text.length)
     return @[];
 
-  NSMutableArray<NSValue*>* results = [NSMutableArray new];
-  NSString* content = _textView.text;
+  NSMutableArray<NSValue *> *results = [NSMutableArray new];
+  NSString *content = _textView.text;
 
-  NSError* error = nil;
-  NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:text
-                                                                         options:options
-                                                                           error:&error];
+  NSError *error = nil;
+  NSRegularExpression *regex =
+      [NSRegularExpression regularExpressionWithPattern:text
+                                                options:options
+                                                  error:&error];
   if (error) {
     NSLog(@"Search regex error: %@", error);
     return @[];
@@ -592,7 +626,8 @@
       enumerateMatchesInString:content
                        options:0
                          range:NSMakeRange(0, content.length)
-                    usingBlock:^(NSTextCheckingResult* result, NSMatchingFlags flags, BOOL* stop) {
+                    usingBlock:^(NSTextCheckingResult *result,
+                                 NSMatchingFlags flags, BOOL *stop) {
                       [results addObject:[NSValue valueWithRange:result.range]];
                     }];
 
@@ -614,7 +649,8 @@
   if (_searchResults.count == 0)
     return;
 
-  _currentSearchIndex = (_currentSearchIndex - 1 + _searchResults.count) % _searchResults.count;
+  _currentSearchIndex =
+      (_currentSearchIndex - 1 + _searchResults.count) % _searchResults.count;
   [self selectRange:[_searchResults[_currentSearchIndex] rangeValue]];
 }
 
@@ -636,7 +672,7 @@
 #pragma mark - Undo/Redo Support
 
 - (void)undo {
-  ShikiSelectionState* state = [_selectionHistory undo];
+  ShikiSelectionState *state = [_selectionHistory undo];
   if (state) {
     _selectionMode = state.mode;
     _textView.selectedRange = state.range;
@@ -645,7 +681,7 @@
 }
 
 - (void)redo {
-  ShikiSelectionState* state = [_selectionHistory redo];
+  ShikiSelectionState *state = [_selectionHistory redo];
   if (state) {
     _selectionMode = state.mode;
     _textView.selectedRange = state.range;
@@ -669,7 +705,7 @@
     return;
   }
 
-  NSValue* rangeValue = [NSValue valueWithRange:range];
+  NSValue *rangeValue = [NSValue valueWithRange:range];
   NSUInteger index = [_mutableSelectedRanges indexOfObject:rangeValue];
 
   if (index != NSNotFound) {
@@ -686,23 +722,24 @@
 }
 
 - (BOOL)isRangeSelected:(NSRange)range {
-  NSValue* rangeValue = [NSValue valueWithRange:range];
+  NSValue *rangeValue = [NSValue valueWithRange:range];
   return [_mutableSelectedRanges containsObject:rangeValue];
 }
 
-- (NSArray<NSString*>*)getScopesAtLocation:(NSUInteger)location {
+- (NSArray<NSString *> *)getScopesAtLocation:(NSUInteger)location {
   if (!_textView || location >= _textView.text.length) {
     return @[];
   }
 
-  NSMutableArray<NSString*>* scopes = [NSMutableArray new];
-  NSAttributedString* text = _textView.attributedText;
+  NSMutableArray<NSString *> *scopes = [NSMutableArray new];
+  NSAttributedString *text = _textView.attributedText;
 
   [text enumerateAttributesInRange:NSMakeRange(location, 1)
                            options:0
-                        usingBlock:^(NSDictionary<NSAttributedStringKey, id>* _Nonnull attrs,
-                                     NSRange range, BOOL* _Nonnull stop) {
-                          NSString* scope = attrs[@"syntax_scope"];
+                        usingBlock:^(NSDictionary<NSAttributedStringKey, id>
+                                         *_Nonnull attrs,
+                                     NSRange range, BOOL *_Nonnull stop) {
+                          NSString *scope = attrs[@"syntax_scope"];
                           if (scope) {
                             [scopes addObject:scope];
                           }
@@ -716,7 +753,7 @@
     return;
 
   NSRange currentSelection = _textView.selectedRange;
-  NSString* text = _textView.text;
+  NSString *text = _textView.text;
 
   // Get the line range containing the selection
   NSRange lineRange = [text lineRangeForRange:currentSelection];
@@ -725,7 +762,8 @@
   if (NSEqualRanges(lineRange, currentSelection)) {
     NSUInteger nextLineStart = NSMaxRange(lineRange);
     if (nextLineStart < text.length) {
-      NSRange nextLineRange = [text lineRangeForRange:NSMakeRange(nextLineStart, 0)];
+      NSRange nextLineRange =
+          [text lineRangeForRange:NSMakeRange(nextLineStart, 0)];
       lineRange = NSUnionRange(lineRange, nextLineRange);
     }
   }

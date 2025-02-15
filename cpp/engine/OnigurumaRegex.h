@@ -35,4 +35,4 @@ void free_scanner(OnigurumaContext* context);
 }
 #endif
 
-#endif // SHIKI_ONIGURUMA_REGEX_H
+#endif  // SHIKI_ONIGURUMA_REGEX_H

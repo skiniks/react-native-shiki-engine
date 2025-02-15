@@ -11,19 +11,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, assign) BOOL hasListeners;
 
-- (void)highlightCode:(NSString*)code
-             language:(NSString*)language
-                theme:(NSString*)theme
+- (void)highlightCode:(NSString *)code
+             language:(NSString *)language
+                theme:(NSString *)theme
               resolve:(RCTPromiseResolveBlock)resolve
                reject:(RCTPromiseRejectBlock)reject;
 
-- (void)loadLanguage:(NSString*)language
-         grammarData:(NSString*)grammarData
+- (void)loadLanguage:(NSString *)language
+         grammarData:(NSString *)grammarData
              resolve:(RCTPromiseResolveBlock)resolve
               reject:(RCTPromiseRejectBlock)reject;
 
-- (void)loadTheme:(NSString*)theme
-        themeData:(NSString*)themeData
+- (void)loadTheme:(NSString *)theme
+        themeData:(NSString *)themeData
           resolve:(RCTPromiseResolveBlock)resolve
            reject:(RCTPromiseRejectBlock)reject;
 
