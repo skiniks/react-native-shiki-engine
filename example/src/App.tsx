@@ -1,11 +1,14 @@
 import type { Token } from 'react-native-shiki'
+import rust from '@shikijs/langs/dist/rust.mjs'
+import dracula from '@shikijs/themes/dist/dracula.mjs'
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, Text, View } from 'react-native'
-import { isNativeHighlighterAvailable } from 'react-native-shiki'
+import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
+import { Clipboard, createHighlighter, isHighlighterAvailable, registerLanguage, registerTheme } from 'react-native-shiki'
 import { TokenDisplay } from './components/TokenDisplay'
-import { HighlighterProvider } from './contexts/highlighter'
-import { useHighlighter } from './hooks/useHighlighter'
 import { styles } from './styles'
+
+registerLanguage('rust', rust)
+registerTheme('dracula', dracula)
 
 const code = `
 use std::collections::HashMap;
@@ -103,18 +106,35 @@ function ShikiDemo() {
   const [highlighterStatus, setHighlighterStatus] = useState('Initializing...')
   const [tokens, setTokens] = useState<Token[]>([])
   const [error, setError] = useState('')
-  const highlighter = useHighlighter()
+  const [copyStatus, setCopyStatus] = useState('Copy')
+
+  const handleCopy = async () => {
+    try {
+      await Clipboard.setString(code)
+      setCopyStatus('Copied!')
+      setTimeout(() => setCopyStatus('Copy'), 2000)
+    }
+    catch (err) {
+      console.error('Failed to copy:', err)
+      setCopyStatus('Failed to copy')
+      setTimeout(() => setCopyStatus('Copy'), 2000)
+    }
+  }
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        const available = isNativeHighlighterAvailable()
+        const available = isHighlighterAvailable()
         setHighlighterStatus(available ? 'Available' : 'Not Available')
 
-        if (!available)
+        if (!available) {
           throw new Error('Native highlighter not available.')
+        }
 
-        await highlighter.initialize()
+        const highlighter = await createHighlighter({
+          langs: ['rust'],
+          themes: ['dracula'],
+        })
 
         const tokenized = await highlighter.tokenize(code, {
           lang: 'rust',
@@ -137,6 +157,7 @@ function ShikiDemo() {
 
     initializeApp()
   }, [])
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -148,7 +169,6 @@ function ShikiDemo() {
       </View>
 
       <View style={styles.demoSection}>
-        <Text style={styles.languageTag}>rust</Text>
         {error
           ? (
               <View style={styles.errorContainer}>
@@ -156,19 +176,21 @@ function ShikiDemo() {
               </View>
             )
           : (
-              <TokenDisplay tokens={tokens} code={code} />
+              <View style={styles.codeContainer}>
+                <TokenDisplay tokens={tokens} code={code} />
+                <TouchableOpacity
+                  style={styles.copyButton}
+                  onPress={handleCopy}
+                >
+                  <Text style={styles.copyButtonText}>
+                    {copyStatus}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
       </View>
     </SafeAreaView>
   )
 }
 
-function App() {
-  return (
-    <HighlighterProvider>
-      <ShikiDemo />
-    </HighlighterProvider>
-  )
-}
-
-export default App
+export default ShikiDemo
