@@ -1,11 +1,16 @@
 #include "ThemeColor.h"
 #include <iomanip>
 #include <sstream>
+#include <xxhash.h>
 
 namespace shiki {
 
-std::unordered_map<std::string, std::shared_ptr<ThemeColor>>
+std::unordered_map<uint64_t, std::shared_ptr<ThemeColor>>
     ThemeColor::colorCache_;
+
+static uint64_t computeColorHash(const std::string &hex) {
+  return XXH3_64bits(hex.c_str(), hex.length());
+}
 
 ThemeColor::ThemeColor(const std::string &hex, float a)
     : hexColor(hex.empty() ? "#000000" : hex), alpha(a), red(0), green(0),
@@ -33,17 +38,22 @@ ThemeColor::ThemeColor(const std::string &hex, float a)
   }
 }
 
-ThemeColor ThemeColor::fromHex(const std::string &hex) {
+std::shared_ptr<ThemeColor> ThemeColor::fromHex(const std::string &hex) {
+  std::string normalizedHex = hex[0] == '#' ? hex : "#" + hex;
+
+  uint64_t hashKey = computeColorHash(normalizedHex);
+
   // Check cache first
-  auto it = colorCache_.find(hex);
+  auto it = colorCache_.find(hashKey);
   if (it != colorCache_.end()) {
-    return *it->second;
+    return it->second;
   }
 
-  // Create new color and cache it
-  auto color = std::make_shared<ThemeColor>(hex);
-  colorCache_[hex] = color;
-  return *color;
+  auto color = std::make_shared<ThemeColor>();
+  color->hexColor = normalizedHex;
+
+  colorCache_[hashKey] = color;
+  return color;
 }
 
 UIColor *ThemeColor::toUIColor() const {
@@ -66,17 +76,8 @@ std::shared_ptr<ThemeColor> ThemeColor::fromUIColor(UIColor *color) {
   return themeColor;
 }
 
-std::string ThemeColor::toHex() const {
-  std::stringstream ss;
-  ss << "#" << std::hex << std::setfill('0') << std::setw(2)
-     << static_cast<int>(red * 255) << std::hex << std::setfill('0')
-     << std::setw(2) << static_cast<int>(green * 255) << std::hex
-     << std::setfill('0') << std::setw(2) << static_cast<int>(blue * 255);
-  if (alpha != 1.0f) {
-    ss << std::hex << std::setfill('0') << std::setw(2)
-       << static_cast<int>(alpha * 255);
-  }
-  return ss.str();
-}
+std::string ThemeColor::toHex() const { return hexColor; }
+
+void ThemeColor::clearCache() { colorCache_.clear(); }
 
 } // namespace shiki

@@ -101,7 +101,7 @@ RCT_EXPORT_MODULE(RNShikiHighlighterModule)
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-  return @[ @"onHighlight", @"onError" ];
+  return @[ @"onHighlight", @"onError", @"onTelemetry" ];
 }
 
 - (void)startObserving {
@@ -252,16 +252,6 @@ RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
       parser.parseThemeStyle(themeStr);
       strongSelf->tokenizer_->setTheme(strongSelf->currentTheme_);
 
-      NSLog(@"Theme loaded with %lu rules",
-            (unsigned long)strongSelf->currentTheme_->rules.size());
-      for (size_t i = 0;
-           i < std::min(size_t(5), strongSelf->currentTheme_->rules.size());
-           i++) {
-        const auto &rule = strongSelf->currentTheme_->rules[i];
-        NSLog(@"Rule %lu: scope=%s, color=%s", (unsigned long)i,
-              rule.scope.c_str(), rule.style.color.c_str());
-      }
-
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(true));
       });
@@ -269,6 +259,59 @@ RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
       dispatch_async(dispatch_get_main_queue(), ^{
         reject(@"theme_error", @(e.what()), nil);
       });
+    }
+  });
+}
+
+- (void)emitTelemetryEvent {
+  if (!hasListeners)
+    return;
+
+  auto &cacheManager = shiki::CacheManager::getInstance();
+  auto mainMetrics = cacheManager.getCache().getMetrics();
+  auto patternMetrics = cacheManager.getPatternCache().getMetrics();
+  auto styleMetrics = cacheManager.getStyleCache().getMetrics();
+  auto syntaxMetrics = cacheManager.getSyntaxTreeCache().getMetrics();
+
+  NSDictionary *telemetryData = @{
+    @"mainCache" : @{
+      @"hitRate" : @(mainMetrics.hitRate()),
+      @"size" : @(mainMetrics.size),
+      @"memoryUsage" : @(mainMetrics.memoryUsage),
+      @"evictions" : @(mainMetrics.evictions)
+    },
+    @"patternCache" : @{
+      @"hitRate" : @(patternMetrics.hitRate()),
+      @"size" : @(patternMetrics.size),
+      @"memoryUsage" : @(patternMetrics.memoryUsage),
+      @"evictions" : @(patternMetrics.evictions)
+    },
+    @"styleCache" : @{
+      @"hitRate" : @(styleMetrics.hitRate()),
+      @"size" : @(styleMetrics.size),
+      @"memoryUsage" : @(styleMetrics.memoryUsage),
+      @"evictions" : @(styleMetrics.evictions)
+    },
+    @"syntaxTreeCache" : @{
+      @"hitRate" : @(syntaxMetrics.hitRate()),
+      @"size" : @(syntaxMetrics.size),
+      @"memoryUsage" : @(syntaxMetrics.memoryUsage),
+      @"evictions" : @(syntaxMetrics.evictions)
+    }
+  };
+
+  [self sendEventWithName:@"onTelemetry" body:telemetryData];
+}
+
+RCT_EXPORT_METHOD(getTelemetryData : (RCTPromiseResolveBlock)
+                      resolve reject : (RCTPromiseRejectBlock)reject)
+{
+  dispatch_async(dispatch_get_main_queue(), ^{
+    @try {
+      [self emitTelemetryEvent];
+      resolve(@(YES));
+    } @catch (NSException *e) {
+      reject(@"telemetry_error", e.reason, nil);
     }
   });
 }

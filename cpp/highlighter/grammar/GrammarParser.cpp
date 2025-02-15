@@ -124,11 +124,6 @@ void GrammarParser::parsePatterns(const rapidjson::Value& patterns, std::vector<
     // Parse match pattern
     if (pattern.HasMember("match") && pattern["match"].IsString()) {
       grammarPattern.match = pattern["match"].GetString();
-
-      // Special handling for comment patterns
-      if (grammarPattern.name.find("comment") != std::string::npos) {
-        std::cout << "[DEBUG] Found comment pattern: " << grammarPattern.match << std::endl;
-      }
     }
 
     // Parse begin/end patterns

@@ -204,7 +204,7 @@ std::optional<Configuration> Configuration::fromJson(const std::string& json) {
     return std::nullopt;
   }
 
-  return config;
+  return std::optional<Configuration>(std::move(config));
 }
 
 template <>

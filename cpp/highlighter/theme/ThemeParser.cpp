@@ -47,12 +47,12 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     const auto& colors = doc["colors"];
     if (colors.HasMember("editor.foreground")) {
       std::string color = colors["editor.foreground"].GetString();
-      theme_->setForeground(ThemeColor::fromHex(color));
+      theme_->setForeground(*ThemeColor::fromHex(color));
       style.color = color[0] == '#' ? color : "#" + color;
     }
     if (colors.HasMember("editor.background")) {
       std::string color = colors["editor.background"].GetString();
-      theme_->setBackground(ThemeColor::fromHex(color));
+      theme_->setBackground(*ThemeColor::fromHex(color));
       style.backgroundColor = color[0] == '#' ? color : "#" + color;
     }
   }
@@ -66,26 +66,21 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
         if (settingsObj.HasMember("foreground")) {
           std::string color = settingsObj["foreground"].GetString();
           style.color = color[0] == '#' ? color : "#" + color;
-          theme_->setForeground(ThemeColor::fromHex(style.color));
+          theme_->setForeground(*ThemeColor::fromHex(style.color));
         }
         if (settingsObj.HasMember("background")) {
           std::string color = settingsObj["background"].GetString();
           style.backgroundColor = color[0] == '#' ? color : "#" + color;
-          theme_->setBackground(ThemeColor::fromHex(style.backgroundColor));
+          theme_->setBackground(*ThemeColor::fromHex(style.backgroundColor));
         }
         break;
       }
     }
   }
 
-  // Fallback colors if still not set
-  if (style.color.empty()) {
-    style.color = theme_->type == "light" ? "#333333" : "#bbbbbb";
-    theme_->setForeground(ThemeColor::fromHex(style.color));
-  }
-  if (style.backgroundColor.empty()) {
-    style.backgroundColor = theme_->type == "light" ? "#fffffe" : "#1e1e1e";
-    theme_->setBackground(ThemeColor::fromHex(style.backgroundColor));
+  // Require colors to be set
+  if (style.color.empty() || style.backgroundColor.empty()) {
+    throw std::runtime_error("Theme must specify both foreground and background colors");
   }
 
   // Parse token colors
@@ -195,7 +190,7 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
           std::string color = it->value.GetString();
           if (!color.empty() && color[0] != '#') {
             std::string replacement = getReplacementColor(color);
-            theme_->colors.push_back(ThemeColor::fromHex(replacement));
+            theme_->colors.push_back(*ThemeColor::fromHex(replacement));
           }
         }
       }
@@ -345,10 +340,10 @@ std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name, const st
   if (doc.HasMember("colors") && doc["colors"].IsObject()) {
     const auto& colors = doc["colors"];
     if (colors.HasMember("editor.background")) {
-      theme->setBackground(ThemeColor::fromHex(colors["editor.background"].GetString()));
+      theme->setBackground(*ThemeColor::fromHex(colors["editor.background"].GetString()));
     }
     if (colors.HasMember("editor.foreground")) {
-      theme->setForeground(ThemeColor::fromHex(colors["editor.foreground"].GetString()));
+      theme->setForeground(*ThemeColor::fromHex(colors["editor.foreground"].GetString()));
     }
   }
 
@@ -437,10 +432,10 @@ std::shared_ptr<Theme> ThemeParser::parseThemeFromObject(const rapidjson::Value&
   if (themeJson.HasMember("colors") && themeJson["colors"].IsObject()) {
     const auto& colors = themeJson["colors"];
     if (colors.HasMember("editor.background")) {
-      theme->setBackground(ThemeColor::fromHex(colors["editor.background"].GetString()));
+      theme->setBackground(*ThemeColor::fromHex(colors["editor.background"].GetString()));
     }
     if (colors.HasMember("editor.foreground")) {
-      theme->setForeground(ThemeColor::fromHex(colors["editor.foreground"].GetString()));
+      theme->setForeground(*ThemeColor::fromHex(colors["editor.foreground"].GetString()));
     }
   }
 

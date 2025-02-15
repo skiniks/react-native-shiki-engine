@@ -91,10 +91,13 @@ struct ThemeStyle {
     return !color.empty() || !backgroundColor.empty() || !fontStyle.empty() || bold || italic || underline;
   }
 
-  // Create a style with default values
-  static ThemeStyle createDefault() {
+  bool operator==(const ThemeStyle& other) const {
+    return color == other.color && backgroundColor == other.backgroundColor && fontStyle == other.fontStyle &&
+      bold == other.bold && italic == other.italic && underline == other.underline;
+  }
+
+  static ThemeStyle getDefaultStyle() {
     ThemeStyle style;
-    style.color = "#F8F8F2";  // Default foreground color
     return style;
   }
 };

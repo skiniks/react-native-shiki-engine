@@ -1,5 +1,6 @@
 #pragma once
 #include <rapidjson/document.h>
+#include <xxhash.h>
 
 #include <map>
 #include <memory>
@@ -261,11 +262,24 @@ class Grammar {
     bool operator==(const IncludeKey& other) const {
       return include == other.include && repository == other.repository;
     }
+
+    uint64_t hash() const {
+      XXH3_state_t* const state = XXH3_createState();
+      if (!state) return 0;
+
+      XXH3_64bits_reset(state);
+      XXH3_64bits_update(state, include.data(), include.size());
+      XXH3_64bits_update(state, repository.data(), repository.size());
+      const uint64_t hash = XXH3_64bits_digest(state);
+      XXH3_freeState(state);
+
+      return hash;
+    }
   };
 
   struct IncludeKeyHash {
     size_t operator()(const IncludeKey& key) const {
-      return std::hash<std::string>()(key.include) ^ std::hash<std::string>()(key.repository);
+      return key.hash();
     }
   };
 

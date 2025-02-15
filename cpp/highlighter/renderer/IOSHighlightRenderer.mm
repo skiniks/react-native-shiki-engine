@@ -31,13 +31,13 @@ void IOSHighlightRenderer::applyLineNumberStyle(const ThemeStyle &style,
   // Apply text color
   if (lineStyle.color) {
     auto color = ThemeColor::fromHex(*lineStyle.color);
-    view.textColor = color.toUIColor();
+    view.textColor = color->toUIColor();
   }
 
   // Apply background color
   if (lineStyle.backgroundColor) {
     auto bgColor = ThemeColor::fromHex(*lineStyle.backgroundColor);
-    view.backgroundColor = bgColor.toUIColor();
+    view.backgroundColor = bgColor->toUIColor();
   }
 
   // Apply font styling
@@ -278,7 +278,7 @@ void IOSHighlightRenderer::applyStyle(const ThemeStyle &style,
   if (!style.color.empty()) {
     auto color = ThemeColor::fromHex(style.color);
     [attrStr addAttribute:NSForegroundColorAttributeName
-                    value:color.toUIColor()
+                    value:color->toUIColor()
                     range:range];
   }
 
@@ -286,7 +286,7 @@ void IOSHighlightRenderer::applyStyle(const ThemeStyle &style,
   if (!style.backgroundColor.empty()) {
     auto bgColor = ThemeColor::fromHex(style.backgroundColor);
     [attrStr addAttribute:NSBackgroundColorAttributeName
-                    value:bgColor.toUIColor()
+                    value:bgColor->toUIColor()
                     range:range];
   }
 

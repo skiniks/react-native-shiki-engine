@@ -94,22 +94,28 @@ uint32_t Theme::parseColor(const std::string& hexColor) {
   return color;
 }
 
-uint32_t Theme::getFontStyle(const std::string& fontStyle) {
-  if (fontStyle.empty()) {
-    return style::FONT_NORMAL;
+uint32_t Theme::getFontStyle(const std::string& scope) const {
+  auto style = getStyle(scope);
+  if (!style.hasProperties()) {
+    return configuration_->getDefaults().defaultFontStyle == "normal" ? style::FONT_NORMAL : style::FONT_BOLD;
   }
 
-  uint32_t style = style::FONT_NORMAL;
-  if (fontStyle.find("bold") != std::string::npos) {
-    style |= style::FONT_BOLD;
+  uint32_t fontStyle = style::FONT_NORMAL;
+  if (style.bold) fontStyle |= style::FONT_BOLD;
+  if (style.italic) fontStyle |= style::FONT_ITALIC;
+  if (style.underline) fontStyle |= style::FONT_UNDERLINE;
+  return fontStyle;
+}
+
+ThemeStyle Theme::getStyle(const std::string& scope) const {
+  auto it = styles_.find(scope);
+  if (it == styles_.end()) {
+    if (configuration_->getDefaults().throwOnMissingColors) {
+      throw std::runtime_error("No style found for scope: " + scope);
+    }
+    return ThemeStyle();
   }
-  if (fontStyle.find("italic") != std::string::npos) {
-    style |= style::FONT_ITALIC;
-  }
-  if (fontStyle.find("underline") != std::string::npos) {
-    style |= style::FONT_UNDERLINE;
-  }
-  return style;
+  return it->second;
 }
 
 void Theme::addSemanticTokenRule(const std::string& token, const ThemeStyle& style) {
@@ -125,13 +131,16 @@ ThemeStyle Theme::resolveSemanticToken(const std::string& token) const {
 }
 
 void Theme::addStyle(const ThemeStyle& style) {
-  styles_.push_back(style);
+  ThemeRule rule;
+  rule.style = style;
+  rule.scope = style.scope;
+  rules.push_back(rule);
 }
 
 const ThemeStyle* Theme::findStyle(const std::string& scope) const {
-  for (const auto& style : styles_) {
-    if (style.fontStyle == scope) {
-      return &style;
+  for (const auto& rule : rules) {
+    if (rule.scope == scope) {
+      return &rule.style;
     }
   }
   return nullptr;
@@ -144,12 +153,12 @@ void Theme::clearCache() {
 ThemeColor Theme::getColor(const std::string& name) const {
   // If it's a hex color, create a ThemeColor directly
   if (!name.empty() && name[0] == '#') {
-    return ThemeColor::fromHex(name);
+    return *ThemeColor::fromHex(name);
   }
 
   // If it's a named color from the theme, find it in the colors array
   for (const auto& color : colors) {
-    if (color.getHexColor() == name) {
+    if (color.hexColor == name) {
       return color;
     }
   }
@@ -166,9 +175,9 @@ ThemeStyle Theme::getLineNumberStyle() const {
     }
   }
 
-  // Fall back to default line number style
+  // If no line number style specified, use foreground color with reduced opacity
   ThemeStyle style;
-  style.color = "#6272A4";  // Dracula theme default
+  style.color = foreground_.toHex();
   return style;
 }
 
@@ -308,12 +317,6 @@ const ThemeRule* Theme::findBestMatchingRule(const std::string& scope) const {
   }
 
   return bestMatch;
-}
-
-ThemeColor ThemeColor::fromHex(const std::string& hex) {
-  ThemeColor color;
-  color.hexColor = hex[0] == '#' ? hex : "#" + hex;
-  return color;
 }
 
 std::string ThemeColor::toHex() const {

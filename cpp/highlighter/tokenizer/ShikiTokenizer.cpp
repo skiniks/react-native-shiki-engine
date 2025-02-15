@@ -4,6 +4,7 @@
 #include <xxhash.h>
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <mutex>
@@ -14,6 +15,7 @@
 
 #include "../cache/CacheManager.h"
 #include "../cache/StyleCache.h"
+#include "../core/Configuration.h"
 #include "../utils/ScopedResource.h"
 #include "../utils/WorkPrioritizer.h"
 
@@ -101,10 +103,9 @@ void ShikiTokenizer::compilePatterns() {
       compiled.name = pattern.name;
       compiledPatterns_.push_back(std::move(compiled));
     } else {
-      // Only log pattern compilation failures
       char s[ONIG_MAX_ERROR_MESSAGE_LEN];
       onig_error_code_to_str((OnigUChar*)s, result, &einfo);
-      std::cout << "[ERROR] Failed to compile pattern: " << s << std::endl;
+      std::cerr << "Failed to compile pattern: " << s << std::endl;
     }
   }
 
@@ -199,13 +200,12 @@ void ShikiTokenizer::evictOldestTokenCache() {
 
 std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
   if (!grammar_ || !theme_) {
-    std::cout << "[ERROR] Missing grammar or theme, skipping tokenization" << std::endl;
+    std::cerr << "Missing grammar or theme, skipping tokenization" << std::endl;
     return {};
   }
 
   // Try to get tokens from cache first
   if (auto cachedTokens = tryGetCachedTokens(code)) {
-    std::cout << "[INFO] Using cached tokens" << std::endl;
     return *cachedTokens;
   }
 
@@ -229,109 +229,7 @@ std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
   // Cache the tokens for future use
   cacheTokens(code, tokens);
 
-  // Log tokenization stats
-  size_t whitespaceTokens = 0;
-  std::unordered_set<std::string> uniqueScopes;
-  std::unordered_map<std::string, std::pair<size_t, std::string>> scopeColorMap;
-  std::unordered_map<std::string, size_t> defaultColoredByScope;
-  std::unordered_map<std::string, size_t> uncoloredByScope;
-
-  const std::string defaultForeground = theme_->getForeground().toHex();
-
-  for (const auto& token : tokens) {
-    // Track unique scopes
-    for (const auto& scope : token.scopes) {
-      uniqueScopes.insert(scope);
-    }
-
-    // Count whitespace tokens
-    if (token.scopes.size() == 1 && token.scopes[0] == "text") {
-      whitespaceTokens++;
-    }
-
-    // Track scope colors
-    std::string combinedScope = token.getCombinedScope();
-    if (!combinedScope.empty()) {
-      scopeColorMap[combinedScope] = {1, token.style.color};
-      auto& count = scopeColorMap[combinedScope].first;
-      count++;
-    }
-
-    // Track tokens by color status
-    if (token.scopes.size() > 1 || (token.scopes.size() == 1 && token.scopes[0] != "text")) {
-      if (token.style.color.empty()) {
-        uncoloredByScope[combinedScope]++;
-      } else if (token.style.color == defaultForeground) {
-        defaultColoredByScope[combinedScope]++;
-      }
-    }
-  }
-
-  // Log summary
-  std::cout << "[INFO] Tokenization complete:" << std::endl;
-  std::cout << "  - Total tokens: " << tokens.size() << std::endl;
-  std::cout << "  - Whitespace tokens: " << whitespaceTokens << std::endl;
-  std::cout << "  - Unique scopes: " << uniqueScopes.size() << std::endl;
-
-  // Log scope color mapping (sample of important scopes)
-  std::cout << "\n[INFO] Scope color mapping (sample):" << std::endl;
-  std::vector<std::pair<std::string, std::pair<size_t, std::string>>> sortedScopes(
-    scopeColorMap.begin(),
-    scopeColorMap.end()
-  );
-  std::sort(sortedScopes.begin(), sortedScopes.end(), [](const auto& a, const auto& b) {
-    return a.second.first > b.second.first;
-  });
-
-  const std::vector<std::string> importantScopeKeywords =
-    {"comment", "string", "keyword", "function", "variable", "type", "macro", "constant", "operator", "punctuation"};
-
-  size_t samplesShown = 0;
-  for (const auto& [scope, info] : sortedScopes) {
-    bool isImportant = false;
-    for (const auto& keyword : importantScopeKeywords) {
-      if (scope.find(keyword) != std::string::npos) {
-        isImportant = true;
-        break;
-      }
-    }
-
-    if (isImportant && samplesShown < 10) {
-      std::cout << "  " << scope << " (" << info.first << " tokens): " << info.second << std::endl;
-      samplesShown++;
-    }
-  }
-
-  // Log default colored scopes
-  if (!defaultColoredByScope.empty()) {
-    std::cout << "\n[INFO] Default colored scopes (" << defaultForeground << "):" << std::endl;
-    std::vector<std::pair<std::string, size_t>> defaultColoredSorted(
-      defaultColoredByScope.begin(),
-      defaultColoredByScope.end()
-    );
-    std::sort(defaultColoredSorted.begin(), defaultColoredSorted.end(), [](const auto& a, const auto& b) {
-      return a.second > b.second;
-    });
-
-    for (size_t i = 0; i < std::min(size_t(5), defaultColoredSorted.size()); i++) {
-      std::cout << "  " << defaultColoredSorted[i].first << ": " << defaultColoredSorted[i].second << " tokens"
-                << std::endl;
-    }
-  }
-
-  // Log truly uncolored scopes if any
-  if (!uncoloredByScope.empty()) {
-    std::cout << "\n[WARN] Truly uncolored scopes (no color assigned):" << std::endl;
-    std::vector<std::pair<std::string, size_t>> uncoloredSorted(uncoloredByScope.begin(), uncoloredByScope.end());
-    std::sort(uncoloredSorted.begin(), uncoloredSorted.end(), [](const auto& a, const auto& b) {
-      return a.second > b.second;
-    });
-
-    for (size_t i = 0; i < std::min(size_t(5), uncoloredSorted.size()); i++) {
-      std::cout << "  " << uncoloredSorted[i].first << ": " << uncoloredSorted[i].second << " tokens" << std::endl;
-    }
-  }
-
+  // Return processed tokens
   return tokens;
 }
 
@@ -554,15 +452,27 @@ void ShikiTokenizer::resolveStyles(std::vector<Token>& tokens) {
 
   resolveStylesBatch(tokens.begin(), tokens.end(), styleCache, resolvedCount, cacheHits);
 
-  // Log summary of style resolution with cache metrics
+  // Log only essential metrics
   auto metrics = styleCache.getMetrics();
-  std::cout << "[INFO] Style resolution stats:" << std::endl
-            << "  - Resolved styles: " << resolvedCount << "/" << tokens.size() << " tokens" << std::endl
-            << "  - Cache hits: " << cacheHits << " (" << (tokens.size() > 0 ? (cacheHits * 100.0 / tokens.size()) : 0)
-            << "%)" << std::endl
-            << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
-            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/" << metrics.maxSize / 1024 << "KB"
-            << std::endl;
+  auto config = Configuration::getInstance().getDefaults();
+  std::cout << "[INFO] Style resolution complete - " << cacheHits * 100.0 / tokens.size() << "% session hit rate ("
+            << cacheHits << "/" << tokens.size() << " tokens), " << metrics.size << " cached entries" << std::endl;
+
+  std::cout << "\n[TELEMETRY] Cache Performance:" << std::endl;
+  std::cout << "  Style Cache:" << std::endl;
+  std::cout << "    Lifetime Hit Rate: " << std::fixed << std::setprecision(2) << (metrics.hitRate() * 100) << "% ("
+            << metrics.hits << "/" << (metrics.hits + metrics.misses) << " total requests)" << std::endl;
+  std::cout << "    Size: " << metrics.size << " entries" << std::endl;
+  std::cout << "    Memory Usage: " << metrics.memoryUsage / 1024 << "KB" << std::endl;
+  std::cout << "    Evictions: " << metrics.evictions << std::endl;
+
+  std::cout << "  Token Cache:" << std::endl;
+  std::cout << "    Size: " << tokenCache_.size() << " entries" << std::endl;
+  std::cout << "    Max Size: " << MAX_TOKEN_CACHE_ENTRIES << " entries" << std::endl;
+
+  std::cout << "  Pattern Stats:" << std::endl;
+  std::cout << "    Compiled Patterns: " << compiledPatterns_.size() << std::endl;
+  std::cout << "    Total Tokens: " << tokens.size() << std::endl;
 }
 
 void ShikiTokenizer::resolveStylesParallel(std::vector<Token>& tokens) {
@@ -623,16 +533,9 @@ void ShikiTokenizer::resolveStylesParallel(std::vector<Token>& tokens) {
     totalCacheHits += hits;
   }
 
-  // Log summary of parallel style resolution with cache metrics
-  auto metrics = styleCache.getMetrics();
-  std::cout << "[INFO] Parallel style resolution stats:" << std::endl
-            << "  - Resolved styles: " << totalResolved << "/" << tokens.size() << " tokens" << std::endl
-            << "  - Cache hits: " << totalCacheHits << " ("
-            << (tokens.size() > 0 ? (totalCacheHits * 100.0 / tokens.size()) : 0) << "%)" << std::endl
-            << "  - Cache entries: " << metrics.entryCount << "/" << metrics.maxEntries << std::endl
-            << "  - Cache memory: " << metrics.memoryUsage / 1024 << "KB/" << metrics.maxSize / 1024 << "KB"
-            << std::endl
-            << "  - Batches: " << numBatches << std::endl;
+  // Log only cache performance in production
+  std::cout << "[INFO] Parallel style resolution complete - " << std::fixed << std::setprecision(2)
+            << (styleCache.getMetrics().hitRate() * 100) << "% cache hit rate" << std::endl;
 }
 
 void ShikiTokenizer::resolveStylesBatch(

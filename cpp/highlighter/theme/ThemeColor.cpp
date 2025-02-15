@@ -1,12 +1,26 @@
 #include "ThemeColor.h"
 
+#include <xxhash.h>
+
 #include <cstdio>
 #include <iomanip>
 #include <sstream>
 
 namespace shiki {
 
-std::unordered_map<std::string, std::shared_ptr<ThemeColor>> ThemeColor::colorCache_;
+std::unordered_map<uint64_t, std::shared_ptr<ThemeColor>> ThemeColor::colorCache_;
+
+uint64_t ThemeColor::computeHash(const std::string& hex) {
+  XXH3_state_t* const state = XXH3_createState();
+  if (!state) return 0;
+
+  XXH3_64bits_reset(state);
+  XXH3_64bits_update(state, hex.data(), hex.size());
+  const uint64_t hash = XXH3_64bits_digest(state);
+  XXH3_freeState(state);
+
+  return hash;
+}
 
 void ThemeColor::parseHexColor() const {
   if (!isValid()) return;
@@ -35,29 +49,35 @@ void ThemeColor::parseHexColor() const {
 }
 
 ThemeColor::ThemeColor(const std::string& hex, float a)
-  : hexColor(hex.empty() ? "#000000" : (hex[0] == '#' ? hex : "#" + hex)), alpha(a), red(0), green(0), blue(0) {
+  : hexColor(hex.empty() ? "" : (hex[0] == '#' ? hex : "#" + hex)),
+    hash_(computeHash(hexColor)),
+    alpha(a),
+    red(0),
+    green(0),
+    blue(0) {
   if (!hexColor.empty()) {
     parseHexColor();
   }
 }
 
-ThemeColor ThemeColor::fromHex(const std::string& hex) {
-  // Ensure hex starts with #
-  std::string validHex = hex;
-  if (!validHex.empty() && validHex[0] != '#') {
-    validHex = "#" + validHex;
+std::shared_ptr<ThemeColor> ThemeColor::fromHex(const std::string& hex) {
+  if (hex.empty()) {
+    return nullptr;
   }
+
+  std::string normalizedHex = hex[0] == '#' ? hex : "#" + hex;
+  uint64_t hashKey = computeHash(normalizedHex);
 
   // Check cache first
-  auto it = colorCache_.find(validHex);
+  auto it = colorCache_.find(hashKey);
   if (it != colorCache_.end()) {
-    return *it->second;
+    return it->second;
   }
 
-  // Create new color
-  auto color = std::make_shared<ThemeColor>(validHex);
-  colorCache_[validHex] = color;
-  return *color;
+  // Create new color if not in cache
+  auto color = std::make_shared<ThemeColor>(normalizedHex);
+  colorCache_[hashKey] = color;
+  return color;
 }
 
 std::string ThemeColor::toHex() const {

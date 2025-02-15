@@ -11,47 +11,35 @@
 namespace shiki {
 
 class ThemeColor {
- private:
-  std::string hexColor;
-  float alpha;
-  float red;
-  float green;
-  float blue;
-  static std::unordered_map<std::string, std::shared_ptr<ThemeColor>> colorCache_;
-
-  void parseHexColor() const;
-
  public:
-  ThemeColor() : hexColor("#000000"), alpha(1.0f), red(0), green(0), blue(0) {}
-  explicit ThemeColor(const std::string& hex, float a = 1.0f);
+  explicit ThemeColor(const std::string& hex = "", float a = 1.0f);
 
-  std::string getHexColor() const {
-    return hexColor;
-  }
-  float getAlpha() const {
-    return alpha;
-  }
-  float getRed() const {
-    return red;
-  }
-  float getGreen() const {
-    return green;
-  }
-  float getBlue() const {
-    return blue;
-  }
-
-  static ThemeColor fromHex(const std::string& hex);
+  static std::shared_ptr<ThemeColor> fromHex(const std::string& hex);
   std::string toHex() const;
 
   bool isValid() const {
-    return !hexColor.empty() && hexColor[0] == '#';
+    return !hexColor.empty();
   }
+
+  float red{0};
+  float green{0};
+  float blue{0};
+  float alpha{1.0f};
+  std::string hexColor;
+  uint64_t hash_{0};
 
 #ifdef __OBJC__
   UIColor* toUIColor() const;
   static std::shared_ptr<ThemeColor> fromUIColor(UIColor* color);
 #endif
+
+  static void clearCache();
+
+ private:
+  void parseHexColor() const;
+  static uint64_t computeHash(const std::string& hex);
+
+  static std::unordered_map<uint64_t, std::shared_ptr<ThemeColor>> colorCache_;
 };
 
 }  // namespace shiki
