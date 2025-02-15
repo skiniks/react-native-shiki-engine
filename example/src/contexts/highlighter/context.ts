@@ -1,4 +1,4 @@
-import type { Token } from 'react-native-shiki-engine'
+import type { Token } from 'react-native-shiki'
 import { createContext } from 'react'
 
 export interface HighlighterContextType {

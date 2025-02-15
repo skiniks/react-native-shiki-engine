@@ -1,7 +1,7 @@
-import type { Token } from 'react-native-shiki-engine'
+import type { Token } from 'react-native-shiki'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, Text, View } from 'react-native'
-import { isNativeEngineAvailable } from 'react-native-shiki-engine'
+import { isNativeHighlighterAvailable } from 'react-native-shiki'
 import { TokenDisplay } from './components/TokenDisplay'
 import { HighlighterProvider } from './contexts/highlighter'
 import { useHighlighter } from './hooks/useHighlighter'
@@ -100,7 +100,7 @@ fn main() {
 `
 
 function ShikiDemo() {
-  const [engineStatus, setEngineStatus] = useState('Initializing...')
+  const [highlighterStatus, setHighlighterStatus] = useState('Initializing...')
   const [tokens, setTokens] = useState<Token[]>([])
   const [error, setError] = useState('')
   const highlighter = useHighlighter()
@@ -108,11 +108,11 @@ function ShikiDemo() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        const available = isNativeEngineAvailable()
-        setEngineStatus(available ? 'Available' : 'Not Available')
+        const available = isNativeHighlighterAvailable()
+        setHighlighterStatus(available ? 'Available' : 'Not Available')
 
         if (!available)
-          throw new Error('Native engine not available.')
+          throw new Error('Native highlighter not available.')
 
         await highlighter.initialize()
 
@@ -140,10 +140,10 @@ function ShikiDemo() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>React Native Shiki Engine</Text>
+        <Text style={styles.title}>React Native Shiki</Text>
         <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Engine Status:</Text>
-          <Text style={styles.statusValue}>{engineStatus}</Text>
+          <Text style={styles.statusLabel}>Highlighter Status:</Text>
+          <Text style={styles.statusValue}>{highlighterStatus}</Text>
         </View>
       </View>
 

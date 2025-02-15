@@ -10842,9 +10842,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-shiki-engine-example@workspace:example":
+"react-native-shiki-example@workspace:example":
   version: 0.0.0-use.local
-  resolution: "react-native-shiki-engine-example@workspace:example"
+  resolution: "react-native-shiki-example@workspace:example"
   dependencies:
     "@babel/core": "npm:^7.26.8"
     "@babel/preset-env": "npm:^7.26.8"
@@ -10858,14 +10858,14 @@ __metadata:
     "@shikijs/themes": "npm:^2.3.2"
     react: "npm:18.3.1"
     react-native: "npm:0.77.0"
-    react-native-shiki-engine: "workspace:^"
+    react-native-shiki: "workspace:^"
     shiki: "npm:^2.3.2"
   languageName: unknown
   linkType: soft
 
-"react-native-shiki-engine@workspace:., react-native-shiki-engine@workspace:^":
+"react-native-shiki@workspace:., react-native-shiki@workspace:^":
   version: 0.0.0-use.local
-  resolution: "react-native-shiki-engine@workspace:."
+  resolution: "react-native-shiki@workspace:."
   dependencies:
     "@antfu/eslint-config": "npm:^4.2.0"
     "@eslint-react/eslint-plugin": "npm:^1.26.2"

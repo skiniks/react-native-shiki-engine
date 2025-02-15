@@ -2,17 +2,17 @@ import type { HighlighterContextType } from './context'
 import rust from '@shikijs/langs/dist/rust.mjs'
 import dracula from '@shikijs/themes/dist/dracula.mjs'
 import React from 'react'
-import { isNativeEngineAvailable, NativeShikiHighlighter } from 'react-native-shiki-engine'
+import { isNativeHighlighterAvailable, NativeShikiHighlighter } from 'react-native-shiki'
 import { HighlighterContext } from './context'
 
 export function HighlighterProvider({ children }: { children: React.ReactNode }) {
   const value = React.useMemo<HighlighterContextType>(
     () => ({
       initialize: async () => {
-        const available = isNativeEngineAvailable()
+        const available = isNativeHighlighterAvailable()
 
         if (!available)
-          throw new Error('Native engine not available.')
+          throw new Error('Native highlighter not available.')
 
         // Parse the grammar array and extract the first object
         const grammarArray = Array.isArray(rust) ? rust : [rust]
@@ -42,10 +42,6 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
       tokenize: async (code: string, options: { lang: string, theme: string }) => {
         const tokens = await NativeShikiHighlighter.highlightCode(code, options.lang, options.theme)
         return tokens
-      },
-
-      dispose: () => {
-        // No explicit disposal needed for the native highlighter
       },
     }),
     [],

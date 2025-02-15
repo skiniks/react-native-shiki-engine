@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(ReactNativeShikiEngine)
+project(ReactNativeShiki)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 17)
@@ -10,22 +10,21 @@ find_library(ONIG_LIB onig
     REQUIRED
 )
 
-add_library(react-native-shiki-engine SHARED
+add_library(react-native-shiki SHARED
     src/main/cpp/cpp-adapter.cpp
-    ../cpp/NativeShikiEngineModule.cpp
     ../cpp/onig_regex.cpp
 )
 
-target_include_directories(react-native-shiki-engine PUBLIC src/main/cpp/include)
-target_include_directories(react-native-shiki-engine PUBLIC ../cpp)
+target_include_directories(react-native-shiki PUBLIC src/main/cpp/include)
+target_include_directories(react-native-shiki PUBLIC ../cpp)
 
 find_library(log-lib log)
 
-target_link_libraries(react-native-shiki-engine
+target_link_libraries(react-native-shiki
     ${ONIG_LIB}
     android
     ${log-lib}
     jsi
     fbjni
-    react_codegen_NativeShikiEngineSpec
+    react_codegen_RNShikiHighlighterSpec
 )

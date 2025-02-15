@@ -1,3 +1,4 @@
+# This needs to be updated to reflect the new name and features `react-native-shiki`
 # React Native Shiki Engine
 
 Oniguruma regex engine implementation for React Native, providing high-performance syntax highlighting capabilities through [Shiki](https://github.com/shikijs/shiki). This module implements a JSI-based native bridge to Oniguruma, enabling efficient pattern matching and syntax highlighting in React Native applications.
@@ -21,14 +22,14 @@ Oniguruma regex engine implementation for React Native, providing high-performan
 ### React Native
 
 ```sh
-yarn add react-native-shiki-engine
+yarn add react-native-shiki
 cd ios && pod install
 ```
 
 ### Expo
 
 ```sh
-npx expo install react-native-shiki-engine
+npx expo install react-native-shiki
 npx expo prebuild
 ```
 
@@ -68,7 +69,7 @@ const highlighter = createHighlighterCore({
 > - Initializing highlighters inside useEffect or event handlers
 > - Multiple instances for the same language/theme combination
 >
-> See the [example directory](https://github.com/skiniks/react-native-shiki-engine/tree/main/example) for a reference implementation using React Context to maintain a single highlighter instance.
+> See the [example directory](https://github.com/skiniks/react-native-shiki/tree/main/example) for a reference implementation using React Context to maintain a single highlighter instance.
 
 ### Advanced Configuration
 
@@ -200,5 +201,5 @@ MIT License - see the [LICENSE](LICENSE) file for details
 
 For questions, bug reports, or feature requests:
 
-- [GitHub Issues](https://github.com/skiniks/react-native-shiki-engine/issues)
-- [GitHub Discussions](https://github.com/skiniks/react-native-shiki-engine/discussions)
+- [GitHub Issues](https://github.com/skiniks/react-native-shiki/issues)
+- [GitHub Discussions](https://github.com/skiniks/react-native-shiki/discussions)

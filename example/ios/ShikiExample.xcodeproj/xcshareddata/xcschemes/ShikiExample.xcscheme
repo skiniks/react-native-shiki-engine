@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "ShikiEngineExample.app"
-               BlueprintName = "ShikiEngineExample"
-               ReferencedContainer = "container:ShikiEngineExample.xcodeproj">
+               BuildableName = "ShikiExample.app"
+               BlueprintName = "ShikiExample"
+               ReferencedContainer = "container:ShikiExample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "ShikiEngineExampleTests.xctest"
-               BlueprintName = "ShikiEngineExampleTests"
-               ReferencedContainer = "container:ShikiEngineExample.xcodeproj">
+               BuildableName = "ShikiExampleTests.xctest"
+               BlueprintName = "ShikiExampleTests"
+               ReferencedContainer = "container:ShikiExample.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "ShikiEngineExample.app"
-            BlueprintName = "ShikiEngineExample"
-            ReferencedContainer = "container:ShikiEngineExample.xcodeproj">
+            BuildableName = "ShikiExample.app"
+            BlueprintName = "ShikiExample"
+            ReferencedContainer = "container:ShikiExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "ShikiEngineExample.app"
-            BlueprintName = "ShikiEngineExample"
-            ReferencedContainer = "container:ShikiEngineExample.xcodeproj">
+            BuildableName = "ShikiExample.app"
+            BlueprintName = "ShikiExample"
+            ReferencedContainer = "container:ShikiExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

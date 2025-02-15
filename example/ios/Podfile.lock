@@ -1210,7 +1210,7 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
-  - react-native-shiki-engine (0.1.8):
+  - react-native-shiki (0.0.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1562,7 +1562,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
-  - react-native-shiki-engine (from `../..`)
+  - react-native-shiki (from `../..`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -1672,7 +1672,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
-  react-native-shiki-engine:
+  react-native-shiki:
     :path: "../.."
   React-nativeconfig:
     :path: "../node_modules/react-native/ReactCommon"
@@ -1772,7 +1772,7 @@ SPEC CHECKSUMS:
   React-logger: 02e5802824aa9b15cb7df42e10a91abead83cd8d
   React-Mapbuffer: 99bd566147aaa78e872568be53ebca8a4449ddae
   React-microtasksnativemodule: 51e7813abf875408a0f367e473a65bbab6aa8481
-  react-native-shiki-engine: eddaea9106330e4c09a9176dc4ef7a195655f8f3
+  react-native-shiki: e25867e36564b47cfe321b8c853a6f82c2cd4aaa
   React-nativeconfig: cd0fbb40987a9658c24dab5812c14e5522a64929
   React-NativeModulesApple: 4a9c304aa4fb086af32e8758ba892386d895b4d3
   React-perflogger: 721172bda31a65ce7b7a0c3bf3de96f12ef6f45d
@@ -1805,6 +1805,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 78d74e245ed67bb94275a1316cdc170b9b7fe884
 
-PODFILE CHECKSUM: ab286c6d74bc2fb562c1f0818fc7e2ee15759ae3
+PODFILE CHECKSUM: f4a2caea70ce4ed065ac3e90b76c44fcfc6ca6ff
 
 COCOAPODS: 1.15.2

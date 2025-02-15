@@ -1,5 +1,5 @@
 import type { ViewStyle } from 'react-native'
-import type { Token } from 'react-native-shiki-engine'
+import type { Token } from 'react-native-shiki'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 const styles = StyleSheet.create({

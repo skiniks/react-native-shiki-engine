@@ -9,7 +9,7 @@ module.exports = {
         root: ['.'],
         extensions: ['.ios.ts', '.android.ts', '.ts', '.ios.tsx', '.android.tsx', '.tsx', '.jsx', '.js', '.json'],
         alias: {
-          'react-native-shiki-engine': path.join(__dirname, '../src/index'),
+          'react-native-shiki': path.join(__dirname, '../src/index'),
         },
       },
     ],

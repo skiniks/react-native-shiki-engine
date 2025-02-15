@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  ShikiEngineExample
+//  ShikiExample
 //
 
 import Foundation

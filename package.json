@@ -1,17 +1,17 @@
 {
-  "name": "react-native-shiki-engine",
-  "version": "0.1.8",
+  "name": "react-native-shiki",
+  "version": "0.0.1",
   "packageManager": "yarn@4.5.3",
-  "description": "Shiki syntax highlighting for React Native. Zero bridge overhead with native Oniguruma regex engine.",
+  "description": "Shiki syntax highlighting for React Native.",
   "author": "Ryan Skinner <hello@ryanskinner.com> (https://github.com/skiniks)",
   "license": "MIT",
-  "homepage": "https://github.com/skiniks/react-native-shiki-engine#readme",
+  "homepage": "https://github.com/skiniks/react-native-shiki#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/skiniks/react-native-shiki-engine.git"
+    "url": "https://github.com/skiniks/react-native-shiki.git"
   },
   "bugs": {
-    "url": "https://github.com/skiniks/react-native-shiki-engine/issues"
+    "url": "https://github.com/skiniks/react-native-shiki/issues"
   },
   "keywords": [
     "react-native",
@@ -145,14 +145,6 @@
         "jsSrcsDir": "src/highlighter",
         "android": {
           "javaPackageName": "com.shikihighlighter"
-        }
-      },
-      {
-        "name": "RNShikiEngine",
-        "type": "modules",
-        "jsSrcsDir": "src/engine",
-        "android": {
-          "javaPackageName": "com.shikiengine"
         }
       }
     ]

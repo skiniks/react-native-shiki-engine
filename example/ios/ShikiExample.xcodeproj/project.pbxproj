@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00E356F31AD99517003FC87E /* ShikiEngineExampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* ShikiEngineExampleTests.m */; };
+		00E356F31AD99517003FC87E /* ShikiExampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* ShikiExampleTests.m */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		1682204E52AB127048CEA362 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 430E64911391C6E6236E9E71 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */; };
-		21F490923FE8A474D2F73AED /* libPods-ShikiEngineExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DB47B37DDAF1091E60FDE6AC /* libPods-ShikiEngineExample.a */; };
+		1682204E52AB127048CEA362 /* libPods-ShikiExample-ShikiExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 430E64911391C6E6236E9E71 /* libPods-ShikiExample-ShikiExampleTests.a */; };
+		21F490923FE8A474D2F73AED /* libPods-ShikiExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DB47B37DDAF1091E60FDE6AC /* libPods-ShikiExample.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		B690EF860B6FD4B96E9308DC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
@@ -23,28 +23,28 @@
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = ShikiEngineExample;
+			remoteInfo = ShikiExample;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		00E356EE1AD99517003FC87E /* ShikiEngineExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShikiEngineExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356EE1AD99517003FC87E /* ShikiExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShikiExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00E356F21AD99517003FC87E /* ShikiEngineExampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShikiEngineExampleTests.m; sourceTree = "<group>"; };
-		130C76488880BE46C0C48318 /* Pods-ShikiEngineExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample.debug.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample.debug.xcconfig"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* ShikiEngineExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShikiEngineExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = ShikiEngineExample/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = ShikiEngineExample/AppDelegate.mm; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ShikiEngineExample/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ShikiEngineExample/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ShikiEngineExample/main.m; sourceTree = "<group>"; };
-		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = ShikiEngineExample/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		23477E9D0EAABA96CFABAF7B /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
-		254DDAA6D085F5D0178ED5C8 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig"; sourceTree = "<group>"; };
-		430E64911391C6E6236E9E71 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiEngineExample-ShikiEngineExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4B3E2655624EE831AA2E770A /* Pods-ShikiEngineExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample.release.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample.release.xcconfig"; sourceTree = "<group>"; };
-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ShikiEngineExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		DB47B37DDAF1091E60FDE6AC /* libPods-ShikiEngineExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiEngineExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356F21AD99517003FC87E /* ShikiExampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShikiExampleTests.m; sourceTree = "<group>"; };
+		130C76488880BE46C0C48318 /* Pods-ShikiExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiExample.debug.xcconfig"; path = "Target Support Files/Pods-ShikiExample/Pods-ShikiExample.debug.xcconfig"; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* ShikiExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShikiExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = ShikiExample/AppDelegate.h; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = ShikiExample/AppDelegate.mm; sourceTree = "<group>"; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = ShikiExample/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ShikiExample/Info.plist; sourceTree = "<group>"; };
+		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ShikiExample/main.m; sourceTree = "<group>"; };
+		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = ShikiExample/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		23477E9D0EAABA96CFABAF7B /* Pods-ShikiExample-ShikiExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiExample-ShikiExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
+		254DDAA6D085F5D0178ED5C8 /* Pods-ShikiExample-ShikiExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiExample-ShikiExampleTests.release.xcconfig"; path = "Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests.release.xcconfig"; sourceTree = "<group>"; };
+		430E64911391C6E6236E9E71 /* libPods-ShikiExample-ShikiExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiExample-ShikiExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B3E2655624EE831AA2E770A /* Pods-ShikiExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiExample.release.xcconfig"; path = "Target Support Files/Pods-ShikiExample/Pods-ShikiExample.release.xcconfig"; sourceTree = "<group>"; };
+		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ShikiExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		DB47B37DDAF1091E60FDE6AC /* libPods-ShikiExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -53,7 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1682204E52AB127048CEA362 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a in Frameworks */,
+				1682204E52AB127048CEA362 /* libPods-ShikiExample-ShikiExampleTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,20 +61,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21F490923FE8A474D2F73AED /* libPods-ShikiEngineExample.a in Frameworks */,
+				21F490923FE8A474D2F73AED /* libPods-ShikiExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00E356EF1AD99517003FC87E /* ShikiEngineExampleTests */ = {
+		00E356EF1AD99517003FC87E /* ShikiExampleTests */ = {
 			isa = PBXGroup;
 			children = (
-				00E356F21AD99517003FC87E /* ShikiEngineExampleTests.m */,
+				00E356F21AD99517003FC87E /* ShikiExampleTests.m */,
 				00E356F01AD99517003FC87E /* Supporting Files */,
 			);
-			path = ShikiEngineExampleTests;
+			path = ShikiExampleTests;
 			sourceTree = "<group>";
 		};
 		00E356F01AD99517003FC87E /* Supporting Files */ = {
@@ -85,7 +85,7 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		13B07FAE1A68108700A75B9A /* ShikiEngineExample */ = {
+		13B07FAE1A68108700A75B9A /* ShikiExample */ = {
 			isa = PBXGroup;
 			children = (
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -96,15 +96,15 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 			);
-			name = ShikiEngineExample;
+			name = ShikiExample;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				DB47B37DDAF1091E60FDE6AC /* libPods-ShikiEngineExample.a */,
-				430E64911391C6E6236E9E71 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */,
+				DB47B37DDAF1091E60FDE6AC /* libPods-ShikiExample.a */,
+				430E64911391C6E6236E9E71 /* libPods-ShikiExample-ShikiExampleTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -119,9 +119,9 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* ShikiEngineExample */,
+				13B07FAE1A68108700A75B9A /* ShikiExample */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				00E356EF1AD99517003FC87E /* ShikiEngineExampleTests */,
+				00E356EF1AD99517003FC87E /* ShikiExampleTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
@@ -134,8 +134,8 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* ShikiEngineExample.app */,
-				00E356EE1AD99517003FC87E /* ShikiEngineExampleTests.xctest */,
+				13B07F961A680F5B00A75B9A /* ShikiExample.app */,
+				00E356EE1AD99517003FC87E /* ShikiExampleTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -143,10 +143,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				130C76488880BE46C0C48318 /* Pods-ShikiEngineExample.debug.xcconfig */,
-				4B3E2655624EE831AA2E770A /* Pods-ShikiEngineExample.release.xcconfig */,
-				23477E9D0EAABA96CFABAF7B /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */,
-				254DDAA6D085F5D0178ED5C8 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */,
+				130C76488880BE46C0C48318 /* Pods-ShikiExample.debug.xcconfig */,
+				4B3E2655624EE831AA2E770A /* Pods-ShikiExample.release.xcconfig */,
+				23477E9D0EAABA96CFABAF7B /* Pods-ShikiExample-ShikiExampleTests.debug.xcconfig */,
+				254DDAA6D085F5D0178ED5C8 /* Pods-ShikiExample-ShikiExampleTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -154,9 +154,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* ShikiEngineExampleTests */ = {
+		00E356ED1AD99517003FC87E /* ShikiExampleTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ShikiEngineExampleTests" */;
+			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ShikiExampleTests" */;
 			buildPhases = (
 				1EC274A55BC506ED4B855226 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
@@ -170,14 +170,14 @@
 			dependencies = (
 				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
-			name = ShikiEngineExampleTests;
-			productName = ShikiEngineExampleTests;
-			productReference = 00E356EE1AD99517003FC87E /* ShikiEngineExampleTests.xctest */;
+			name = ShikiExampleTests;
+			productName = ShikiExampleTests;
+			productReference = 00E356EE1AD99517003FC87E /* ShikiExampleTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		13B07F861A680F5B00A75B9A /* ShikiEngineExample */ = {
+		13B07F861A680F5B00A75B9A /* ShikiExample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ShikiEngineExample" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ShikiExample" */;
 			buildPhases = (
 				4EEC4BA84C9D7BDE4FB7ED80 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
@@ -191,9 +191,9 @@
 			);
 			dependencies = (
 			);
-			name = ShikiEngineExample;
-			productName = ShikiEngineExample;
-			productReference = 13B07F961A680F5B00A75B9A /* ShikiEngineExample.app */;
+			name = ShikiExample;
+			productName = ShikiExample;
+			productReference = 13B07F961A680F5B00A75B9A /* ShikiExample.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -213,7 +213,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "ShikiEngineExample" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "ShikiExample" */;
 			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -226,8 +226,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* ShikiEngineExample */,
-				00E356ED1AD99517003FC87E /* ShikiEngineExampleTests */,
+				13B07F861A680F5B00A75B9A /* ShikiExample */,
+				00E356ED1AD99517003FC87E /* ShikiExampleTests */,
 			);
 		};
 /* End PBXProject section */
@@ -284,7 +284,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ShikiEngineExample-ShikiEngineExampleTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-ShikiExample-ShikiExampleTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -297,15 +297,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		45C5CA581DA93D4494B64B34 /* [CP] Copy Pods Resources */ = {
@@ -314,15 +314,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample/Pods-ShikiExample-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample/Pods-ShikiExample-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiExample/Pods-ShikiExample-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		4EEC4BA84C9D7BDE4FB7ED80 /* [CP] Check Pods Manifest.lock */ = {
@@ -340,7 +340,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ShikiEngineExample-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-ShikiExample-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -353,15 +353,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiExample-ShikiExampleTests/Pods-ShikiExample-ShikiExampleTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E14968E4D29FE8158DC6EDC9 /* [CP] Embed Pods Frameworks */ = {
@@ -370,15 +370,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample/Pods-ShikiExample-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiExample/Pods-ShikiExample-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiExample/Pods-ShikiExample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -388,7 +388,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				00E356F31AD99517003FC87E /* ShikiEngineExampleTests.m in Sources */,
+				00E356F31AD99517003FC87E /* ShikiExampleTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -406,7 +406,7 @@
 /* Begin PBXTargetDependency section */
 		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* ShikiEngineExample */;
+			target = 13B07F861A680F5B00A75B9A /* ShikiExample */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -414,14 +414,14 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 23477E9D0EAABA96CFABAF7B /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */;
+			baseConfigurationReference = 23477E9D0EAABA96CFABAF7B /* Pods-ShikiExample-ShikiExampleTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = ShikiEngineExampleTests/Info.plist;
+				INFOPLIST_FILE = ShikiExampleTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -433,19 +433,19 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = shikiengine.example;
+				PRODUCT_BUNDLE_IDENTIFIER = shiki.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShikiEngineExample.app/ShikiEngineExample";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShikiExample.app/ShikiExample";
 			};
 			name = Debug;
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 254DDAA6D085F5D0178ED5C8 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */;
+			baseConfigurationReference = 254DDAA6D085F5D0178ED5C8 /* Pods-ShikiExample-ShikiExampleTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
-				INFOPLIST_FILE = ShikiEngineExampleTests/Info.plist;
+				INFOPLIST_FILE = ShikiExampleTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -457,22 +457,22 @@
 					"-lc++",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = shikiengine.example;
+				PRODUCT_BUNDLE_IDENTIFIER = shiki.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShikiEngineExample.app/ShikiEngineExample";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShikiExample.app/ShikiExample";
 			};
 			name = Release;
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 130C76488880BE46C0C48318 /* Pods-ShikiEngineExample.debug.xcconfig */;
+			baseConfigurationReference = 130C76488880BE46C0C48318 /* Pods-ShikiExample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7D4M5HEQ89;
 				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = ShikiEngineExample/Info.plist;
+				INFOPLIST_FILE = ShikiExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -484,8 +484,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = shikiengine.example;
-				PRODUCT_NAME = ShikiEngineExample;
+				PRODUCT_BUNDLE_IDENTIFIER = shiki.example;
+				PRODUCT_NAME = ShikiExample;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -494,13 +494,13 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4B3E2655624EE831AA2E770A /* Pods-ShikiEngineExample.release.xcconfig */;
+			baseConfigurationReference = 4B3E2655624EE831AA2E770A /* Pods-ShikiExample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7D4M5HEQ89;
-				INFOPLIST_FILE = ShikiEngineExample/Info.plist;
+				INFOPLIST_FILE = ShikiExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -512,8 +512,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = shikiengine.example;
-				PRODUCT_NAME = ShikiEngineExample;
+				PRODUCT_BUNDLE_IDENTIFIER = shiki.example;
+				PRODUCT_NAME = ShikiExample;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -674,7 +674,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ShikiEngineExampleTests" */ = {
+		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ShikiExampleTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				00E356F61AD99517003FC87E /* Debug */,
@@ -683,7 +683,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ShikiEngineExample" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ShikiExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -692,7 +692,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "ShikiEngineExample" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "ShikiExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

@@ -31,7 +31,7 @@ const config = {
         acc[name] = path.join(__dirname, 'node_modules', name)
         return acc
       }, {}),
-      'react-native-shiki-engine': root,
+      'react-native-shiki': root,
     },
   },
 

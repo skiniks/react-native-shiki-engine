@@ -174,16 +174,15 @@ void AndroidHighlighter::updateJavaView(JNIEnv* env, jobject view, const std::st
 
 void AndroidHighlighter::cacheJNIReferences(JNIEnv* env) {
   // Find and cache ShikiHighlighterView class and methods
-  jclass localClass = env->FindClass("com/shikiengine/ShikiHighlighterView");
+  jclass localClass = env->FindClass("com/shiki/ShikiHighlighterView");
   if (localClass) {
     viewClass_ = static_cast<jclass>(env->NewGlobalRef(localClass));
     createViewMethod_ = env->GetStaticMethodID(
       viewClass_,
       "create",
-      "(Ljava/lang/String;Ljava/lang/String;ZFLjava/lang/String;)Lcom/shikiengine/ShikiHighlighterView;"
+      "(Ljava/lang/String;Ljava/lang/String;ZFLjava/lang/String;)Lcom/shiki/ShikiHighlighterView;"
     );
-    updateViewMethod_ =
-      env->GetMethodID(viewClass_, "updateContent", "(Ljava/lang/String;[Lcom/shikiengine/StyledToken;)V");
+    updateViewMethod_ = env->GetMethodID(viewClass_, "updateContent", "(Ljava/lang/String;[Lcom/shiki/StyledToken;)V");
     env->DeleteLocalRef(localClass);
   }
 }

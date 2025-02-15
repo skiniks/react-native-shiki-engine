@@ -9,16 +9,12 @@
 using namespace facebook::jni;
 using namespace facebook::jsi;
 
-#define TAG       "ShikiEngine"
+#define TAG       "Shiki"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
 
-extern "C" JNIEXPORT jdouble JNICALL Java_com_shikiengine_ShikiEngineModule_createScanner(
-  JNIEnv* env,
-  jobject thiz,
-  jobjectArray patterns,
-  jdouble maxCacheSize
-) {
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_shiki_ShikiModule_createScanner(JNIEnv* env, jobject thiz, jobjectArray patterns, jdouble maxCacheSize) {
   try {
     jsize length = env->GetArrayLength(patterns);
     std::vector<std::string> patternStrings;
@@ -51,7 +47,7 @@ extern "C" JNIEXPORT jdouble JNICALL Java_com_shikiengine_ShikiEngineModule_crea
   }
 }
 
-extern "C" JNIEXPORT jobject JNICALL Java_com_shikiengine_ShikiEngineModule_findNextMatchSync(
+extern "C" JNIEXPORT jobject JNICALL Java_com_shiki_ShikiModule_findNextMatchSync(
   JNIEnv* env,
   jobject thiz,
   jdouble scannerId,
@@ -117,7 +113,7 @@ extern "C" JNIEXPORT jobject JNICALL Java_com_shikiengine_ShikiEngineModule_find
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_shikiengine_ShikiEngineModule_destroyScanner(JNIEnv* env, jobject thiz, jdouble scannerId) {
+Java_com_shiki_ShikiModule_destroyScanner(JNIEnv* env, jobject thiz, jdouble scannerId) {
   try {
     uint64_t ptr = static_cast<uint64_t>(scannerId);
     OnigurumaContext* context = reinterpret_cast<OnigurumaContext*>(ptr);

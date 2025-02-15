@@ -2,7 +2,7 @@
   "extends": "../tsconfig",
   "compilerOptions": {
     "paths": {
-      "react-native-shiki-engine": ["../src/index"]
+      "react-native-shiki": ["../src/index"]
     },
     "typeRoots": [
       "./node_modules/@types",

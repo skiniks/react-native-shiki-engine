@@ -1,4 +1,4 @@
-package shikiengine.example
+package shiki.example
 
 import android.app.Application
 import com.facebook.react.PackageList
