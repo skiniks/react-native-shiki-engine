@@ -138,15 +138,11 @@
     ]
   },
   "codegenConfig": {
-    "libraries": [
-      {
-        "name": "RNShikiHighlighter",
-        "type": "modules",
-        "jsSrcsDir": "src/highlighter",
-        "android": {
-          "javaPackageName": "com.shikihighlighter"
-        }
-      }
-    ]
+    "name": "RNShikiHighlighter",
+    "type": "modules",
+    "jsSrcsDir": "src/highlighter",
+    "android": {
+      "javaPackageName": "com.shikihighlighter"
+    }
   }
 }

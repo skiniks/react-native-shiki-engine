@@ -1,12 +1,12 @@
-import type { TokenizeOptions } from './createHighlighter'
+import type { HighlighterOptions, TokenizeOptions } from './createHighlighter'
 import type { Token } from './NativeShikiHighlighter'
 import { createHighlighter } from './createHighlighter'
 
 let cachedHighlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null
 
-async function getHighlighter() {
+async function getHighlighter(options: HighlighterOptions = {}) {
   if (!cachedHighlighter) {
-    cachedHighlighter = await createHighlighter()
+    cachedHighlighter = await createHighlighter(options)
   }
   return cachedHighlighter
 }
@@ -18,8 +18,9 @@ async function getHighlighter() {
 export async function codeToTokens(
   code: string,
   options: TokenizeOptions,
+  highlighterOptions: HighlighterOptions = {},
 ): Promise<Token[]> {
-  const highlighter = await getHighlighter()
+  const highlighter = await getHighlighter(highlighterOptions)
   return highlighter.tokenize(code, options)
 }
 

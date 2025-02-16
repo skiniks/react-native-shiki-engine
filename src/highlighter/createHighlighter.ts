@@ -8,6 +8,11 @@ const themeRegistry = new Map<string, string>()
 export interface HighlighterOptions {
   themes?: string[]
   langs?: string[]
+  /**
+   * Whether to enable caching. Defaults to true.
+   * Disabling cache can reduce memory usage at the cost of performance.
+   */
+  enableCache?: boolean
 }
 
 export interface TokenizeOptions {
@@ -51,6 +56,9 @@ export async function createHighlighter(options: HighlighterOptions = {}): Promi
     throw new Error('Native highlighter is not available on this platform')
   }
 
+  // Configure cache
+  await NativeShikiHighlighter.enableCache(options.enableCache !== false)
+
   // Load initial themes if provided
   if (options.themes?.length) {
     for (const theme of options.themes) {
@@ -75,7 +83,7 @@ export async function createHighlighter(options: HighlighterOptions = {}): Promi
 
   return {
     tokenize: async (code: string, options: TokenizeOptions) => {
-      return NativeShikiHighlighter.highlightCode(code, options.lang, options.theme)
+      return NativeShikiHighlighter.codeToTokens(code, options.lang, options.theme)
     },
 
     loadLanguage: async (language: string) => {

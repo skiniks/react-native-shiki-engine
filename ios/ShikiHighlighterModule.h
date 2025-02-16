@@ -1,9 +1,6 @@
+#import <RNShikiHighlighter/RNShikiHighlighter.h>
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-
-#if RCT_NEW_ARCH_ENABLED
-#import <RNShikiHighlighter/RNShikiHighlighter.h>
-#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -11,11 +8,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, assign) BOOL hasListeners;
 
-- (void)highlightCode:(NSString *)code
-             language:(NSString *)language
-                theme:(NSString *)theme
-              resolve:(RCTPromiseResolveBlock)resolve
-               reject:(RCTPromiseRejectBlock)reject;
+- (void)codeToTokens:(NSString *)code
+            language:(NSString *)language
+               theme:(NSString *)theme
+             resolve:(RCTPromiseResolveBlock)resolve
+              reject:(RCTPromiseRejectBlock)reject;
 
 - (void)loadLanguage:(NSString *)language
          grammarData:(NSString *)grammarData
@@ -26,6 +23,10 @@ NS_ASSUME_NONNULL_BEGIN
         themeData:(NSString *)themeData
           resolve:(RCTPromiseResolveBlock)resolve
            reject:(RCTPromiseRejectBlock)reject;
+
+- (void)enableCache:(BOOL)enabled
+            resolve:(RCTPromiseResolveBlock)resolve
+             reject:(RCTPromiseRejectBlock)reject;
 
 @end
 

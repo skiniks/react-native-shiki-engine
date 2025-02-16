@@ -31,6 +31,8 @@ class CacheManager {
   }
 
   void add(const std::string& code, const std::string& language, CacheEntry entry) {
+    if (!config_->performance.enableCache) return;
+
     size_t entrySize = entry.getMemoryUsage();
     uint64_t hash = computeHash(code, language);
 
@@ -41,6 +43,8 @@ class CacheManager {
   }
 
   std::optional<CacheEntry> get(const std::string& code, const std::string& language) {
+    if (!config_->performance.enableCache) return std::nullopt;
+
     uint64_t hash = computeHash(code, language);
     return cache_.get(hash);
   }

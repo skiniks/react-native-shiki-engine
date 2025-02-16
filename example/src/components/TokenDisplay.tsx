@@ -28,11 +28,12 @@ export function TokenDisplay({ tokens, code, style }: TokenDisplayProps) {
       <ScrollView horizontal showsHorizontalScrollIndicator>
         <View style={styles.codeWrapper}>
           <Text style={styles.codeText}>
-            {tokens.map((token, index) => {
+            {tokens.map((token) => {
               const content = code.slice(token.start, token.start + token.length)
+              const tokenKey = `${token.start}-${token.length}-${token.scope}`
               return (
                 <Text
-                  key={`${index}-${token.scope}`}
+                  key={tokenKey}
                   style={{
                     color: token.style?.color,
                     backgroundColor: token.style?.backgroundColor,

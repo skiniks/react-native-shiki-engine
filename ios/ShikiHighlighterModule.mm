@@ -6,7 +6,6 @@
 #import <React/RCTUIManager.h>
 #import <React/RCTUtils.h>
 
-#if RCT_NEW_ARCH_ENABLED
 #import <RNShikiHighlighter/RNShikiHighlighter.h>
 #import <React/RCTConversions.h>
 #import <React/RCTFabricComponentsPlugins.h>
@@ -16,7 +15,6 @@ using namespace facebook::react;
 
 @interface RCTShikiHighlighterModule () <NativeShikiHighlighterSpec>
 @end
-#endif
 
 #import "../../cpp/highlighter/cache/CacheManager.h"
 #import "../../cpp/highlighter/grammar/Grammar.h"
@@ -79,13 +77,11 @@ RCT_EXPORT_MODULE(RNShikiHighlighterModule)
                                         []() { return true; });
 }
 
-#if RCT_NEW_ARCH_ENABLED
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params {
   return std::make_shared<facebook::react::NativeShikiHighlighterSpecJSI>(
       params);
 }
-#endif
 
 - (NSDictionary *)getConstants {
   return @{
@@ -122,7 +118,7 @@ RCT_EXPORT_METHOD(removeListeners : (double)count)
   // Required for RCTEventEmitter
 }
 
-RCT_EXPORT_METHOD(highlightCode : (NSString *)code language : (NSString *)
+RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
                       language theme : (NSString *)
                           theme resolve : (RCTPromiseResolveBlock)
                               resolve reject : (RCTPromiseRejectBlock)reject)
@@ -312,6 +308,27 @@ RCT_EXPORT_METHOD(getTelemetryData : (RCTPromiseResolveBlock)
       resolve(@(YES));
     } @catch (NSException *e) {
       reject(@"telemetry_error", e.reason, nil);
+    }
+  });
+}
+
+RCT_EXPORT_METHOD(enableCache : (BOOL)enabled resolve : (RCTPromiseResolveBlock)
+                      resolve reject : (RCTPromiseRejectBlock)reject)
+{
+  dispatch_async(self->highlightQueue_, ^{
+    @try {
+      shiki::Configuration::getInstance().performance.enableCache = enabled;
+      if (!enabled) {
+        // Clear existing caches when disabling
+        shiki::CacheManager::getInstance().clear();
+      }
+      dispatch_async(dispatch_get_main_queue(), ^{
+        resolve(@(YES));
+      });
+    } @catch (NSException *e) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        reject(@"cache_config_error", e.reason, nil);
+      });
     }
   });
 }

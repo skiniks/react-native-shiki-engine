@@ -40,6 +40,7 @@ struct Configuration {
     size_t batchSize{32 * 1024};  // 32KB
     bool enableIncrementalUpdates{true};
     bool enableBackgroundProcessing{true};
+    bool enableCache{true};
   } performance;
 
   struct Memory {
