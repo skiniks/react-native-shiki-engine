@@ -12,16 +12,15 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../memory/TextRangePool.h"
 #include "Theme.h"
 
-// Remove UIKit includes and use forward declarations if needed
 class ThemeColor;
 
 namespace shiki {
 
 using Document = rapidjson::Document;
 
-// Helper function to format color for logging
 static std::string formatColor(const std::string& color) {
   return color.empty() ? "none" : color;
 }
@@ -35,14 +34,12 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     throw std::runtime_error("Invalid theme JSON");
   }
 
-  // Parse theme type - no logging needed
   if (doc.HasMember("type")) {
     theme_->type = doc["type"].GetString();
   } else {
     theme_->type = "dark";
   }
 
-  // Parse colors first
   if (doc.HasMember("colors") && doc["colors"].IsObject()) {
     const auto& colors = doc["colors"];
     if (colors.HasMember("editor.foreground")) {
@@ -57,7 +54,6 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     }
   }
 
-  // Try to find global settings first (no name/scope)
   if (doc.HasMember("settings") && doc["settings"].IsArray()) {
     const auto& settings = doc["settings"].GetArray();
     for (const auto& setting : settings) {
@@ -78,12 +74,10 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     }
   }
 
-  // Require colors to be set
   if (style.color.empty() || style.backgroundColor.empty()) {
     throw std::runtime_error("Theme must specify both foreground and background colors");
   }
 
-  // Parse token colors
   if (doc.HasMember("tokenColors") && doc["tokenColors"].IsArray()) {
     const auto& tokenColors = doc["tokenColors"].GetArray();
     for (const auto& tokenColor : tokenColors) {
@@ -94,7 +88,6 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
       const auto& settings = tokenColor["settings"];
       ThemeStyle tokenStyle;
 
-      // Parse color settings
       if (settings.HasMember("foreground")) {
         std::string color = settings["foreground"].GetString();
         tokenStyle.color = color[0] == '#' ? color : "#" + color;
@@ -111,12 +104,10 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
         tokenStyle.underline = fontStyle.find("underline") != std::string::npos;
       }
 
-      // Handle scope field which can be string, array, or comma-separated list
       const auto& scopeValue = tokenColor["scope"];
       std::vector<std::string> scopes;
 
       if (scopeValue.IsString()) {
-        // Handle comma-separated list
         std::string scopeStr = scopeValue.GetString();
         std::istringstream scopeStream(scopeStr);
         std::string scope;
@@ -128,11 +119,9 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
           }
         }
       } else if (scopeValue.IsArray()) {
-        // Handle array of scopes
         for (const auto& scope : scopeValue.GetArray()) {
           if (scope.IsString()) {
             std::string scopeStr = scope.GetString();
-            // Still split by commas in case array elements contain lists
             std::istringstream scopeStream(scopeStr);
             std::string subScope;
             while (std::getline(scopeStream, subScope, ',')) {
@@ -146,7 +135,6 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
         }
       }
 
-      // Create rules for all found scopes
       for (const auto& scope : scopes) {
         ThemeRule rule;
         rule.scope = scope;
@@ -156,7 +144,6 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     }
   }
 
-  // Handle color replacements for non-hex colors
   std::unordered_map<std::string, std::string> replacementMap;
   int replacementCount = 0;
 
@@ -172,7 +159,6 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     return hex;
   };
 
-  // Process non-hex colors in token colors
   for (auto& rule : theme_->rules) {
     if (!rule.style.color.empty() && rule.style.color[0] != '#')
       rule.style.color = getReplacementColor(rule.style.color);
@@ -180,7 +166,6 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
       rule.style.backgroundColor = getReplacementColor(rule.style.backgroundColor);
   }
 
-  // Process non-hex colors in editor colors
   if (doc.HasMember("colors") && doc["colors"].IsObject()) {
     const auto& colors = doc["colors"];
     for (auto it = colors.MemberBegin(); it != colors.MemberEnd(); ++it) {
@@ -202,6 +187,7 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
 
 std::vector<TokenRange> ThemeParser::tokenize(const std::string& content) {
   std::vector<TokenRange> ranges;
+  ranges.reserve(content.length() / 8);
   size_t pos = 0;
 
   while (pos < content.length()) {
@@ -222,25 +208,46 @@ std::vector<TokenRange> ThemeParser::tokenize(const std::string& content) {
         if (pos < content.length()) pos++;
       }
       if (pos < content.length()) pos++;  // Include closing quote
+
+      TokenRange range;
+      range.start = start;
+      range.length = pos - start;
+      range.scopes.push_back("string");
+      ranges.push_back(std::move(range));
     }
     // Handle identifiers and keywords
     else if (std::isalpha(content[pos]) || content[pos] == '_') {
       while (pos < content.length() && (std::isalnum(content[pos]) || content[pos] == '_')) {
         pos++;
       }
+
+      TokenRange range;
+      range.start = start;
+      range.length = pos - start;
+      range.scopes.push_back("identifier");
+      ranges.push_back(std::move(range));
     }
     // Handle numbers
     else if (std::isdigit(content[pos])) {
       while (pos < content.length() && (std::isdigit(content[pos]) || content[pos] == '.')) {
         pos++;
       }
+
+      TokenRange range;
+      range.start = start;
+      range.length = pos - start;
+      range.scopes.push_back("constant.numeric");
+      ranges.push_back(std::move(range));
     }
     // Handle operators and punctuation
     else {
       pos++;
+      TokenRange range;
+      range.start = start;
+      range.length = pos - start;
+      range.scopes.push_back("punctuation");
+      ranges.push_back(std::move(range));
     }
-
-    ranges.push_back({start, pos - start});
   }
 
   return ranges;
@@ -336,7 +343,6 @@ std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name, const st
 
   auto theme = std::make_shared<Theme>(name);
 
-  // Parse colors first
   if (doc.HasMember("colors") && doc["colors"].IsObject()) {
     const auto& colors = doc["colors"];
     if (colors.HasMember("editor.background")) {
@@ -347,19 +353,16 @@ std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name, const st
     }
   }
 
-  // Parse token colors
   if (doc.HasMember("tokenColors") && doc["tokenColors"].IsArray()) {
     for (const auto& tokenColor : doc["tokenColors"].GetArray()) {
       ThemeStyle style;
 
       if (tokenColor.HasMember("scope")) {
         if (tokenColor["scope"].IsString()) {
-          // Split string scope by commas as per TextMate spec
           std::string scopeStr = tokenColor["scope"].GetString();
           std::istringstream scopeStream(scopeStr);
           std::string scope;
           while (std::getline(scopeStream, scope, ',')) {
-            // Trim whitespace
             scope.erase(0, scope.find_first_not_of(" \t"));
             scope.erase(scope.find_last_not_of(" \t") + 1);
             if (!scope.empty()) {
@@ -373,11 +376,9 @@ std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name, const st
           for (const auto& scope : tokenColor["scope"].GetArray()) {
             if (scope.IsString()) {
               std::string scopeStr = scope.GetString();
-              // Split string scope by commas as per TextMate spec
               std::istringstream scopeStream(scopeStr);
               std::string subScope;
               while (std::getline(scopeStream, subScope, ',')) {
-                // Trim whitespace
                 subScope.erase(0, subScope.find_first_not_of(" \t"));
                 subScope.erase(subScope.find_last_not_of(" \t") + 1);
                 if (!subScope.empty()) {
@@ -428,7 +429,6 @@ std::shared_ptr<Theme> ThemeParser::parseThemeFromObject(const rapidjson::Value&
 
   auto theme = std::make_shared<Theme>(themeJson["name"].GetString());
 
-  // Parse colors first
   if (themeJson.HasMember("colors") && themeJson["colors"].IsObject()) {
     const auto& colors = themeJson["colors"];
     if (colors.HasMember("editor.background")) {
@@ -439,19 +439,16 @@ std::shared_ptr<Theme> ThemeParser::parseThemeFromObject(const rapidjson::Value&
     }
   }
 
-  // Parse token colors
   if (themeJson.HasMember("tokenColors") && themeJson["tokenColors"].IsArray()) {
     for (const auto& tokenColor : themeJson["tokenColors"].GetArray()) {
       ThemeStyle style;
 
       if (tokenColor.HasMember("scope")) {
         if (tokenColor["scope"].IsString()) {
-          // Split string scope by commas as per TextMate spec
           std::string scopeStr = tokenColor["scope"].GetString();
           std::istringstream scopeStream(scopeStr);
           std::string scope;
           while (std::getline(scopeStream, scope, ',')) {
-            // Trim whitespace
             scope.erase(0, scope.find_first_not_of(" \t"));
             scope.erase(scope.find_last_not_of(" \t") + 1);
             if (!scope.empty()) {
@@ -465,11 +462,9 @@ std::shared_ptr<Theme> ThemeParser::parseThemeFromObject(const rapidjson::Value&
           for (const auto& scope : tokenColor["scope"].GetArray()) {
             if (scope.IsString()) {
               std::string scopeStr = scope.GetString();
-              // Split string scope by commas as per TextMate spec
               std::istringstream scopeStream(scopeStr);
               std::string subScope;
               while (std::getline(scopeStream, subScope, ',')) {
-                // Trim whitespace
                 subScope.erase(0, subScope.find_first_not_of(" \t"));
                 subScope.erase(subScope.find_last_not_of(" \t") + 1);
                 if (!subScope.empty()) {

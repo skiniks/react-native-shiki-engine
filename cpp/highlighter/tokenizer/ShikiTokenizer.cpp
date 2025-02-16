@@ -16,6 +16,7 @@
 #include "../cache/CacheManager.h"
 #include "../cache/StyleCache.h"
 #include "../core/Configuration.h"
+#include "../memory/TokenPool.h"
 #include "../utils/ScopedResource.h"
 #include "../utils/WorkPrioritizer.h"
 
@@ -210,6 +211,7 @@ std::vector<Token> ShikiTokenizer::tokenize(const std::string& code) {
   }
 
   std::vector<Token> tokens;
+  tokens.reserve(code.length() / 16);
   std::vector<std::string> scopeStack;
 
   // Start with base scope from grammar
@@ -242,6 +244,7 @@ void ShikiTokenizer::processPatterns(
   const char* str = code.c_str();
   const char* end = str + code.length();
   const char* start = str;
+  auto& tokenPool = TokenPool::getInstance();
 
   // Only add base scope once at the start if not already present
   if (grammar_ && !grammar_->scopeName.empty() && (scopeStack.empty() || scopeStack[0] != grammar_->scopeName)) {
@@ -307,18 +310,19 @@ void ShikiTokenizer::processPatterns(
 
       // If there's text before the match, create a basic token
       if (start - str < bestRegion->beg[0]) {
-        Token textToken;
-        textToken.start = start - str;
-        textToken.length = bestRegion->beg[0] - (start - str);
+        Token* textToken = tokenPool.allocate();
+        textToken->start = start - str;
+        textToken->length = bestRegion->beg[0] - (start - str);
         for (const auto& scope : scopeStack) {
-          textToken.addScope(scope);
+          textToken->addScope(scope);
         }
-        textToken.addScope("text");
-        tokens.push_back(textToken);
+        textToken->addScope("text");
+        tokens.push_back(*textToken);
+        tokenPool.deallocate(textToken);
       }
 
       // Create a map of positions to tokens to handle overlapping regions
-      std::map<std::pair<size_t, size_t>, Token> positionTokens;
+      std::map<std::pair<size_t, size_t>, Token*> positionTokens;
 
       // Check if this is a comment pattern
       bool isComment = bestPattern->name.find("comment") != std::string::npos;
@@ -328,26 +332,26 @@ void ShikiTokenizer::processPatterns(
       // markers
       if (isLineComment) {
         // Create token for the comment marker (//)
-        Token markerToken;
-        markerToken.start = bestRegion->beg[0];
-        markerToken.length = 2;  // Length of "//"
+        Token* markerToken = tokenPool.allocate();
+        markerToken->start = bestRegion->beg[0];
+        markerToken->length = 2;  // Length of "//"
         for (const auto& scope : scopeStack) {
-          markerToken.addScope(scope);
+          markerToken->addScope(scope);
         }
-        markerToken.addScope(bestPattern->name);
-        markerToken.addScope("punctuation.definition.comment");
-        positionTokens[{markerToken.start, markerToken.length}] = markerToken;
+        markerToken->addScope(bestPattern->name);
+        markerToken->addScope("punctuation.definition.comment");
+        positionTokens[{markerToken->start, markerToken->length}] = markerToken;
 
         // Create token for the comment text
         if (bestRegion->end[0] - bestRegion->beg[0] > 2) {
-          Token textToken;
-          textToken.start = bestRegion->beg[0] + 2;  // Start after "//"
-          textToken.length = bestRegion->end[0] - bestRegion->beg[0] - 2;
+          Token* textToken = tokenPool.allocate();
+          textToken->start = bestRegion->beg[0] + 2;  // Start after "//"
+          textToken->length = bestRegion->end[0] - bestRegion->beg[0] - 2;
           for (const auto& scope : scopeStack) {
-            textToken.addScope(scope);
+            textToken->addScope(scope);
           }
-          textToken.addScope(bestPattern->name);
-          positionTokens[{textToken.start, textToken.length}] = textToken;
+          textToken->addScope(bestPattern->name);
+          positionTokens[{textToken->start, textToken->length}] = textToken;
         }
       } else {
         // Handle captures first as they are more specific
@@ -357,18 +361,18 @@ void ShikiTokenizer::processPatterns(
             const std::string& name = capture_entry.second;
             if (index < bestRegion->num_regs && !name.empty() && bestRegion->beg[index] < code.length() &&
                 bestRegion->end[index] <= code.length()) {
-              Token captureToken;
-              captureToken.start = bestRegion->beg[index];
-              captureToken.length = bestRegion->end[index] - bestRegion->beg[index];
+              Token* captureToken = tokenPool.allocate();
+              captureToken->start = bestRegion->beg[index];
+              captureToken->length = bestRegion->end[index] - bestRegion->beg[index];
 
               // Add base scopes
               for (const auto& scope : scopeStack) {
-                captureToken.addScope(scope);
+                captureToken->addScope(scope);
               }
-              captureToken.addScope(name);
+              captureToken->addScope(name);
 
               // Store in position map
-              positionTokens[{captureToken.start, captureToken.length}] = captureToken;
+              positionTokens[{captureToken->start, captureToken->length}] = captureToken;
             }
           }
         }
@@ -388,52 +392,55 @@ void ShikiTokenizer::processPatterns(
           }
 
           if (!covered) {
-            Token token;
-            token.start = matchStart;
-            token.length = matchLength;
+            Token* token = tokenPool.allocate();
+            token->start = matchStart;
+            token->length = matchLength;
 
             // Add scopes from the stack first
             for (const auto& scope : scopeStack) {
-              token.addScope(scope);
+              token->addScope(scope);
             }
-            token.addScope(bestPattern->name);
+            token->addScope(bestPattern->name);
 
             // Store in position map
-            positionTokens[{token.start, token.length}] = token;
+            positionTokens[{token->start, token->length}] = token;
           }
         }
       }
 
       // Add all tokens from the position map to the final token list
       for (const auto& [pos, token] : positionTokens) {
-        tokens.push_back(token);
+        tokens.push_back(*token);
+        tokenPool.deallocate(token);
       }
 
       start = str + bestRegion->end[0];
     } else {
       // No match found, create a basic token for this character
-      Token token;
-      token.start = start - str;
-      token.length = 1;
+      Token* token = tokenPool.allocate();
+      token->start = start - str;
+      token->length = 1;
       for (const auto& scope : scopeStack) {
-        token.addScope(scope);
+        token->addScope(scope);
       }
-      token.addScope("text");
-      tokens.push_back(token);
+      token->addScope("text");
+      tokens.push_back(*token);
+      tokenPool.deallocate(token);
       start++;
     }
   }
 
   // If there's any remaining text, create a token for it
   if (start < end) {
-    Token token;
-    token.start = start - str;
-    token.length = end - start;
+    Token* token = tokenPool.allocate();
+    token->start = start - str;
+    token->length = end - start;
     for (const auto& scope : scopeStack) {
-      token.addScope(scope);
+      token->addScope(scope);
     }
-    token.addScope("text");
-    tokens.push_back(token);
+    token->addScope("text");
+    tokens.push_back(*token);
+    tokenPool.deallocate(token);
   }
 }
 
