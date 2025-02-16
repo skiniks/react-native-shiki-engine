@@ -30,6 +30,8 @@
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
   "workspaces": [
     "example"
   ],
@@ -39,8 +41,12 @@
     "android/build.gradle",
     "android/gradle.properties",
     "android/src/main",
-    "cpp",
-    "ios",
+    "cpp/**/*.cpp",
+    "cpp/**/*.h",
+    "ios/**/*.cpp",
+    "ios/**/*.h",
+    "ios/**/*.m",
+    "ios/**/*.mm",
     "lib/commonjs",
     "lib/module",
     "lib/typescript",
@@ -140,9 +146,6 @@
   "codegenConfig": {
     "name": "RNShikiHighlighter",
     "type": "modules",
-    "jsSrcsDir": "src/highlighter",
-    "android": {
-      "javaPackageName": "com.shikihighlighter"
-    }
+    "jsSrcsDir": "src"
   }
 }
