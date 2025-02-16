@@ -12,6 +12,12 @@ namespace shiki {
 class ConfigurationValidator;
 
 struct Configuration {
+  Configuration(const Configuration&) = delete;
+  Configuration& operator=(const Configuration&) = delete;
+
+  Configuration(Configuration&&) = default;
+  Configuration& operator=(Configuration&&) = default;
+
   struct Core {
     std::string language;
     std::string theme;
@@ -73,8 +79,6 @@ struct Configuration {
   T toPlatformConfig() const;
 
   ~Configuration() = default;
-  Configuration(Configuration&&) = default;
-  Configuration& operator=(Configuration&&) = default;
 
   static Configuration& getInstance() {
     static Configuration instance;
@@ -126,13 +130,11 @@ struct Configuration {
   };
 
   void cacheConfig(const ConfigKey& key, const ConfigValue& value) {
-    auto hashKey = key.hash();
-    configCache_[hashKey] = value;
+    configCache_[key] = value;
   }
 
   std::optional<ConfigValue> getCachedConfig(const ConfigKey& key) {
-    auto hashKey = key.hash();
-    auto it = configCache_.find(hashKey);
+    auto it = configCache_.find(key);
     if (it != configCache_.end()) {
       it->second.hitCount++;
       it->second.timestamp = time(nullptr);
@@ -161,11 +163,9 @@ struct Configuration {
   friend class ConfigurationValidator;
   static ConfigurationValidator& getValidator();
   Configuration() = default;
-  Configuration(const Configuration&) = delete;
-  Configuration& operator=(const Configuration&) = delete;
 
-  std::unordered_map<uint64_t, ConfigValue> configCache_;
   Defaults defaults_;
+  std::unordered_map<ConfigKey, ConfigValue, ConfigKeyHash> configCache_;
 };
 
 class ConfigurationValidator {
