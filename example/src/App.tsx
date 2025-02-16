@@ -10,8 +10,7 @@ import { styles } from './styles'
 registerLanguage('rust', rust)
 registerTheme('dracula', dracula)
 
-const code = `
-use std::collections::HashMap;
+const code = `use std::collections::HashMap;
 
 // Define a custom error type for commands
 #[derive(Debug)]
@@ -99,8 +98,7 @@ fn main() {
         "{}",
         manager.execute_command("factorial", vec!["not_a_number".to_string()])
     );
-}
-`
+}`
 
 function ShikiDemo() {
   const [highlighterStatus, setHighlighterStatus] = useState('Initializing...')
