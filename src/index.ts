@@ -1,5 +1,5 @@
 export type { Highlighter, HighlighterOptions, TokenizeOptions } from './highlighter/createHighlighter'
 export { createHighlighter, registerLanguage, registerTheme } from './highlighter/createHighlighter'
-export type { ThemeStyle, Token } from './highlighter/NativeShikiHighlighter'
 export { codeToTokens, loadLanguage, loadTheme } from './highlighter/shorthands'
+export type { ThemeStyle, Token } from './specs/NativeShikiHighlighter'
 export { Clipboard, isHighlighterAvailable } from './utils'

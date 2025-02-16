@@ -53,4 +53,4 @@ export interface Spec extends TurboModule {
   removeListeners: (count: number) => void
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('RNShikiHighlighterModule')
+export default TurboModuleRegistry.getEnforcing<Spec>('ShikiHighlighter')

@@ -1,4 +1,5 @@
-import { NativeModules, Platform } from 'react-native'
+import { Platform } from 'react-native'
+import NativeShikiClipboard from '../specs/NativeShikiClipboard'
 
 const LINKING_ERROR
   = `The package 'react-native-shiki' doesn't seem to be linked. Make sure: \n\n${
@@ -6,16 +7,9 @@ const LINKING_ERROR
   }- You rebuilt the app after installing the package\n`
   + `- You are not using Expo Go\n`
 
-const ShikiClipboard = NativeModules.ShikiClipboard
-  ? NativeModules.ShikiClipboard
-  : new Proxy(
-    {},
-    {
-      get() {
-        throw new Error(LINKING_ERROR)
-      },
-    },
-  )
+if (!NativeShikiClipboard) {
+  throw new Error(LINKING_ERROR)
+}
 
 export const Clipboard = {
   /**
@@ -23,7 +17,7 @@ export const Clipboard = {
    * @param text The content to be stored in the clipboard
    */
   setString(text: string): Promise<void> {
-    return ShikiClipboard.setString(text)
+    return NativeShikiClipboard.setString(text)
   },
 
   /**
@@ -31,6 +25,6 @@ export const Clipboard = {
    * @returns Promise that resolves with the content of the clipboard
    */
   getString(): Promise<string> {
-    return ShikiClipboard.getString()
+    return NativeShikiClipboard.getString()
   },
 }

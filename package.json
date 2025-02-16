@@ -144,8 +144,8 @@
     ]
   },
   "codegenConfig": {
-    "name": "RNShikiHighlighter",
+    "name": "RNShikiSpec",
     "type": "modules",
-    "jsSrcsDir": "src"
+    "jsSrcsDir": "src/specs"
   }
 }

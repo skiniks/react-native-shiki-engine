@@ -1,4 +1,4 @@
-#import <RNShikiHighlighter/RNShikiHighlighter.h>
+#import <RNShikiSpec/RNShikiSpec.h>
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 

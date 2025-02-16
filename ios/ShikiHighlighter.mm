@@ -1,4 +1,4 @@
-#import "ShikiHighlighterModule.h"
+#import "ShikiHighlighter.h"
 #import "ErrorManager.h"
 #import "RCTShikiHighlighterComponentView.h"
 #import <React/RCTBridge.h>
@@ -6,7 +6,7 @@
 #import <React/RCTUIManager.h>
 #import <React/RCTUtils.h>
 
-#import <RNShikiHighlighter/RNShikiHighlighter.h>
+#import <RNShikiSpec/RNShikiSpec.h>
 #import <React/RCTConversions.h>
 #import <React/RCTFabricComponentsPlugins.h>
 #import <ReactCommon/CallInvoker.h>
@@ -34,7 +34,7 @@ using namespace facebook::react;
 @synthesize moduleRegistry = _moduleRegistry;
 @synthesize viewRegistry_DEPRECATED = _viewRegistry_DEPRECATED;
 
-RCT_EXPORT_MODULE(RNShikiHighlighterModule)
+RCT_EXPORT_MODULE(ShikiHighlighter)
 
 + (BOOL)requiresMainQueueSetup {
   return NO;

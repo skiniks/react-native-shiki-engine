@@ -1,5 +1,5 @@
+import type { Token } from '../specs/NativeShikiHighlighter'
 import type { HighlighterOptions, TokenizeOptions } from './createHighlighter'
-import type { Token } from './NativeShikiHighlighter'
 import { createHighlighter } from './createHighlighter'
 
 let cachedHighlighter: Awaited<ReturnType<typeof createHighlighter>> | null = null

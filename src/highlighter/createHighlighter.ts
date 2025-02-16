@@ -1,6 +1,6 @@
-import type { Token } from './NativeShikiHighlighter'
+import type { Token } from '../specs/NativeShikiHighlighter'
+import NativeShikiHighlighter from '../specs/NativeShikiHighlighter'
 import { isHighlighterAvailable } from '../utils'
-import NativeShikiHighlighter from './NativeShikiHighlighter'
 
 const languageRegistry = new Map<string, string>()
 const themeRegistry = new Map<string, string>()

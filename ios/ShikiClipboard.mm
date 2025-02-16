@@ -1,29 +1,42 @@
 #import "ShikiClipboard.h"
 #import <UIKit/UIKit.h>
+#import <mach/mach.h>
 
-@implementation ShikiClipboard
+#import <RNShikiSpec/RNShikiSpec.h>
 
-RCT_EXPORT_MODULE()
+using namespace facebook;
 
-RCT_EXPORT_METHOD(setString : (NSString *)text resolver : (
-    RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)reject)
-{
-  @try {
-    [[UIPasteboard generalPasteboard] setString:text];
-    resolve(nil);
-  } @catch (NSException *exception) {
-    reject(@"clipboard_error", @"Failed to set clipboard content", nil);
+@implementation RCTShikiClipboardModule
+
+RCT_EXPORT_MODULE(ShikiClipboard)
+
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params {
+  return std::make_shared<facebook::react::NativeShikiClipboardSpecJSI>(params);
+}
+
+- (void)setString:(NSString *)text
+          resolve:(RCTPromiseResolveBlock)resolve
+           reject:(RCTPromiseRejectBlock)reject {
+  @autoreleasepool {
+    @try {
+      [[UIPasteboard generalPasteboard] setString:text];
+      resolve(nil);
+    } @catch (NSException *exception) {
+      reject(@"clipboard_error", @"Failed to set clipboard content", nil);
+    }
   }
 }
 
-RCT_EXPORT_METHOD(getString : (RCTPromiseResolveBlock)
-                      resolve rejecter : (RCTPromiseRejectBlock)reject)
-{
-  @try {
-    NSString *content = [[UIPasteboard generalPasteboard] string];
-    resolve(content ?: @"");
-  } @catch (NSException *exception) {
-    reject(@"clipboard_error", @"Failed to get clipboard content", nil);
+- (void)getString:(RCTPromiseResolveBlock)resolve
+           reject:(RCTPromiseRejectBlock)reject {
+  @autoreleasepool {
+    @try {
+      NSString *content = [[UIPasteboard generalPasteboard] string];
+      resolve(content ?: @"");
+    } @catch (NSException *exception) {
+      reject(@"clipboard_error", @"Failed to get clipboard content", nil);
+    }
   }
 }
 
