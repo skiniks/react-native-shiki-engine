@@ -1,17 +1,15 @@
-import type { ViewProps } from 'react-native'
+import type { NativeProps } from '../specs/RTNTestViewNativeComponent'
 import React from 'react'
 import RTNTestViewNative from '../specs/RTNTestViewNativeComponent'
 
-export interface RTNTestViewProps extends ViewProps {
-  text?: string
-}
-
-export class RTNTestView extends React.Component<RTNTestViewProps> {
+export class RTNTestView extends React.Component<NativeProps> {
   render() {
-    const { text, ...rest } = this.props
+    const { text, textColor, fontStyle, ...rest } = this.props
     return (
       <RTNTestViewNative
         text={text}
+        textColor={textColor}
+        fontStyle={fontStyle}
         {...rest}
       />
     )

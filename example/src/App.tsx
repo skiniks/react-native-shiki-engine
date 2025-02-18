@@ -190,12 +190,10 @@ function ShikiDemo() {
 
       <View style={styles.testSection}>
         <RTNTestView
-          style={{
-            width: '100%',
-            height: 100,
-            marginVertical: 20,
-          }}
           text="Hello from RTNTestView!"
+          textColor="#FFFFFF"
+          fontStyle="italic"
+          style={{ backgroundColor: '#FF0000', width: '100%', height: 100, marginVertical: 20 }}
         />
       </View>
     </SafeAreaView>
