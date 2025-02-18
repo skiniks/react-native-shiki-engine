@@ -145,7 +145,10 @@
   },
   "codegenConfig": {
     "name": "RNShikiSpec",
-    "type": "modules",
-    "jsSrcsDir": "src/specs"
+    "type": "all",
+    "jsSrcsDir": "src/specs",
+    "ios": {
+      "componentProvider": "ios/RTNTestView/RTNTestView"
+    }
   }
 }

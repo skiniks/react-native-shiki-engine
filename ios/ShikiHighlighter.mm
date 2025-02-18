@@ -1,6 +1,5 @@
 #import "ShikiHighlighter.h"
 #import "ErrorManager.h"
-#import "RCTShikiHighlighterComponentView.h"
 #import <React/RCTBridge.h>
 #import <React/RCTEventEmitter.h>
 #import <React/RCTUIManager.h>

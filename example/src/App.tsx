@@ -3,7 +3,7 @@ import rust from '@shikijs/langs/dist/rust.mjs'
 import dracula from '@shikijs/themes/dist/dracula.mjs'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
-import { Clipboard, createHighlighter, isHighlighterAvailable, registerLanguage, registerTheme } from 'react-native-shiki'
+import { Clipboard, createHighlighter, isHighlighterAvailable, registerLanguage, registerTheme, RTNTestView } from 'react-native-shiki'
 import { TokenDisplay } from './components/TokenDisplay'
 import { styles } from './styles'
 
@@ -186,6 +186,17 @@ function ShikiDemo() {
                 </TouchableOpacity>
               </View>
             )}
+      </View>
+
+      <View style={styles.testSection}>
+        <RTNTestView
+          style={{
+            width: '100%',
+            height: 100,
+            marginVertical: 20,
+          }}
+          text="Hello from RTNTestView!"
+        />
       </View>
     </SafeAreaView>
   )
