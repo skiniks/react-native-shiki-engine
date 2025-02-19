@@ -1,5 +1,5 @@
 import { Platform } from 'react-native'
-import NativeShikiClipboard from '../specs/NativeShikiClipboard'
+import { NativeShikiClipboard } from '../specs'
 
 const LINKING_ERROR
   = `The package 'react-native-shiki' doesn't seem to be linked. Make sure: \n\n${

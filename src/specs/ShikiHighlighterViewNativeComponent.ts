@@ -25,4 +25,4 @@ export interface ShikiHighlighterViewProps extends ViewProps {
   scrollEnabled?: boolean
 }
 
-export default codegenNativeComponent<ShikiHighlighterViewProps>('ShikiHighlighterView') as any
+export default codegenNativeComponent<ShikiHighlighterViewProps>('ShikiHighlighterView')

@@ -1,12 +1,12 @@
-import type { ShikiHighlighterViewProps } from '../specs/ShikiHighlighterViewNativeComponent'
+import type { ShikiHighlighterViewProps } from '../specs'
 import React from 'react'
-import ShikiHighlighterViewNative from '../specs/ShikiHighlighterViewNativeComponent'
+import { ShikiHighlighterViewNativeComponent } from '../specs'
 
 export class ShikiHighlighterView extends React.Component<ShikiHighlighterViewProps> {
   render() {
     const { tokens, text, fontSize, fontFamily, scrollEnabled, ...rest } = this.props
     return (
-      <ShikiHighlighterViewNative
+      <ShikiHighlighterViewNativeComponent
         tokens={tokens}
         text={text}
         fontSize={fontSize}

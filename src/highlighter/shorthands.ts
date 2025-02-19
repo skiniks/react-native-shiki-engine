@@ -1,4 +1,4 @@
-import type { Token } from '../specs/NativeShikiHighlighter'
+import type { Token } from '../specs'
 import type { HighlighterOptions, TokenizeOptions } from './createHighlighter'
 import { createHighlighter } from './createHighlighter'
 

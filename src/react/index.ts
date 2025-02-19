@@ -1,0 +1,1 @@
+export { ShikiHighlighterView } from './ShikiHighlighterView'
