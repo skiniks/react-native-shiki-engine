@@ -99,10 +99,4 @@ export const styles = StyleSheet.create({
     color: '#bf616a',
     fontSize: 16,
   },
-  testSection: {
-    width: '100%',
-    borderRadius: 8,
-    padding: 16,
-    marginTop: 20,
-  },
 })
