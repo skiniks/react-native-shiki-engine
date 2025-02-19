@@ -3,12 +3,9 @@ import rust from '@shikijs/langs/dist/rust.mjs'
 import dracula from '@shikijs/themes/dist/dracula.mjs'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
-import { Clipboard, createHighlighter, isHighlighterAvailable, registerLanguage, registerTheme, RTNTestView } from 'react-native-shiki'
-import { TokenDisplay } from './components/TokenDisplay'
+import { Clipboard, ShikiHighlighterView } from 'react-native-shiki'
+import NativeShikiHighlighter from '../../src/specs/NativeShikiHighlighter'
 import { styles } from './styles'
-
-registerLanguage('rust', rust)
-registerTheme('dracula', dracula)
 
 const code = `use std::collections::HashMap;
 
@@ -101,6 +98,7 @@ fn main() {
 }`
 
 function ShikiDemo() {
+  const [isReady, setIsReady] = useState(false)
   const [highlighterStatus, setHighlighterStatus] = useState('Initializing...')
   const [tokens, setTokens] = useState<Token[]>([])
   const [error, setError] = useState('')
@@ -120,26 +118,24 @@ function ShikiDemo() {
   }
 
   useEffect(() => {
-    const initializeApp = async () => {
+    const initializeHighlighter = async () => {
       try {
-        const available = isHighlighterAvailable()
-        setHighlighterStatus(available ? 'Available' : 'Not Available')
+        // Load language and theme directly through the Turbo Module
+        const langData = Array.isArray(rust) ? rust[0] : rust
+        const langLoaded = await NativeShikiHighlighter.loadLanguage('rust', JSON.stringify(langData))
+        const themeLoaded = await NativeShikiHighlighter.loadTheme('dracula', JSON.stringify(dracula))
 
-        if (!available) {
-          throw new Error('Native highlighter not available.')
+        if (!langLoaded || !themeLoaded) {
+          throw new Error('Failed to load language or theme')
         }
 
-        const highlighter = await createHighlighter({
-          langs: ['rust'],
-          themes: ['dracula'],
-        })
+        setHighlighterStatus('Available')
 
-        const tokenized = await highlighter.tokenize(code, {
-          lang: 'rust',
-          theme: 'dracula',
-        })
+        // Get tokens directly from the Turbo Module
+        const tokenized = await NativeShikiHighlighter.codeToTokens(code, 'rust', 'dracula')
 
         setTokens(tokenized)
+        setIsReady(true)
       }
       catch (err: unknown) {
         if (err instanceof Error) {
@@ -153,7 +149,7 @@ function ShikiDemo() {
       }
     }
 
-    initializeApp()
+    initializeHighlighter()
   }, [])
 
   return (
@@ -174,8 +170,16 @@ function ShikiDemo() {
               </View>
             )
           : (
-              <View style={styles.codeContainer}>
-                <TokenDisplay tokens={tokens} code={code} />
+              <>
+                {isReady && tokens.length > 0 && (
+                  <ShikiHighlighterView
+                    style={styles.codeContainer}
+                    tokens={tokens}
+                    text={code}
+                    fontSize={14}
+                    scrollEnabled
+                  />
+                )}
                 <TouchableOpacity
                   style={styles.copyButton}
                   onPress={handleCopy}
@@ -184,17 +188,8 @@ function ShikiDemo() {
                     {copyStatus}
                   </Text>
                 </TouchableOpacity>
-              </View>
+              </>
             )}
-      </View>
-
-      <View style={styles.testSection}>
-        <RTNTestView
-          text="Hello from RTNTestView!"
-          textColor="#FFFFFF"
-          fontStyle="italic"
-          style={{ backgroundColor: '#FF0000', width: '100%', height: 100, marginVertical: 20 }}
-        />
       </View>
     </SafeAreaView>
   )

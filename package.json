@@ -41,12 +41,12 @@
     "android/build.gradle",
     "android/gradle.properties",
     "android/src/main",
+    "apple/**/*.cpp",
+    "apple/**/*.h",
+    "apple/**/*.m",
+    "apple/**/*.mm",
     "cpp/**/*.cpp",
     "cpp/**/*.h",
-    "ios/**/*.cpp",
-    "ios/**/*.h",
-    "ios/**/*.m",
-    "ios/**/*.mm",
     "lib/commonjs",
     "lib/module",
     "lib/typescript",
@@ -148,7 +148,7 @@
     "type": "all",
     "jsSrcsDir": "src/specs",
     "ios": {
-      "componentProvider": "ios/RTNTestView/RTNTestView"
+      "componentProvider": "apple/ShikiHighlighterView"
     }
   }
 }

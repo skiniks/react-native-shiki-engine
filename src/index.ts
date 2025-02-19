@@ -1,6 +1,6 @@
 export type { Highlighter, HighlighterOptions, TokenizeOptions } from './highlighter/createHighlighter'
 export { createHighlighter, registerLanguage, registerTheme } from './highlighter/createHighlighter'
 export { codeToTokens, loadLanguage, loadTheme } from './highlighter/shorthands'
-export { RTNTestView } from './react/RTNTestView'
+export { ShikiHighlighterView } from './react/ShikiHighlighterView'
 export type { ThemeStyle, Token } from './specs/NativeShikiHighlighter'
 export { Clipboard, isHighlighterAvailable } from './utils'

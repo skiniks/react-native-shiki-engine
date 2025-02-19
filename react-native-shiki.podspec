@@ -12,11 +12,11 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :git => "https://github.com/skiniks/react-native-shiki.git", :tag => "#{s.version}" }
 
-  s.vendored_frameworks = "ios/Oniguruma.xcframework"
+  s.vendored_frameworks = "apple/Oniguruma.xcframework"
 
   s.source_files = [
     "cpp/**/*.{cpp,h,mm,hpp}",
-    "ios/**/*.{h,mm}",
+    "apple/**/*.{h,mm}",
     "cpp/highlighter/platform/ios/**/*.{h,mm}",
     "cpp/highlighter/assets/ios/**/*.{h,mm}",
     "thirdparty/xxHash/xxhash.{c,h}"
@@ -25,7 +25,6 @@ Pod::Spec.new do |s|
   s.exclude_files = [
     "cpp/highlighter/platform/android/**/*",
     "**/android/**/*",
-    "ios/onLoad.mm",
   ]
 
   s.pod_target_xcconfig = {
@@ -35,10 +34,11 @@ Pod::Spec.new do |s|
       '$(PODS_TARGET_SRCROOT)/cpp/fabric',
       '$(PODS_TARGET_SRCROOT)/cpp',
       '$(PODS_TARGET_SRCROOT)/cpp/highlighter',
+      '$(PODS_TARGET_SRCROOT)/cpp/highlighter/platform',
       '$(PODS_TARGET_SRCROOT)/cpp/highlighter/tokenizer',
       '$(PODS_ROOT)/Headers/Public/react-native-shiki',
       '$(PODS_ROOT)/Headers/Public/ReactCodegen',
-      '$(PODS_TARGET_SRCROOT)/ios/Oniguruma.xcframework/ios-arm64/Headers'
+      '$(PODS_TARGET_SRCROOT)/apple/Oniguruma.xcframework/ios-arm64/Headers'
     ].join(' '),
     'FRAMEWORK_SEARCH_PATHS' => [
       '$(PODS_TARGET_SRCROOT)/ios'
