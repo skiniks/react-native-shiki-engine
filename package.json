@@ -14,15 +14,14 @@
     "url": "https://github.com/skiniks/react-native-shiki/issues"
   },
   "keywords": [
-    "react-native",
-    "ios",
     "android",
+    "fabric",
+    "ios",
+    "react-native",
     "shiki",
-    "oniguruma",
-    "regex",
     "syntax-highlighting",
     "textmate",
-    "turbo"
+    "turbo-module"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
