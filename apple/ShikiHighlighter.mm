@@ -27,11 +27,11 @@ using namespace facebook::react;
   std::shared_ptr<shiki::Grammar> currentGrammar_;
   std::shared_ptr<shiki::Theme> currentTheme_;
   dispatch_queue_t highlightQueue_;
-  BOOL hasListeners;
 }
 
 @synthesize moduleRegistry = _moduleRegistry;
 @synthesize viewRegistry_DEPRECATED = _viewRegistry_DEPRECATED;
+@synthesize hasListeners = _hasListeners;
 
 RCT_EXPORT_MODULE(ShikiHighlighter)
 
@@ -44,7 +44,7 @@ RCT_EXPORT_MODULE(ShikiHighlighter)
     tokenizer_ = &shiki::ShikiTokenizer::getInstance();
     highlightQueue_ =
         dispatch_queue_create("com.shiki.highlight", DISPATCH_QUEUE_SERIAL);
-    hasListeners = NO;
+    _hasListeners = NO;
 
     [self setupErrorHandling];
   }
@@ -54,7 +54,7 @@ RCT_EXPORT_MODULE(ShikiHighlighter)
 - (void)setupErrorHandling {
   shiki::ErrorManager::getInstance().setBridgeErrorCallback(
       [self](const std::string &errorJson) {
-        if (self->hasListeners) {
+        if (self->_hasListeners) {
           [self sendEventWithName:@"ShikiError"
                              body:@{@"error" : @(errorJson.c_str())}];
         }
@@ -100,11 +100,11 @@ RCT_EXPORT_MODULE(ShikiHighlighter)
 }
 
 - (void)startObserving {
-  hasListeners = YES;
+  _hasListeners = YES;
 }
 
 - (void)stopObserving {
-  hasListeners = NO;
+  _hasListeners = NO;
 }
 
 RCT_EXPORT_METHOD(addListener : (NSString *)eventName)
@@ -259,7 +259,7 @@ RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
 }
 
 - (void)emitTelemetryEvent {
-  if (!hasListeners)
+  if (!_hasListeners)
     return;
 
   auto &cacheManager = shiki::CacheManager::getInstance();

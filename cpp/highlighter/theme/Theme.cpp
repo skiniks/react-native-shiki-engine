@@ -319,10 +319,6 @@ const ThemeRule* Theme::findBestMatchingRule(const std::string& scope) const {
   return bestMatch;
 }
 
-std::string ThemeColor::toHex() const {
-  return hexColor;
-}
-
 bool Theme::applyStyle(Token& token) const {
   std::cout << "[DEBUG] Applying style for token scopes: '" << token.getCombinedScope() << "'" << std::endl;
 

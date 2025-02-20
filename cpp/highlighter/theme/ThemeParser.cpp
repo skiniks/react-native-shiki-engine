@@ -21,10 +21,6 @@ namespace shiki {
 
 using Document = rapidjson::Document;
 
-static std::string formatColor(const std::string& color) {
-  return color.empty() ? "none" : color;
-}
-
 ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
   ThemeStyle style;
   Document doc;
