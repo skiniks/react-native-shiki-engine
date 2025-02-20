@@ -8,7 +8,7 @@ if ! which clang-format >/dev/null; then
   exit 1
 fi
 
-find android cpp ios \
+find android apple cpp \
   \! -path '*/Oniguruma.xcframework/*' \
   \! -path 'android/.cxx/*' \
   \! -path 'android/src/main/cpp/include/*' \
@@ -21,7 +21,7 @@ find android cpp ios \
 done
 
 echo "Verifying formatting..."
-find android cpp ios \
+find android apple cpp \
   \! -path '*/Oniguruma.xcframework/*' \
   \! -path 'android/.cxx/*' \
   \! -path 'android/src/main/cpp/include/*' \

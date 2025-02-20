@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "../core/Constants.h"
-#include "../utils/ScopedResource.h"
 #include "MemoryTracker.h"
+#include "highlighter/core/Constants.h"
+#include "highlighter/utils/ScopedResource.h"
 
 #ifdef __APPLE__
 #  include <dispatch/dispatch.h>

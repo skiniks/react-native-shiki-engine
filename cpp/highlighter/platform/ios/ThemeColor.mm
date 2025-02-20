@@ -1,4 +1,4 @@
-#include "../../theme/ThemeColor.h"
+#include "highlighter/theme/ThemeColor.h"
 #import <UIKit/UIKit.h>
 
 namespace shiki {

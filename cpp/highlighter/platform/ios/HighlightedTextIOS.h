@@ -1,5 +1,5 @@
 #pragma once
-#include "../../text/HighlightedText.h"
+#include "highlighter/text/HighlightedText.h"
 #include <string>
 
 @class UITextView;

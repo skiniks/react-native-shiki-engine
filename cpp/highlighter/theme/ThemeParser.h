@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "../text/TokenRange.h"
 #include "Theme.h"
 #include "ThemeStyle.h"
+#include "highlighter/text/TokenRange.h"
 
 namespace shiki {
 

@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "../theme/Theme.h"
+#include "highlighter/theme/Theme.h"
 
 namespace shiki {
 

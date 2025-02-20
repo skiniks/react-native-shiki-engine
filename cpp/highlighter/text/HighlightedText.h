@@ -3,10 +3,10 @@
 #include <string>
 #include <vector>
 
-#include "../core/Constants.h"
-#include "../error/HighlightError.h"
-#include "../memory/MemoryManager.h"
 #include "TextRange.h"
+#include "highlighter/core/Constants.h"
+#include "highlighter/error/HighlightError.h"
+#include "highlighter/memory/MemoryManager.h"
 
 namespace shiki {
 namespace text {

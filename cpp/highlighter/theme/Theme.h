@@ -8,12 +8,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../core/Configuration.h"
-#include "../core/Constants.h"
-#include "../grammar/Grammar.h"
-#include "../tokenizer/Token.h"
 #include "ThemeColor.h"
 #include "ThemeStyle.h"
+#include "highlighter/core/Configuration.h"
+#include "highlighter/core/Constants.h"
+#include "highlighter/grammar/Grammar.h"
+#include "highlighter/tokenizer/Token.h"
 
 namespace shiki {
 

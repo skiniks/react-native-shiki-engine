@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 
-#include "../text/TextRange.h"
 #include "MemoryPool.h"
+#include "highlighter/text/TextRange.h"
 
 namespace shiki {
 

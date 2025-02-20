@@ -1,7 +1,7 @@
 #pragma once
 #include <jni.h>
 
-#include "../PlatformMeasurement.h"
+#include "highlighter/platform/PlatformMeasurement.h"
 
 namespace shiki {
 

@@ -6,11 +6,12 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
-#include "../core/CacheEntry.h"
-#include "../core/Configuration.h"
-#include "../core/Constants.h"
 #include "Cache.h"
+#include "highlighter/core/CacheEntry.h"
+#include "highlighter/core/Configuration.h"
+#include "highlighter/core/Constants.h"
 
 namespace shiki {
 

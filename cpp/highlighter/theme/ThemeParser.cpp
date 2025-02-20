@@ -12,8 +12,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../memory/TextRangePool.h"
 #include "Theme.h"
+#include "highlighter/memory/TextRangePool.h"
 
 class ThemeColor;
 

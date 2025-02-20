@@ -10,13 +10,13 @@
 #include <unordered_set>
 #include <vector>
 
-#include "../cache/StyleCache.h"
-#include "../grammar/Grammar.h"
-#include "../renderer/LineNumbers.h"
-#include "../text/TokenRange.h"
-#include "../theme/Theme.h"
-#include "../utils/ConcurrencyUtil.h"
 #include "Token.h"
+#include "highlighter/cache/StyleCache.h"
+#include "highlighter/grammar/Grammar.h"
+#include "highlighter/renderer/LineNumbers.h"
+#include "highlighter/text/TokenRange.h"
+#include "highlighter/theme/Theme.h"
+#include "highlighter/utils/ConcurrencyUtil.h"
 #include "oniguruma.h"
 
 namespace shiki {

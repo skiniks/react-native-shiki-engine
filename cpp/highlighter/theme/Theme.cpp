@@ -5,8 +5,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "../tokenizer/Token.h"
 #include "ThemeParser.h"
+#include "highlighter/tokenizer/Token.h"
 
 namespace shiki {
 

@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "../platform/PlatformHighlighter.h"
+#include "highlighter/platform/PlatformHighlighter.h"
 
 namespace shiki {
 

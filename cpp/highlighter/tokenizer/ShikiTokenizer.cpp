@@ -4,21 +4,26 @@
 #include <xxhash.h>
 
 #include <algorithm>
+#include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <sstream>
+#include <string>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
-#include "../cache/CacheManager.h"
-#include "../cache/StyleCache.h"
-#include "../core/Configuration.h"
-#include "../memory/TokenPool.h"
-#include "../utils/ScopedResource.h"
-#include "../utils/WorkPrioritizer.h"
+#include "highlighter/cache/CacheManager.h"
+#include "highlighter/cache/StyleCache.h"
+#include "highlighter/core/Configuration.h"
+#include "highlighter/memory/TokenPool.h"
+#include "highlighter/utils/ScopedResource.h"
+#include "highlighter/utils/WorkPrioritizer.h"
 
 namespace shiki {
 

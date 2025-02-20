@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../theme/ThemeStyle.h"
+#include "highlighter/theme/ThemeStyle.h"
 
 namespace shiki {
 

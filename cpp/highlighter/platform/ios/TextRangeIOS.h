@@ -1,5 +1,5 @@
 #pragma once
-#include "../../text/TextRange.h"
+#include "highlighter/text/TextRange.h"
 
 @class NSString;
 @class UIFont;

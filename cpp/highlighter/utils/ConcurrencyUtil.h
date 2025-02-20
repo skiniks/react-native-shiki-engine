@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "../core/Constants.h"
+#include "highlighter/core/Constants.h"
 
 namespace shiki {
 

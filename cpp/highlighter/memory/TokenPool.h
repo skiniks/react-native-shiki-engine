@@ -1,6 +1,6 @@
 #pragma once
-#include "../tokenizer/Token.h"
 #include "MemoryPool.h"
+#include "highlighter/tokenizer/Token.h"
 
 namespace shiki {
 

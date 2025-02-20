@@ -2,8 +2,8 @@
 #include <optional>
 #include <string>
 
-#include "../core/Constants.h"
 #include "ThemeColor.h"
+#include "highlighter/core/Constants.h"
 
 namespace shiki {
 

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../text/HighlightedText.h"
+#include "highlighter/text/HighlightedText.h"
 
 namespace shiki {
 

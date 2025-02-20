@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../text/TextRange.h"
+#include "highlighter/text/TextRange.h"
 
 namespace shiki {
 

@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 
-#include "../text/TextDiff.h"
+#include "highlighter/text/TextDiff.h"
 
 namespace shiki {
 

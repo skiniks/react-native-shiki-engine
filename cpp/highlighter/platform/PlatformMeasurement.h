@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 
-#include "../text/TextMetrics.h"
-#include "../theme/ThemeStyle.h"
+#include "highlighter/text/TextMetrics.h"
+#include "highlighter/theme/ThemeStyle.h"
 
 namespace shiki {
 

@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "../error/HighlightError.h"
+#include "highlighter/error/HighlightError.h"
 
 namespace shiki {
 

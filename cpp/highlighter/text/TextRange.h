@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "../platform/PlatformMeasurement.h"
-#include "../theme/ThemeStyle.h"
 #include "TextMetrics.h"
+#include "highlighter/platform/PlatformMeasurement.h"
+#include "highlighter/theme/ThemeStyle.h"
 
 namespace shiki {
 

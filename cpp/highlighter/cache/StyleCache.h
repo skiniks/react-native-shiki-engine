@@ -6,9 +6,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../theme/ThemeStyle.h"
 #include "Cache.h"
 #include "CacheConfig.h"
+#include "highlighter/theme/ThemeStyle.h"
 
 namespace shiki {
 

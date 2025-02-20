@@ -5,10 +5,10 @@
 #include <string>
 #include <unordered_map>
 
-#include "../grammar/Grammar.h"
-#include "../tokenizer/ShikiTokenizer.h"
 #include "Cache.h"
 #include "CacheConfig.h"
+#include "highlighter/grammar/Grammar.h"
+#include "highlighter/tokenizer/ShikiTokenizer.h"
 
 namespace shiki {
 

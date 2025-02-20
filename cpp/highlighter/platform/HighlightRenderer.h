@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "../core/ViewConfig.h"
 #include "PlatformHighlighter.h"
+#include "highlighter/core/ViewConfig.h"
 
 namespace shiki {
 

@@ -5,8 +5,8 @@
 #include <memory>
 #include <string>
 
-#include "../error/HighlightError.h"
 #include "Grammar.h"
+#include "highlighter/error/HighlightError.h"
 
 namespace shiki {
 

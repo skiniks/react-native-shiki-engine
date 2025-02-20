@@ -15,11 +15,11 @@ using namespace facebook::react;
 @interface RCTShikiHighlighterModule () <NativeShikiHighlighterSpec>
 @end
 
-#import "../../cpp/highlighter/cache/CacheManager.h"
-#import "../../cpp/highlighter/grammar/Grammar.h"
-#import "../../cpp/highlighter/theme/Theme.h"
-#import "../../cpp/highlighter/theme/ThemeParser.h"
-#import "../../cpp/highlighter/tokenizer/ShikiTokenizer.h"
+#import "highlighter/cache/CacheManager.h"
+#import "highlighter/grammar/Grammar.h"
+#import "highlighter/theme/Theme.h"
+#import "highlighter/theme/ThemeParser.h"
+#import "highlighter/tokenizer/ShikiTokenizer.h"
 
 @implementation RCTShikiHighlighterModule {
   __weak RCTBridge *_bridge;

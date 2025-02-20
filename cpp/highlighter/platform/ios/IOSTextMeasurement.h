@@ -1,5 +1,5 @@
 #pragma once
-#include "../PlatformMeasurement.h"
+#include "highlighter/platform/PlatformMeasurement.h"
 
 #ifdef __OBJC__
 @class UIFont;

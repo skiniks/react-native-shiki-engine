@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "../core/Constants.h"
+#include "highlighter/core/Constants.h"
 
 namespace shiki {
 
