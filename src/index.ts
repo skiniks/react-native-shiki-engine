@@ -14,7 +14,6 @@ export { useClipboard, useShikiHighlighter } from './hooks'
 
 export { ShikiHighlighterView } from './react'
 
-export type { ShikiHighlighterViewProps } from './specs'
-export type { Token } from './specs'
+export type { ShikiHighlighterViewProps, Token } from './specs'
 
 export { Clipboard, isHighlighterAvailable } from './utils'
