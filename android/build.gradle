@@ -8,10 +8,19 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:7.2.1"
+    classpath "com.android.tools.build:gradle:8.1.2"
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
+}
+
+// Explicitly define React Native version from package.json
+def getReactNativeVersion() {
+  def inputFile = new File("$rootDir/../package.json")
+  def json = new groovy.json.JsonSlurper().parseText(inputFile.text)
+  def version = json.devDependencies."react-native"
+  // Remove any prefix like ^ or ~
+  return version.replaceAll(/[\^~]/, "")
 }
 
 def reactNativeArchitectures() {
@@ -98,20 +107,14 @@ android {
   }
 }
 
-repositories {
-  mavenCentral()
-  google()
-}
-
-def kotlin_version = getExtOrDefault("kotlinVersion")
-
 dependencies {
-  // For < 0.71, this will be from the local maven repo
-  // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
-  //noinspection GradleDynamicVersion
+  implementation fileTree(dir: "$rootDir/../node_modules/react-native/android", include: ["*.aar", "*.jar"])
   implementation "com.facebook.react:react-native:+"
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation "com.facebook.fbjni:fbjni:+"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:${getExtOrDefault("kotlinVersion")}"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+  implementation "com.facebook.soloader:soloader:0.10.5"
 }
 
 if (isNewArchitectureEnabled()) {
