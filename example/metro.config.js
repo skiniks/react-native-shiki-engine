@@ -2,6 +2,7 @@ const path = require('node:path')
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
 const escape = require('escape-string-regexp')
 const exclusionList = require('metro-config/src/defaults/exclusionList')
+const shikiMetroConfig = require('react-native-shiki/metro.config')
 const pak = require('../package.json')
 
 const root = path.resolve(__dirname, '..')
@@ -45,4 +46,8 @@ const config = {
   },
 }
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config)
+module.exports = mergeConfig(
+  getDefaultConfig(__dirname),
+  shikiMetroConfig,
+  config,
+)

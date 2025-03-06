@@ -49,6 +49,7 @@
     "lib/commonjs",
     "lib/module",
     "lib/typescript",
+    "metro.config.js",
     "react-native.config.js",
     "src"
   ],

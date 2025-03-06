@@ -1,5 +1,5 @@
-import rust from '@shikijs/langs/dist/rust.mjs'
-import dracula from '@shikijs/themes/dist/dracula.mjs'
+import rust from '@shikijs/langs/rust'
+import dracula from '@shikijs/themes/dracula'
 import React from 'react'
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
 import { ShikiHighlighterView, useClipboard, useShikiHighlighter } from 'react-native-shiki'
