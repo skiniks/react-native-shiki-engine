@@ -63,7 +63,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:cpp": "scripts/clang-format.sh",
-    "lint:all": "yarn lint:fix && yarn lint:cpp",
+    "lint:kt": "scripts/ktlint.sh",
+    "lint:all": "yarn lint:fix && yarn lint:cpp && yarn lint:kt",
     "release": "release-it"
   },
   "peerDependencies": {
@@ -148,6 +149,9 @@
     "jsSrcsDir": "src/specs",
     "ios": {
       "componentProvider": "apple/ShikiHighlighterView"
+    },
+    "android": {
+      "componentProvider": "android/src/main/kotlin/com/shiki/ShikiPackage.kt"
     }
   }
 }
