@@ -3,6 +3,7 @@
 #include <memory>
 #include <queue>
 #include <string>
+#include <unordered_map>
 
 #include "HighlightError.h"
 

@@ -11,6 +11,18 @@
 
 #ifdef __APPLE__
 #  include <dispatch/dispatch.h>
+#elif defined(__ANDROID__)
+#  include <android/log.h>
+#  include <jni.h>
+
+// Android memory trim levels (ComponentCallbacks2)
+#  define TRIM_MEMORY_COMPLETE         80
+#  define TRIM_MEMORY_MODERATE         60
+#  define TRIM_MEMORY_BACKGROUND       40
+#  define TRIM_MEMORY_UI_HIDDEN        20
+#  define TRIM_MEMORY_RUNNING_CRITICAL 15
+#  define TRIM_MEMORY_RUNNING_LOW      10
+#  define TRIM_MEMORY_RUNNING_MODERATE 5
 #endif
 
 namespace shiki {

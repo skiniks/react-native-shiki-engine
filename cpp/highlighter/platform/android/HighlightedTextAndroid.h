@@ -7,7 +7,7 @@
 
 namespace shiki {
 
-class HighlightedTextAndroid final : public HighlightedText {
+class HighlightedTextAndroid final : public text::HighlightedText {
  public:
   explicit HighlightedTextAndroid(jobject textView, JNIEnv* env);
   ~HighlightedTextAndroid() override;

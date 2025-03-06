@@ -3,8 +3,10 @@
 #include <cstdlib>
 
 #ifdef __ANDROID__
+#  include <android/log.h>
 #  include <android/native_window.h>
 #  include <jni.h>
+#  include <malloc.h>
 #elif defined(__APPLE__)
 #  include <CoreFoundation/CoreFoundation.h>
 #  include <dispatch/dispatch.h>
@@ -16,60 +18,29 @@ namespace shiki {
 
 void MemoryManager::initializePlatformSignals() {
 #ifdef __ANDROID__
-  // Android memory pressure signals
-  if (auto vm = AndroidRuntime::getJavaVM()) {
-    JNIEnv* env;
-    vm->AttachCurrentThread(&env, nullptr);
-
-    jclass activityThread = env->FindClass("android/app/ActivityThread");
-    jmethodID currentApplication =
-      env->GetStaticMethodID(activityThread, "currentApplication", "()Landroid/app/Application;");
-    jobject application = env->CallStaticObjectMethod(activityThread, currentApplication);
-
-    // Register component callbacks to receive trim memory signals
-    jclass componentCallbacks = env->FindClass("android/content/ComponentCallbacks2");
-    env->RegisterNatives(
-      componentCallbacks,
-      new JNINativeMethod[]{{"onTrimMemory", "(I)V", (void*)&MemoryManager::onTrimMemory}},
-      1
-    );
-
-    env->CallVoidMethod(
-      application,
-      env->GetMethodID(
-        env->GetObjectClass(application),
-        "registerComponentCallbacks",
-        "(Landroid/content/ComponentCallbacks;)V"
-      ),
-      env->NewObject(componentCallbacks, env->GetMethodID(componentCallbacks, "<init>", "()V"))
-    );
-  }
+  // Android memory pressure signals are handled through JNI callbacks
+  // The actual registration happens in the Java layer
+  __android_log_print(ANDROID_LOG_INFO, "MemoryManager", "Initialized platform signals for Android");
 #elif defined(__APPLE__)
   // iOS/macOS memory pressure monitoring using dispatch source
   dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
   dispatch_source_t source = dispatch_source_create(
     DISPATCH_SOURCE_TYPE_MEMORYPRESSURE,
     0,
-    DISPATCH_MEMORYPRESSURE_WARN | DISPATCH_MEMORYPRESSURE_CRITICAL,
+    DISPATCH_MEMORYPRESSURE_NORMAL | DISPATCH_MEMORYPRESSURE_WARN | DISPATCH_MEMORYPRESSURE_CRITICAL,
     queue
   );
 
   if (source) {
     dispatch_source_set_event_handler(source, ^{
-      unsigned long status = dispatch_source_get_data(source);
-      if (status & DISPATCH_MEMORYPRESSURE_CRITICAL) {
-        if (criticalPressureCallback_) {
-          criticalPressureCallback_();
-        }
-      } else if (status & DISPATCH_MEMORYPRESSURE_WARN) {
-        if (highPressureCallback_) {
-          highPressureCallback_();
-        }
+      dispatch_source_memorypressure_flags_t level = dispatch_source_get_data(source);
+      if (level & DISPATCH_MEMORYPRESSURE_CRITICAL) {
+        if (criticalPressureCallback_) criticalPressureCallback_();
+      } else if (level & DISPATCH_MEMORYPRESSURE_WARN) {
+        if (highPressureCallback_) highPressureCallback_();
       }
     });
-
     dispatch_resume(source);
-    memoryPressureSource_ = source;
   }
 #endif
 }
@@ -78,7 +49,10 @@ void MemoryManager::initializePlatformSignals() {
 void MemoryManager::onTrimMemory(JNIEnv* env, jobject obj, jint level) {
   auto& instance = getInstance();
 
-  // Map Android trim levels to our pressure levels
+  // Log memory trim event
+  __android_log_print(ANDROID_LOG_INFO, "MemoryManager", "onTrimMemory called with level: %d", level);
+
+  // Handle different memory trim levels
   switch (level) {
     case TRIM_MEMORY_RUNNING_MODERATE:
     case TRIM_MEMORY_RUNNING_LOW:
@@ -94,6 +68,17 @@ void MemoryManager::onTrimMemory(JNIEnv* env, jobject obj, jint level) {
       }
       break;
   }
+
+  // Get current memory info
+  struct mallinfo mi = mallinfo();
+  __android_log_print(
+    ANDROID_LOG_INFO,
+    "MemoryManager",
+    "Current memory usage - arena: %d, used: %d, free: %d",
+    mi.arena,
+    mi.uordblks,
+    mi.fordblks
+  );
 }
 #endif
 
