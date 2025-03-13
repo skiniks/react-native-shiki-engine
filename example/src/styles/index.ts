@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
   },
   header: {
     marginTop: 40,
-    marginBottom: 30,
+    marginBottom: 16,
     marginHorizontal: 16,
   },
   title: {

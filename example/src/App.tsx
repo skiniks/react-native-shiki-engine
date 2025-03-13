@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { ShikiHighlighterView, useClipboard, useShikiHighlighter } from 'react-native-shiki'
 import { AdvancedView } from './AdvancedView'
+import { BackArrow } from './components/BackArrow'
 import { rustSnippet } from './snippets/rust'
 import { styles } from './styles'
 
@@ -25,7 +26,24 @@ function App() {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => setShowAdvanced(false)}>
-            <Text style={styles.backButton}>← Back to Basic Example</Text>
+            <View style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 4,
+            }}
+            >
+              <BackArrow color="#88C0D0" size={16} />
+              <Text style={[
+                styles.backButton,
+                {
+                  marginLeft: 8,
+                  marginBottom: 0,
+                },
+              ]}
+              >
+                Back to Basic Example
+              </Text>
+            </View>
           </TouchableOpacity>
           <Text style={styles.title}>Advanced View Customization</Text>
         </View>
@@ -69,6 +87,7 @@ function App() {
                     text={rustSnippet}
                     fontSize={14}
                     scrollEnabled
+                    selectable
                   />
                 )}
                 <TouchableOpacity

@@ -68,7 +68,7 @@ export const DEFAULT_VIEW_CONFIG: Required<ViewConfigOptions> = {
  * Create a view configuration with custom options
  */
 export function createViewConfig(options: ViewConfigOptions = {}): Required<ViewConfigOptions> {
-  return {
+  const config = {
     ...DEFAULT_VIEW_CONFIG,
     ...options,
     contentInset: {
@@ -76,4 +76,6 @@ export function createViewConfig(options: ViewConfigOptions = {}): Required<View
       ...options.contentInset,
     },
   }
+
+  return config
 }

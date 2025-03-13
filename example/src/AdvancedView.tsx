@@ -117,7 +117,7 @@ export function AdvancedView() {
   const [fontFamily, setFontFamily] = useState('Menlo')
   const [fontWeight, setFontWeight] = useState('regular')
   const [fontStyle, setFontStyle] = useState('normal')
-  const [showLineNumbers, setShowLineNumbers] = useState(false)
+  const [showLineNumbers, setShowLineNumbers] = useState(true)
   const [scrollEnabled, setScrollEnabled] = useState(true)
   const [selectable, setSelectable] = useState(true)
   const [contentInset, setContentInset] = useState({
@@ -128,6 +128,7 @@ export function AdvancedView() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [renderError, setRenderError] = useState<string | null>(null)
+  const [outerScrollEnabled, setOuterScrollEnabled] = useState(true)
   const mountedRef = useRef(true)
   const hasRenderedRef = useRef(false)
   const renderAttemptsRef = useRef(0)
@@ -147,6 +148,12 @@ export function AdvancedView() {
       }
     }
   }, [isReady, tokens])
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   const viewConfig = useViewConfig({
     fontSize,
@@ -205,46 +212,27 @@ export function AdvancedView() {
     try {
       renderAttemptsRef.current += 1
 
-      // Additional validation of tokens
-      const validTokens = tokens.filter(token =>
-        token
-        && typeof token.start === 'number'
-        && typeof token.length === 'number'
-        && token.start >= 0
-        && token.length > 0
-        && token.start + token.length <= rustSnippet.length,
-      )
-
-      if (validTokens.length === 0) {
-        return (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>No valid tokens available</Text>
-          </View>
-        )
-      }
-
-      // If we've successfully rendered before, don't try again
-      if (hasRenderedRef.current) {
-        return (
+      const codeBlock = (
+        <View
+          onTouchStart={() => setOuterScrollEnabled(false)}
+          onTouchEnd={() => setOuterScrollEnabled(true)}
+          onTouchCancel={() => setOuterScrollEnabled(true)}
+        >
           <ShikiHighlighterView
             style={styles.codeContainer}
-            tokens={validTokens}
+            tokens={tokens}
             text={rustSnippet}
             {...viewConfig}
           />
-        )
-      }
-
-      const result = (
-        <ShikiHighlighterView
-          style={styles.codeContainer}
-          tokens={validTokens}
-          text={rustSnippet}
-          {...viewConfig}
-        />
+        </View>
       )
 
-      // Mark as successfully rendered
+      if (hasRenderedRef.current) {
+        return codeBlock
+      }
+
+      const result = codeBlock
+
       hasRenderedRef.current = true
       renderAttemptsRef.current = 0
       return result
@@ -253,7 +241,6 @@ export function AdvancedView() {
       console.error('Error rendering ShikiHighlighterView:', err)
       const errorMessage = err instanceof Error ? err.message : String(err)
 
-      // Update state only if component is still mounted
       if (mountedRef.current) {
         setRenderError(`Error rendering code: ${errorMessage}`)
       }
@@ -271,9 +258,11 @@ export function AdvancedView() {
   }, [error, isLoading, renderError, status, tokens, viewConfig, isReady])
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Advanced View Customization</Text>
-
+    <ScrollView
+      style={styles.container}
+      nestedScrollEnabled
+      scrollEnabled={outerScrollEnabled}
+    >
       <View style={styles.codePreview}>
         {renderShikiHighlighter()}
       </View>
@@ -305,7 +294,7 @@ export function AdvancedView() {
         <View style={styles.controlRow}>
           <Text style={styles.controlLabel}>Font Family:</Text>
           <View style={styles.controlValue}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled>
               {fontFamilies.map(family => (
                 <TouchableOpacity
                   key={family}
@@ -325,7 +314,7 @@ export function AdvancedView() {
         <View style={styles.controlRow}>
           <Text style={styles.controlLabel}>Font Weight:</Text>
           <View style={styles.controlValue}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled>
               {fontWeights.map(weight => (
                 <TouchableOpacity
                   key={weight}
@@ -345,7 +334,7 @@ export function AdvancedView() {
         <View style={styles.controlRow}>
           <Text style={styles.controlLabel}>Font Style:</Text>
           <View style={styles.controlValue}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled>
               {fontStyles.map(style => (
                 <TouchableOpacity
                   key={style}
