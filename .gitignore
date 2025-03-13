@@ -25,6 +25,7 @@ project.xcworkspace
 .cxx
 .gradle
 .idea
+.kotlin
 .project
 .settings
 local.properties

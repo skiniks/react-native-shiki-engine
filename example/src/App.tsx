@@ -1,7 +1,7 @@
 import rust from '@shikijs/langs/rust'
 import dracula from '@shikijs/themes/dracula'
 import React from 'react'
-import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 import { ShikiHighlighterView, useClipboard, useShikiHighlighter } from 'react-native-shiki'
 import { rustSnippet } from './snippets/rust'
 import { styles } from './styles'
@@ -19,7 +19,7 @@ function App() {
   const handleCopy = () => copyToClipboard(rustSnippet)
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>React Native Shiki</Text>
         <View style={styles.statusContainer}>
@@ -57,7 +57,7 @@ function App() {
               </>
             )}
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
 
