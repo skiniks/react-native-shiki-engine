@@ -1,5 +1,5 @@
 import type { TurboModule } from 'react-native'
-import { TurboModuleRegistry } from 'react-native'
+import { Platform, TurboModuleRegistry } from 'react-native'
 
 export interface Spec extends TurboModule {
   /**
@@ -9,4 +9,14 @@ export interface Spec extends TurboModule {
   install: () => boolean
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('ShikiBridge')
+const mockShikiBridge: Spec = {
+  install: () => {
+    console.warn('ShikiBridge is not available on iOS')
+    return false
+  },
+}
+
+export default Platform.select({
+  android: () => TurboModuleRegistry.getEnforcing<Spec>('ShikiBridge'),
+  default: () => mockShikiBridge,
+})()

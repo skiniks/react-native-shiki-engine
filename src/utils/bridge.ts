@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import NativeShikiBridge from '../specs/NativeShikiBridge'
 import logger from './logger'
 
@@ -8,6 +9,11 @@ let initialized = false
  * This should be called as early as possible in the app lifecycle
  */
 export function initializeShikiBridge(): boolean {
+  if (Platform.OS === 'ios') {
+    logger.warn('ShikiBridge: Skipping initialization on iOS (Android-only feature)')
+    return true
+  }
+
   if (initialized) {
     logger.warn('ShikiBridge: Already initialized')
     return true
@@ -46,4 +52,6 @@ export function initializeShikiBridge(): boolean {
   }
 }
 
-initializeShikiBridge()
+if (Platform.OS === 'android') {
+  initializeShikiBridge()
+}
