@@ -8,6 +8,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.text.style.LineHeightSpan
 import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
 import android.text.style.UnderlineSpan
 import android.util.Log
 import android.util.TypedValue
@@ -25,6 +26,16 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
   private var tokens: ReadableArray? = null
   private var fontSize: Float = 14f
   private var fontFamily: String? = null
+  private var fontWeight: String = "regular"
+  private var fontStyle: String = "normal"
+  private var showLineNumbers: Boolean = false
+  private var selectable: Boolean = true
+  private var contentInset = mapOf(
+    "top" to 0,
+    "right" to 0,
+    "bottom" to 0,
+    "left" to 0
+  )
   private var scrollEnabled: Boolean = true
 
   companion object {
@@ -196,106 +207,225 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
     processTextWithBatches()
   }
 
+  fun setFontWeight(fontWeight: String?) {
+    try {
+      Log.d(TAG, "Setting fontWeight: $fontWeight")
+      this.fontWeight = fontWeight ?: "regular"
+
+      if (!text.isEmpty() && tokens != null) {
+        applyTextFormatting()
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in setFontWeight: ${e.message}", e)
+    }
+  }
+
+  fun setFontStyle(fontStyle: String?) {
+    try {
+      Log.d(TAG, "Setting fontStyle: $fontStyle")
+      this.fontStyle = fontStyle ?: "normal"
+
+      if (!text.isEmpty() && tokens != null) {
+        applyTextFormatting()
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in setFontStyle: ${e.message}", e)
+    }
+  }
+
+  fun setShowLineNumbers(showLineNumbers: Boolean) {
+    try {
+      Log.d(TAG, "Setting showLineNumbers: $showLineNumbers")
+      this.showLineNumbers = showLineNumbers
+
+      if (!text.isEmpty() && tokens != null) {
+        applyTextFormatting()
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in setShowLineNumbers: ${e.message}", e)
+    }
+  }
+
+  fun setSelectable(selectable: Boolean) {
+    this.selectable = selectable
+    textView.setTextIsSelectable(selectable)
+  }
+
+  fun setContentInset(contentInset: ReadableMap?) {
+    if (contentInset != null) {
+      val top = if (contentInset.hasKey("top")) contentInset.getInt("top") else 0
+      val right = if (contentInset.hasKey("right")) contentInset.getInt("right") else 0
+      val bottom = if (contentInset.hasKey("bottom")) contentInset.getInt("bottom") else 0
+      val left = if (contentInset.hasKey("left")) contentInset.getInt("left") else 0
+
+      this.contentInset = mapOf(
+        "top" to top,
+        "right" to right,
+        "bottom" to bottom,
+        "left" to left
+      )
+
+      textView.setPadding(
+        dpToPx(left),
+        dpToPx(top),
+        dpToPx(right),
+        dpToPx(bottom)
+      )
+    }
+  }
+
   fun setScrollEnabled(enabled: Boolean) {
-    scrollEnabled = enabled
+    try {
+      Log.d(TAG, "Setting scrollEnabled: $enabled")
+      scrollEnabled = enabled
+
+      textView.isVerticalScrollBarEnabled = enabled
+
+      if (enabled) {
+        textView.scrollBarStyle = android.view.View.SCROLLBARS_INSIDE_OVERLAY
+        textView.isVerticalFadingEdgeEnabled = true
+        textView.setVerticalScrollbarPosition(android.view.View.SCROLLBAR_POSITION_RIGHT)
+
+        textView.overScrollMode = android.view.View.OVER_SCROLL_ALWAYS
+      }
+
+      if (enabled) {
+        textView.setHorizontallyScrolling(true)
+
+        // For vertical scrolling, we need to use ScrollingMovementMethod
+        textView.movementMethod = android.text.method.ScrollingMovementMethod.getInstance()
+
+        // Make sure the TextView can take focus for scrolling
+        textView.isFocusable = true
+        textView.isFocusableInTouchMode = true
+
+        // Set max height to allow scrolling
+        textView.maxHeight = Int.MAX_VALUE
+      } else {
+        // Disable scrolling
+        textView.movementMethod = null
+        textView.isFocusable = selectable
+        textView.isFocusableInTouchMode = selectable
+      }
+
+      // Update layout parameters
+      val params = textView.layoutParams
+      if (params != null) {
+        if (enabled) {
+          // When scrollable, allow the TextView to be as tall as needed
+          params.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        } else {
+          // When not scrollable, match the parent height
+          params.height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
+        textView.layoutParams = params
+      }
+
+      // Force layout update
+      textView.requestLayout()
+      invalidate()
+
+      Log.d(TAG, "ScrollEnabled set to $enabled successfully")
+    } catch (e: Exception) {
+      Log.e(TAG, "Error setting scrollEnabled: ${e.message}", e)
+    }
   }
 
   private fun updateFont() {
-    val systemFontName = SYSTEM_FONTS[fontFamily] ?: "monospace"
-    val typeface = when {
-      fontFamily?.contains("SF-Mono") == true -> Typeface.MONOSPACE
-      fontFamily?.contains("Menlo") == true -> Typeface.MONOSPACE
-      else -> Typeface.create(systemFontName, Typeface.NORMAL)
+    try {
+      Log.d(TAG, "Updating font to family: $fontFamily, weight: $fontWeight, style: $fontStyle")
+
+      // Determine the typeface style based on fontWeight and fontStyle
+      var typefaceStyle = Typeface.NORMAL
+
+      if (fontWeight == "bold" || fontWeight == "semibold" || fontWeight == "medium") {
+        typefaceStyle = typefaceStyle or Typeface.BOLD
+      }
+
+      if (fontStyle == "italic") {
+        typefaceStyle = typefaceStyle or Typeface.ITALIC
+      }
+
+      // Try to create the typeface with the provided font family
+      val typeface = if (fontFamily != null) {
+        try {
+          // Try to use the exact font family name provided
+          Typeface.create(fontFamily, typefaceStyle)
+        } catch (e: Exception) {
+          Log.w(TAG, "Could not create typeface with font family '$fontFamily', falling back to monospace", e)
+          // Fall back to monospace if the provided font family doesn't work
+          Typeface.create("monospace", typefaceStyle)
+        }
+      } else {
+        // Default to monospace if no font family is provided
+        Typeface.create("monospace", typefaceStyle)
+      }
+
+      textView.typeface = typeface
+
+      Log.d(TAG, "Font updated successfully with style $typefaceStyle")
+
+      // Force a redraw
+      textView.invalidate()
+      invalidate()
+    } catch (e: Exception) {
+      Log.e(TAG, "Error updating font: ${e.message}", e)
+      // Fallback to default monospace font
+      textView.typeface = Typeface.MONOSPACE
     }
-    textView.typeface = typeface
   }
 
   private fun processTextWithBatches() {
     Log.d(TAG, "processTextWithBatches called")
-    if (text.isEmpty()) {
-      Log.d(TAG, "Text is empty, setting empty text")
-      textView.text = ""
-      return
-    }
+    try {
+      if (text.isEmpty()) {
+        Log.d(TAG, "Text is empty, setting empty text")
+        textView.text = ""
+        return
+      }
 
-    val spannableText = SpannableStringBuilder(text)
+      // Check if tokens are null or empty
+      if (tokens == null || tokens?.size() == 0) {
+        Log.d(TAG, "Tokens are null or empty, setting plain text")
+        textView.text = text
+        return
+      }
 
-    // Check if we have tokens to apply
-    if (tokens != null && tokens!!.size() > 0) {
-      Log.d(TAG, "Processing ${tokens!!.size()} tokens for highlighting")
+      try {
+        // Use the applyTextFormatting method to handle both token styling and line numbers
+        applyTextFormatting()
+      } catch (e: Exception) {
+        Log.e(TAG, "Error in applyTextFormatting: ${e.message}", e)
+        // Fallback to plain text if formatting fails
+        textView.text = text
+      }
 
-      var tokensWithStyles = 0
-      var tokensWithColors = 0
-
-      // Debug: Print a sample of tokens for inspection
-      debugSampleTokens(tokens!!)
-
-      // Apply each token's style
-      for (i in 0 until tokens!!.size()) {
+      // Force layout update
+      post {
         try {
-          val token = tokens!!.getMap(i)
-          if (token != null) {
-            val start = token.getInt("start")
-            val length = token.getInt("length")
-            val style = token.getMap("style")
-
-            if (style != null) {
-              tokensWithStyles++
-              if (style.hasKey("color") && style.getString("color") != null) {
-                tokensWithColors++
-              }
-            }
-
-            // Ensure start and length are valid
-            if (start >= 0 && length > 0 && start + length <= text.length) {
-              if (i % 50 == 0) { // Log only every 50th token to avoid flooding
-                Log.d(TAG, "Applying token style at position $start with length $length")
-                // Log the token text for debugging
-                val tokenText = text.substring(start, start + length)
-                Log.d(TAG, "Token text: '$tokenText'")
-              }
-
-              applyTokenStyle(spannableText, start, length, style)
-            } else {
-              Log.e(TAG, "Invalid token range: start=$start, length=$length, textLength=${text.length}")
-            }
-          }
+          textView.requestLayout()
+          invalidate()
         } catch (e: Exception) {
-          Log.e(TAG, "Error processing token at index $i: ${e.message}")
-          e.printStackTrace()
+          Log.e(TAG, "Error in post-layout update: ${e.message}", e)
         }
       }
 
-      Log.d(TAG, "Applied styles to all tokens: $tokensWithStyles tokens had styles, $tokensWithColors tokens had color information")
-      Log.d(TAG, "All tokens processed successfully")
-    } else {
-      // If no tokens, apply white color to all text
-      Log.d(TAG, "No tokens available, applying default white color to all text")
-      spannableText.setSpan(
-        ForegroundColorSpan(Color.WHITE),
-        0,
-        text.length,
-        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
-      )
+      // Ensure the text is visible by checking its properties
+      Log.d(TAG, "TextView text length: ${textView.text?.length}")
+      Log.d(TAG, "TextView text color: ${textView.currentTextColor}")
+      Log.d(TAG, "TextView visibility: ${textView.visibility}")
+      Log.d(TAG, "TextView width: ${textView.width}, height: ${textView.height}")
+
+      Log.d(TAG, "processTextWithBatches completed")
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in processTextWithBatches: ${e.message}", e)
+      // Fallback to plain text if processing fails
+      try {
+        textView.text = text
+      } catch (e2: Exception) {
+        Log.e(TAG, "Error setting fallback text: ${e2.message}", e2)
+      }
     }
-
-    // Set the styled text to the TextView
-    textView.text = spannableText
-    Log.d(TAG, "Set spannable text to TextView")
-
-    // Force layout update
-    post {
-      textView.requestLayout()
-      invalidate()
-    }
-
-    // Ensure the text is visible by checking its properties
-    Log.d(TAG, "TextView text length: ${textView.text?.length}")
-    Log.d(TAG, "TextView text color: ${textView.currentTextColor}")
-    Log.d(TAG, "TextView visibility: ${textView.visibility}")
-    Log.d(TAG, "TextView width: ${textView.width}, height: ${textView.height}")
-
-    Log.d(TAG, "processTextWithBatches completed")
   }
 
   private fun applyTokenStyle(text: SpannableStringBuilder, start: Int, length: Int, style: ReadableMap?) {
@@ -310,6 +440,12 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
       if (shouldLogDetails) {
         Log.d(TAG, "Style is null")
       }
+      return
+    }
+
+    // Skip tokens with invalid ranges
+    if (start < 0 || length <= 0 || start + length > text.length) {
+      Log.e(TAG, "Invalid token range: start=$start, length=$length, textLength=${text.length}")
       return
     }
 
@@ -715,6 +851,257 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
       Log.d("ShikiHighlighterView", "===== END TOKEN SAMPLE =====")
     } catch (e: Exception) {
       Log.e("ShikiHighlighterView", "Error debugging tokens: ${e.message}")
+    }
+  }
+
+  private fun applyTextFormatting() {
+    if (text.isEmpty()) {
+      textView.text = ""
+      return
+    }
+
+    if (tokens == null) {
+      textView.text = text
+      return
+    }
+
+    try {
+      val spannableBuilder = SpannableStringBuilder(text)
+
+      try {
+        // Apply token styling
+        applyTokenStyling(spannableBuilder)
+      } catch (e: Exception) {
+        Log.e(TAG, "Error in applyTokenStyling: ${e.message}", e)
+        // Continue with the original text if token styling fails
+      }
+
+      try {
+        // Apply line numbers if enabled
+        if (showLineNumbers) {
+          val lineNumberedText = createLineNumberedText(spannableBuilder)
+          textView.text = lineNumberedText
+          Log.d(TAG, "Applied line numbers to text")
+        } else {
+          textView.text = spannableBuilder
+        }
+
+        // Log success
+        Log.d(TAG, "Successfully set text to TextView with ${textView.text.length} characters")
+      } catch (e: Exception) {
+        Log.e(TAG, "Error setting text to TextView: ${e.message}", e)
+        // Fallback to plain text if setting text fails
+        textView.text = text
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in applyTextFormatting: ${e.message}", e)
+      // Fallback to plain text if formatting fails
+      try {
+        textView.text = text
+        Log.d(TAG, "Fallback to plain text successful")
+      } catch (e2: Exception) {
+        Log.e(TAG, "Error setting fallback text: ${e2.message}", e2)
+      }
+    }
+  }
+
+  private fun createLineNumberedText(styledText: SpannableStringBuilder): SpannableStringBuilder {
+    try {
+      // Count the number of lines
+      val originalText = styledText.toString()
+      val lines = originalText.split("\n")
+      val lineCount = lines.size
+
+      // Calculate the width needed for line numbers
+      val maxLineNumberWidth = lineCount.toString().length + 1 // +1 for the space
+
+      // Create a new SpannableStringBuilder for the result
+      val result = SpannableStringBuilder()
+
+      // Track the current position in the original text
+      var currentPos = 0
+
+      val lineNumberColor = Color.parseColor("#6272A4") // Dracula comment color
+
+      lines.forEachIndexed { index, line ->
+        // Calculate the start and end positions for this line in the original text
+        val lineStart = currentPos
+        val lineEnd = lineStart + line.length
+
+        // Create the line number prefix with consistent width
+        val lineNumber = (index + 1).toString().padStart(maxLineNumberWidth)
+        val prefix = "$lineNumber | "
+        val prefixStart = result.length
+
+        // Add the prefix with styling
+        result.append(prefix)
+        val prefixEnd = result.length
+
+        // Style the line number differently
+        result.setSpan(
+          ForegroundColorSpan(lineNumberColor),
+          prefixStart,
+          prefixEnd,
+          SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        // Apply monospace font to line numbers
+        result.setSpan(
+          TypefaceSpan("monospace"),
+          prefixStart,
+          prefixEnd,
+          SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        // Add the line content with its original styling
+        if (lineStart < lineEnd && lineStart < styledText.length) {
+          val endPos = minOf(lineEnd, styledText.length)
+
+          // Get all spans from the original text for this line
+          val contentStart = result.length
+          result.append(styledText.subSequence(lineStart, endPos))
+
+          // Copy spans from the original text
+          val spans = styledText.getSpans(lineStart, endPos, Any::class.java)
+          for (span in spans) {
+            val spanStart = styledText.getSpanStart(span)
+            val spanEnd = styledText.getSpanEnd(span)
+            val spanFlags = styledText.getSpanFlags(span)
+
+            // Calculate the new span positions in the result text
+            val newSpanStart = contentStart + (spanStart - lineStart).coerceAtLeast(0)
+            val newSpanEnd = contentStart + (spanEnd - lineStart).coerceAtMost(endPos - lineStart)
+
+            if (newSpanEnd > newSpanStart) {
+              result.setSpan(span, newSpanStart, newSpanEnd, spanFlags)
+            }
+          }
+        }
+
+        // Add a newline if not the last line
+        if (index < lines.size - 1) {
+          result.append("\n")
+        }
+
+        // Update the current position (add 1 for the newline character)
+        currentPos = lineEnd + (if (index < lines.size - 1) 1 else 0)
+      }
+
+      return result
+    } catch (e: Exception) {
+      Log.e(TAG, "Error creating line numbered text: ${e.message}", e)
+      // Return the original text if there's an error
+      return styledText
+    }
+  }
+
+  private fun applyTokenStyling(spannableBuilder: SpannableStringBuilder) {
+    try {
+      // Apply token styling
+      tokens?.let { tokensArray ->
+        // Filter out invalid tokens before processing
+        val validTokens = ArrayList<ReadableMap>()
+        for (i in 0 until tokensArray.size()) {
+          val token = tokensArray.getMap(i)
+          if (token != null) {
+            val start = token.getInt("start")
+            val length = token.getInt("length")
+
+            // Only include tokens with valid ranges
+            if (start >= 0 && length > 0 && start + length <= spannableBuilder.length) {
+              validTokens.add(token)
+            } else {
+              Log.d(TAG, "Skipping invalid token: start=$start, length=$length, textLength=${spannableBuilder.length}")
+            }
+          }
+        }
+
+        Log.d(TAG, "Processing ${validTokens.size} valid tokens out of ${tokensArray.size()} total tokens")
+
+        // Process only valid tokens
+        for (token in validTokens) {
+          try {
+            val start = token.getInt("start")
+            val length = token.getInt("length")
+            val style = token.getMap("style") ?: continue
+
+            // Apply color
+            if (style.hasKey("color")) {
+              val colorStr = style.getString("color")
+              if (colorStr != null) {
+                try {
+                  val color = Color.parseColor(colorStr)
+                  spannableBuilder.setSpan(
+                    ForegroundColorSpan(color),
+                    start,
+                    start + length,
+                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                  )
+                } catch (e: Exception) {
+                  Log.e(TAG, "Error parsing color: $colorStr", e)
+                }
+              }
+            }
+
+            // Apply font weight
+            if (style.hasKey("bold") && style.getBoolean("bold")) {
+              spannableBuilder.setSpan(
+                StyleSpan(Typeface.BOLD),
+                start,
+                start + length,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+              )
+            } else if (this.fontWeight == "bold") {
+              spannableBuilder.setSpan(
+                StyleSpan(Typeface.BOLD),
+                start,
+                start + length,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+              )
+            } else if (this.fontWeight == "medium") {
+              // Medium is not directly supported, use BOLD
+              spannableBuilder.setSpan(
+                StyleSpan(Typeface.BOLD),
+                start,
+                start + length,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+              )
+            }
+
+            // Apply font style
+            if (style.hasKey("italic") && style.getBoolean("italic")) {
+              spannableBuilder.setSpan(
+                StyleSpan(Typeface.ITALIC),
+                start,
+                start + length,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+              )
+            } else if (this.fontStyle == "italic") {
+              spannableBuilder.setSpan(
+                StyleSpan(Typeface.ITALIC),
+                start,
+                start + length,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+              )
+            }
+
+            // Apply underline
+            if (style.hasKey("underline") && style.getBoolean("underline")) {
+              spannableBuilder.setSpan(
+                UnderlineSpan(),
+                start,
+                start + length,
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+              )
+            }
+          } catch (e: Exception) {
+            Log.e(TAG, "Error processing token: ${e.message}", e)
+            // Continue with the next token
+          }
+        }
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in applyTokenStyling: ${e.message}", e)
     }
   }
 }

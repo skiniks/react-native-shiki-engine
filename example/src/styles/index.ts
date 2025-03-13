@@ -24,6 +24,11 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
     color: '#ECEFF4',
   },
+  backButton: {
+    fontSize: 16,
+    color: '#88C0D0',
+    marginBottom: 16,
+  },
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -98,5 +103,22 @@ export const styles = StyleSheet.create({
   errorText: {
     color: '#bf616a',
     fontSize: 16,
+  },
+  advancedButton: {
+    backgroundColor: '#6272a4',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    alignSelf: 'flex-start',
+    marginHorizontal: 16,
+  },
+  advancedButtonText: {
+    color: '#F8F8F2',
+    fontSize: 16,
+    fontWeight: '500',
   },
 })

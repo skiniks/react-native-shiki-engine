@@ -164,10 +164,23 @@ using namespace facebook::react;
   NSMutableAttributedString *attributedString =
       [[NSMutableAttributedString alloc] initWithString:_text];
 
-  // Use SF Mono or fallback to Menlo
-  UIFont *font = [UIFont fontWithName:@"SFMono-Regular" size:_fontSize];
+  // Use the provided font family or fall back to system fonts
+  UIFont *font = nil;
+
+  if (_fontFamily && _fontFamily.length > 0) {
+    NSLog(@"ShikiHighlighterView: Trying to use provided font family: %@", _fontFamily);
+    font = [UIFont fontWithName:_fontFamily size:_fontSize];
+  }
+
+  // If the provided font family isn't available, fall back to system monospaced font
   if (!font) {
-    font = [UIFont fontWithName:@"Menlo-Regular" size:_fontSize];
+    NSLog(@"ShikiHighlighterView: Falling back to system monospaced font");
+    if (@available(iOS 13.0, *)) {
+      font = [UIFont monospacedSystemFontOfSize:_fontSize
+                                         weight:UIFontWeightRegular];
+    } else {
+      font = [UIFont systemFontOfSize:_fontSize];
+    }
   }
 
   // Set paragraph style for line height

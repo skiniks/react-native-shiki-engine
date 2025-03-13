@@ -17,11 +17,23 @@ export interface Token {
   style: ThemeStyle
 }
 
+export interface ContentInset {
+  top?: Float
+  right?: Float
+  bottom?: Float
+  left?: Float
+}
+
 export interface ShikiHighlighterViewProps extends ViewProps {
   tokens: Token[]
   text: string
   fontSize?: Float
   fontFamily?: string
+  fontWeight?: string
+  fontStyle?: string
+  showLineNumbers?: boolean
+  selectable?: boolean
+  contentInset?: ContentInset
   scrollEnabled?: boolean
 }
 

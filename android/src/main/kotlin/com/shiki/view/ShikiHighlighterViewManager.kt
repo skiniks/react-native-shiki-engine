@@ -3,6 +3,7 @@ package com.shiki.view
 import android.util.Log
 import android.view.ViewGroup
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
@@ -61,6 +62,36 @@ class ShikiHighlighterViewManager :
   override fun setFontFamily(view: ShikiHighlighterView, fontFamily: String?) {
     Log.d(TAG, "Setting fontFamily: $fontFamily")
     view.setFontFamily(fontFamily)
+  }
+
+  @ReactProp(name = "fontWeight")
+  override fun setFontWeight(view: ShikiHighlighterView, fontWeight: String?) {
+    Log.d(TAG, "Setting fontWeight: $fontWeight")
+    view.setFontWeight(fontWeight)
+  }
+
+  @ReactProp(name = "fontStyle")
+  override fun setFontStyle(view: ShikiHighlighterView, fontStyle: String?) {
+    Log.d(TAG, "Setting fontStyle: $fontStyle")
+    view.setFontStyle(fontStyle)
+  }
+
+  @ReactProp(name = "showLineNumbers")
+  override fun setShowLineNumbers(view: ShikiHighlighterView, showLineNumbers: Boolean) {
+    Log.d(TAG, "Setting showLineNumbers: $showLineNumbers")
+    view.setShowLineNumbers(showLineNumbers)
+  }
+
+  @ReactProp(name = "selectable")
+  override fun setSelectable(view: ShikiHighlighterView, selectable: Boolean) {
+    Log.d(TAG, "Setting selectable: $selectable")
+    view.setSelectable(selectable)
+  }
+
+  @ReactProp(name = "contentInset")
+  override fun setContentInset(view: ShikiHighlighterView, contentInset: ReadableMap?) {
+    Log.d(TAG, "Setting contentInset: $contentInset")
+    view.setContentInset(contentInset)
   }
 
   @ReactProp(name = "scrollEnabled")

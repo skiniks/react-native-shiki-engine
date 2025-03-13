@@ -12,7 +12,7 @@ export {
   type TokenizeOptions,
 } from './highlighter'
 
-export { useClipboard, useShikiHighlighter } from './hooks'
+export { useClipboard, useShikiHighlighter, useViewConfig } from './hooks'
 
 export { ShikiHighlighterView } from './react'
 
