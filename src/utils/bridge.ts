@@ -52,6 +52,6 @@ export function initializeShikiBridge(): boolean {
   }
 }
 
-if (Platform.OS === 'android') {
+if (Platform.OS === 'android' && NativeShikiBridge) {
   initializeShikiBridge()
 }
