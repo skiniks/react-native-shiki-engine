@@ -5917,6 +5917,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-de-morgan@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "eslint-plugin-de-morgan@npm:1.2.0"
+  peerDependencies:
+    eslint: ">=8.0.0"
+  checksum: 10/aaa57b5f97a17b8d6cb2d543a4c9f019f670f0ac35f2d941eb2bfd7fd40f56c81e3ce80455c560bd6ee1d31fe1455f56f2b2e42fcec5d6cb226450f6db9583f5
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-es-x@npm:^7.8.0":
   version: 7.8.0
   resolution: "eslint-plugin-es-x@npm:7.8.0"
@@ -10846,6 +10855,7 @@ __metadata:
     "@types/react": "npm:^18.3.3"
     del-cli: "npm:^6.0.0"
     eslint: "npm:^9.20.0"
+    eslint-plugin-de-morgan: "npm:^1.2.0"
     eslint-plugin-react-hooks: "npm:^5.1.0"
     eslint-plugin-react-refresh: "npm:^0.4.19"
     jiti: "npm:^2.4.2"
