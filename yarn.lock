@@ -3462,31 +3462,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shikijs/langs@npm:^2.3.2":
-  version: 2.4.1
-  resolution: "@shikijs/langs@npm:2.4.1"
+"@shikijs/langs@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@shikijs/langs@npm:3.2.1"
   dependencies:
-    "@shikijs/types": "npm:2.4.1"
-  checksum: 10/402c41a1fc98a5f5cee3a74413b791d73a75672c2637d7a40539e5f2f97bcaa744a720bbee475f466d78444a2f9e0367f23611e41fa8cc138962a30146f5b63a
+    "@shikijs/types": "npm:3.2.1"
+  checksum: 10/ccda5e09d67a2d4ad5aa6a06a9f85f9efb96a6c5cf2a6e0aa1dff2f0283ab4140fc12609975bb249b81c921469bfe9d004fcea7f45c6363385c639fbd5256310
   languageName: node
   linkType: hard
 
-"@shikijs/themes@npm:^2.3.2":
-  version: 2.4.1
-  resolution: "@shikijs/themes@npm:2.4.1"
+"@shikijs/themes@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@shikijs/themes@npm:3.2.1"
   dependencies:
-    "@shikijs/types": "npm:2.4.1"
-  checksum: 10/0e2542b6011dd352de65997c05aaa050f090a0f80e684869cb4f4f4ead5f82672fa71a9c8230e3fcc48647a80fefbb69b0bbdc6cdeaee6ffbe64a5d6a53e5174
+    "@shikijs/types": "npm:3.2.1"
+  checksum: 10/ab27aff5437ec85010899545058640ad2c41e935b74b4213300609ea62a8dd5b84229cd15f491650ce05b7c6f965beadfe67aa53de022fa0a1cb48f19ab59865
   languageName: node
   linkType: hard
 
-"@shikijs/types@npm:2.4.1":
-  version: 2.4.1
-  resolution: "@shikijs/types@npm:2.4.1"
+"@shikijs/types@npm:3.2.1":
+  version: 3.2.1
+  resolution: "@shikijs/types@npm:3.2.1"
   dependencies:
     "@shikijs/vscode-textmate": "npm:^10.0.2"
     "@types/hast": "npm:^3.0.4"
-  checksum: 10/d3d21c211513832d621ace257823fae7c90c74acf547f559221c36882f56aa21fb3ea746fcbface0e25c84c2eb295a81b1570220ff60e597a235321d0265ef25
+  checksum: 10/a9a70a98daf93041ae5199714fe0a7cfae8ba82f31967c3f349da83ca2b16fbaeab3e8ce3cf63672c09ed85da34093f94e7203f46722c88764f314dbe4c8d21c
   languageName: node
   linkType: hard
 
@@ -10961,8 +10961,8 @@ __metadata:
     "@react-native-community/cli-platform-ios": "npm:15.1.3"
     "@react-native/babel-preset": "npm:0.77.0"
     "@react-native/metro-config": "npm:0.77.0"
-    "@shikijs/langs": "npm:^2.3.2"
-    "@shikijs/themes": "npm:^2.3.2"
+    "@shikijs/langs": "npm:^3.2.1"
+    "@shikijs/themes": "npm:^3.2.1"
     react: "npm:18.3.1"
     react-native: "npm:0.77.0"
     react-native-shiki: "workspace:^"
