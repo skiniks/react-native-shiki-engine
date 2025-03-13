@@ -48,9 +48,12 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
     private val SYSTEM_FONTS = mapOf(
       "SFMono-Regular" to "monospace",
       "Menlo-Regular" to "monospace",
+      "Menlo" to "monospace",
       "monospace" to "monospace",
       "SF-Mono" to "monospace",
-      "Menlo" to "monospace"
+      "Courier" to "serif-monospace",
+      "Monaco" to "sans-serif-monospace",
+      "System" to "sans-serif-monospace"
     )
 
     private var libraryLoaded = false
@@ -202,9 +205,26 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
   }
 
   fun setFontFamily(family: String?) {
-    fontFamily = family
-    updateFont()
-    processTextWithBatches()
+    Log.d(TAG, "Setting fontFamily: $family (previous: $fontFamily)")
+
+    // Only update if the font family has changed
+    if (family != fontFamily) {
+      fontFamily = family
+      Log.d(TAG, "Font family changed, updating font")
+      updateFont()
+
+      // Make sure to reapply text formatting
+      if (!text.isEmpty() && tokens != null) {
+        Log.d(TAG, "Reapplying text formatting after font family change")
+        applyTextFormatting()
+      }
+
+      // Force a layout update
+      requestLayout()
+      invalidate()
+    } else {
+      Log.d(TAG, "Font family unchanged, skipping update")
+    }
   }
 
   fun setFontWeight(fontWeight: String?) {
@@ -335,29 +355,45 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
     try {
       Log.d(TAG, "Updating font to family: $fontFamily, weight: $fontWeight, style: $fontStyle")
 
-      // Determine the typeface style based on fontWeight and fontStyle
       var typefaceStyle = Typeface.NORMAL
-
-      if (fontWeight == "bold" || fontWeight == "semibold" || fontWeight == "medium") {
-        typefaceStyle = typefaceStyle or Typeface.BOLD
+      if (fontWeight == "bold") {
+        typefaceStyle = Typeface.BOLD
+      } else if (fontWeight == "medium") {
+        // Medium is not directly supported, use BOLD
+        typefaceStyle = Typeface.BOLD
       }
 
       if (fontStyle == "italic") {
         typefaceStyle = typefaceStyle or Typeface.ITALIC
       }
 
-      // Try to create the typeface with the provided font family
-      val typeface = if (fontFamily != null) {
-        try {
-          // Try to use the exact font family name provided
-          Typeface.create(fontFamily, typefaceStyle)
-        } catch (e: Exception) {
-          Log.w(TAG, "Could not create typeface with font family '$fontFamily', falling back to monospace", e)
-          // Fall back to monospace if the provided font family doesn't work
-          Typeface.create("monospace", typefaceStyle)
+      // Map the font family to a system font if needed
+      val mappedFontFamily = if (fontFamily != null) {
+        val systemFont = SYSTEM_FONTS[fontFamily]
+        if (systemFont != null) {
+          Log.d(TAG, "Mapped font family '$fontFamily' to system font '$systemFont'")
+          systemFont
+        } else {
+          Log.d(TAG, "Using font family '$fontFamily' directly (no mapping found)")
+          // If no mapping found, default to monospace for code
+          Log.d(TAG, "No mapping found for '$fontFamily', defaulting to monospace")
+          "monospace"
         }
       } else {
-        // Default to monospace if no font family is provided
+        "monospace"
+      }
+
+      // Try to create the typeface with the provided font family
+      val typeface = try {
+        // Try to use the exact font family name provided
+        val tf = Typeface.create(mappedFontFamily, typefaceStyle)
+        Log.d(TAG, "Created typeface with font family '$mappedFontFamily' and style $typefaceStyle")
+        // Log additional typeface information
+        Log.d(TAG, "Typeface details - isBold: ${tf.isBold}, isItalic: ${tf.isItalic}")
+        tf
+      } catch (e: Exception) {
+        Log.w(TAG, "Could not create typeface with font family '$mappedFontFamily', falling back to monospace", e)
+        // Fall back to monospace if the provided font family doesn't work
         Typeface.create("monospace", typefaceStyle)
       }
 
@@ -365,9 +401,15 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
 
       Log.d(TAG, "Font updated successfully with style $typefaceStyle")
 
-      // Force a redraw
+      // Force a redraw and reapply text formatting
       textView.invalidate()
       invalidate()
+
+      // If we have text and tokens, reapply the formatting
+      if (!text.isEmpty() && tokens != null) {
+        Log.d(TAG, "Reapplying text formatting after font update")
+        applyTextFormatting()
+      }
     } catch (e: Exception) {
       Log.e(TAG, "Error updating font: ${e.message}", e)
       // Fallback to default monospace font
@@ -1083,6 +1125,26 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
                 start + length,
                 SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
               )
+            }
+
+            // Apply font family
+            if (this.fontFamily != null) {
+              try {
+                // Map the font family to a system font if needed
+                val mappedFontFamily = SYSTEM_FONTS[fontFamily] ?: "monospace"
+                Log.d(TAG, "Applying font family to token: '$mappedFontFamily' (original: '$fontFamily')")
+
+                // For Android API 28+, we could use TypefaceSpan(fontFamily) directly
+                // But for compatibility, we'll use the string-based constructor
+                spannableBuilder.setSpan(
+                  TypefaceSpan(mappedFontFamily),
+                  start,
+                  start + length,
+                  SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+              } catch (e: Exception) {
+                Log.e(TAG, "Error applying font family: ${e.message}", e)
+              }
             }
 
             // Apply underline
