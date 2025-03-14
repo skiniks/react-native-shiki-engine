@@ -16,6 +16,7 @@ using namespace facebook::react;
 @end
 
 #import "highlighter/cache/CacheManager.h"
+#import "highlighter/core/Configuration.h"
 #import "highlighter/grammar/Grammar.h"
 #import "highlighter/theme/Theme.h"
 #import "highlighter/theme/ThemeParser.h"
@@ -24,8 +25,18 @@ using namespace facebook::react;
 @implementation RCTShikiHighlighterModule {
   __weak RCTBridge *_bridge;
   shiki::ShikiTokenizer *tokenizer_;
+
+  // Maps to store multiple grammars and themes
+  NSMutableDictionary<NSString *, std::shared_ptr<shiki::Grammar>> *grammars_;
+  NSMutableDictionary<NSString *, std::shared_ptr<shiki::Theme>> *themes_;
+
+  // Default language and theme
+  NSString *defaultLanguage_;
+  NSString *defaultTheme_;
+
   std::shared_ptr<shiki::Grammar> currentGrammar_;
   std::shared_ptr<shiki::Theme> currentTheme_;
+
   dispatch_queue_t highlightQueue_;
 }
 
@@ -45,6 +56,9 @@ RCT_EXPORT_MODULE(ShikiHighlighter)
     highlightQueue_ =
         dispatch_queue_create("com.shiki.highlight", DISPATCH_QUEUE_SERIAL);
     _hasListeners = NO;
+
+    grammars_ = [NSMutableDictionary dictionary];
+    themes_ = [NSMutableDictionary dictionary];
 
     [self setupErrorHandling];
   }
@@ -122,8 +136,8 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
                           theme resolve : (RCTPromiseResolveBlock)
                               resolve reject : (RCTPromiseRejectBlock)reject)
 {
-  if (!code || !language || !theme) {
-    reject(@"invalid_params", @"Code, language, and theme are required", nil);
+  if (!code) {
+    resolve(@[]);
     return;
   }
 
@@ -134,38 +148,53 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
       return;
 
     @try {
+      // Use specified language/theme or defaults
+      NSString *lang = language ?: strongSelf->defaultLanguage_;
+      NSString *thm = theme ?: strongSelf->defaultTheme_;
+
+      // Check if language and theme are loaded
+      if (!lang || !strongSelf->grammars_[lang]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          reject(@"invalid_language", @"Language not loaded", nil);
+        });
+        return;
+      }
+
+      if (!thm || !strongSelf->themes_[thm]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          reject(@"invalid_theme", @"Theme not loaded", nil);
+        });
+        return;
+      }
+
+      // Tokenize with the specified language and theme
       std::string codeStr = std::string([code UTF8String]);
-      auto tokens = strongSelf->tokenizer_->tokenize(codeStr);
+      std::vector<shiki::Token> tokens = strongSelf->tokenizer_->tokenize(
+          codeStr, [lang UTF8String], [thm UTF8String]);
 
-      NSLog(@"Generated %lu tokens", (unsigned long)tokens.size());
-
-      NSMutableArray *result = [NSMutableArray arrayWithCapacity:tokens.size()];
+      // Convert to JS array
+      NSMutableArray *result = [NSMutableArray array];
       for (const auto &token : tokens) {
+        NSMutableDictionary *tokenDict = [NSMutableDictionary dictionary];
+        tokenDict[@"start"] = @(token.start);
+        tokenDict[@"length"] = @(token.length);
+
+        NSMutableArray *scopes = [NSMutableArray array];
+        for (const auto &scope : token.scopes) {
+          [scopes addObject:@(scope.c_str())];
+        }
+        tokenDict[@"scopes"] = scopes;
+
         NSMutableDictionary *style = [NSMutableDictionary dictionary];
-        [style setObject:@(token.style.color.c_str()) forKey:@"color"];
-
-        if (!token.style.backgroundColor.empty()) {
-          [style setObject:@(token.style.backgroundColor.c_str())
-                    forKey:@"backgroundColor"];
-        }
-        if (token.style.bold) {
-          [style setObject:@(YES) forKey:@"bold"];
-        }
-        if (token.style.italic) {
-          [style setObject:@(YES) forKey:@"italic"];
-        }
-        if (token.style.underline) {
-          [style setObject:@(YES) forKey:@"underline"];
-        }
-
-        NSMutableDictionary *tokenDict = @{
-          @"start" : @(token.start),
-          @"length" : @(token.length),
-          @"scope" :
-              [NSString stringWithUTF8String:token.getCombinedScope().c_str()],
-          @"style" : style
-        }
-                                             .mutableCopy;
+        style[@"color"] =
+            token.style.color ? @(token.style.color) : [NSNull null];
+        style[@"backgroundColor"] = token.style.backgroundColor
+                                        ? @(token.style.backgroundColor)
+                                        : [NSNull null];
+        style[@"bold"] = @(token.style.bold);
+        style[@"italic"] = @(token.style.italic);
+        style[@"underline"] = @(token.style.underline);
+        tokenDict[@"style"] = style;
 
         [result addObject:tokenDict];
       }
@@ -175,7 +204,7 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
       });
     } @catch (NSException *e) {
       dispatch_async(dispatch_get_main_queue(), ^{
-        reject(@"highlight_error", e.reason, nil);
+        reject(@"tokenize_error", e.reason, nil);
       });
     }
   });
@@ -205,15 +234,30 @@ RCT_EXPORT_METHOD(loadLanguage : (NSString *)language grammarData : (NSString *)
         return;
       }
 
-      strongSelf->currentGrammar_ = shiki::Grammar::fromJson(grammarStr);
-      if (!strongSelf->currentGrammar_) {
+      // Create the grammar
+      auto grammar = shiki::Grammar::fromJson(grammarStr);
+      if (!grammar) {
         dispatch_async(dispatch_get_main_queue(), ^{
           reject(@"grammar_parse_error", @"Failed to parse grammar", nil);
         });
         return;
       }
 
-      strongSelf->tokenizer_->setGrammar(strongSelf->currentGrammar_);
+      // Store in the map
+      strongSelf->grammars_[language] = grammar;
+
+      // Set as default if it's the first one
+      if (!strongSelf->defaultLanguage_) {
+        strongSelf->defaultLanguage_ = language;
+      }
+
+      strongSelf->currentGrammar_ = grammar;
+      strongSelf->tokenizer_->setGrammar(grammar);
+
+      // Add to Configuration
+      auto &config = shiki::Configuration::getInstance();
+      config.addLanguage([language UTF8String], grammar);
+
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(YES));
       });
@@ -242,10 +286,26 @@ RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
 
     try {
       std::string themeStr = std::string([themeData UTF8String]);
-      strongSelf->currentTheme_ = std::make_shared<shiki::Theme>();
-      shiki::ThemeParser parser(strongSelf->currentTheme_.get());
+
+      // Create the theme
+      auto themeObj = std::make_shared<shiki::Theme>();
+      shiki::ThemeParser parser(themeObj.get());
       parser.parseThemeStyle(themeStr);
-      strongSelf->tokenizer_->setTheme(strongSelf->currentTheme_);
+
+      // Store in the map
+      strongSelf->themes_[theme] = themeObj;
+
+      // Set as default if it's the first one
+      if (!strongSelf->defaultTheme_) {
+        strongSelf->defaultTheme_ = theme;
+      }
+
+      strongSelf->currentTheme_ = themeObj;
+      strongSelf->tokenizer_->setTheme(themeObj);
+
+      // Add to Configuration
+      auto &config = shiki::Configuration::getInstance();
+      config.addTheme([theme UTF8String], themeObj);
 
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(true));
@@ -253,6 +313,140 @@ RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
     } catch (const std::exception &e) {
       dispatch_async(dispatch_get_main_queue(), ^{
         reject(@"theme_error", @(e.what()), nil);
+      });
+    }
+  });
+}
+
+RCT_EXPORT_METHOD(setDefaultLanguage : (NSString *)language resolve : (
+    RCTPromiseResolveBlock)resolve reject : (RCTPromiseRejectBlock)reject)
+{
+  if (!language) {
+    reject(@"invalid_params", @"Language is required", nil);
+    return;
+  }
+
+  __weak RCTShikiHighlighterModule *weakSelf = self;
+  dispatch_async(self->highlightQueue_, ^{
+    RCTShikiHighlighterModule *strongSelf = weakSelf;
+    if (!strongSelf)
+      return;
+
+    @try {
+      // Check if the language exists
+      if (!strongSelf->grammars_[language]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          reject(@"invalid_language", @"Language not loaded", nil);
+        });
+        return;
+      }
+
+      // Set as default
+      strongSelf->defaultLanguage_ = language;
+
+      strongSelf->currentGrammar_ = strongSelf->grammars_[language];
+      strongSelf->tokenizer_->setGrammar(strongSelf->currentGrammar_);
+
+      // Update Configuration
+      auto &config = shiki::Configuration::getInstance();
+      config.setDefaultLanguage([language UTF8String]);
+
+      dispatch_async(dispatch_get_main_queue(), ^{
+        resolve(@(YES));
+      });
+    } @catch (NSException *e) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        reject(@"set_default_language_error", e.reason, nil);
+      });
+    }
+  });
+}
+
+RCT_EXPORT_METHOD(setDefaultTheme : (NSString *)theme resolve : (
+    RCTPromiseResolveBlock)resolve reject : (RCTPromiseRejectBlock)reject)
+{
+  if (!theme) {
+    reject(@"invalid_params", @"Theme is required", nil);
+    return;
+  }
+
+  __weak RCTShikiHighlighterModule *weakSelf = self;
+  dispatch_async(self->highlightQueue_, ^{
+    RCTShikiHighlighterModule *strongSelf = weakSelf;
+    if (!strongSelf)
+      return;
+
+    @try {
+      // Check if the theme exists
+      if (!strongSelf->themes_[theme]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          reject(@"invalid_theme", @"Theme not loaded", nil);
+        });
+        return;
+      }
+
+      // Set as default
+      strongSelf->defaultTheme_ = theme;
+
+      strongSelf->currentTheme_ = strongSelf->themes_[theme];
+      strongSelf->tokenizer_->setTheme(strongSelf->currentTheme_);
+
+      // Update Configuration
+      auto &config = shiki::Configuration::getInstance();
+      config.setDefaultTheme([theme UTF8String]);
+
+      dispatch_async(dispatch_get_main_queue(), ^{
+        resolve(@(YES));
+      });
+    } @catch (NSException *e) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        reject(@"set_default_theme_error", e.reason, nil);
+      });
+    }
+  });
+}
+
+RCT_EXPORT_METHOD(getLoadedLanguages : (RCTPromiseResolveBlock)
+                      resolve reject : (RCTPromiseRejectBlock)reject)
+{
+  __weak RCTShikiHighlighterModule *weakSelf = self;
+  dispatch_async(self->highlightQueue_, ^{
+    RCTShikiHighlighterModule *strongSelf = weakSelf;
+    if (!strongSelf)
+      return;
+
+    @try {
+      NSArray *languages = [strongSelf->grammars_ allKeys];
+
+      dispatch_async(dispatch_get_main_queue(), ^{
+        resolve(languages);
+      });
+    } @catch (NSException *e) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        reject(@"get_languages_error", e.reason, nil);
+      });
+    }
+  });
+}
+
+RCT_EXPORT_METHOD(getLoadedThemes : (RCTPromiseResolveBlock)
+                      resolve reject : (RCTPromiseRejectBlock)reject)
+{
+  __weak RCTShikiHighlighterModule *weakSelf = self;
+  dispatch_async(self->highlightQueue_, ^{
+    RCTShikiHighlighterModule *strongSelf = weakSelf;
+    if (!strongSelf)
+      return;
+
+    @try {
+      NSArray *themes = [strongSelf->themes_ allKeys];
+
+      dispatch_async(dispatch_get_main_queue(), ^{
+        resolve(themes);
+      });
+    } @catch (NSException *e) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        reject(@"get_themes_error", e.reason, nil);
       });
     }
   });

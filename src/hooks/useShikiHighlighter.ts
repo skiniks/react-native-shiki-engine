@@ -1,5 +1,5 @@
 import type { Token } from '../specs'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { NativeShikiHighlighter } from '../specs'
 
 // Static cache to track loaded resources
@@ -10,11 +10,11 @@ const loadedResources = {
 }
 
 interface UseShikiHighlighterOptions {
-  code: string
-  lang: string
-  theme: string
-  langData: unknown
-  themeData: unknown
+  code?: string
+  lang?: string
+  theme?: string
+  langData?: unknown
+  themeData?: unknown
 }
 
 interface UseShikiHighlighterResult {
@@ -22,15 +22,19 @@ interface UseShikiHighlighterResult {
   isReady: boolean
   error: string | null
   status: string
+  getLoadedLanguages: () => Promise<string[]>
+  getLoadedThemes: () => Promise<string[]>
+  setDefaultLanguage: (language: string) => Promise<void>
+  setDefaultTheme: (theme: string) => Promise<void>
 }
 
 // Helper function to add delay between operations
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export function useShikiHighlighter({
-  code,
-  lang,
-  theme,
+  code = '',
+  lang = '',
+  theme = '',
   langData,
   themeData,
 }: UseShikiHighlighterOptions): UseShikiHighlighterResult {
@@ -39,6 +43,46 @@ export function useShikiHighlighter({
   const [tokens, setTokens] = useState<Token[]>([])
   const [error, setError] = useState<string | null>(null)
 
+  const getLoadedLanguages = useCallback(async () => {
+    try {
+      return await NativeShikiHighlighter.getLoadedLanguages()
+    }
+    catch (error) {
+      console.error('Error getting loaded languages:', error)
+      return []
+    }
+  }, [])
+
+  const getLoadedThemes = useCallback(async () => {
+    try {
+      return await NativeShikiHighlighter.getLoadedThemes()
+    }
+    catch (error) {
+      console.error('Error getting loaded themes:', error)
+      return []
+    }
+  }, [])
+
+  const setDefaultLanguage = useCallback(async (language: string) => {
+    try {
+      await NativeShikiHighlighter.setDefaultLanguage(language)
+    }
+    catch (error) {
+      console.error('Error setting default language:', error)
+      throw error
+    }
+  }, [])
+
+  const setDefaultTheme = useCallback(async (theme: string) => {
+    try {
+      await NativeShikiHighlighter.setDefaultTheme(theme)
+    }
+    catch (error) {
+      console.error('Error setting default theme:', error)
+      throw error
+    }
+  }, [])
+
   useEffect(() => {
     let isMounted = true
     let loadedLang = false
@@ -46,25 +90,14 @@ export function useShikiHighlighter({
 
     const initializeHighlighter = async () => {
       try {
-        // Validate inputs
-        if (!code) {
-          throw new Error('Code is required')
+        // Skip tokenization if code, lang, or theme is not provided
+        if (!code || !lang || !theme) {
+          return
         }
 
-        if (!lang) {
-          throw new Error('Language is required')
-        }
-
-        if (!theme) {
-          throw new Error('Theme is required')
-        }
-
-        if (!langData) {
-          throw new Error('Language data is required')
-        }
-
-        if (!themeData) {
-          throw new Error('Theme data is required')
+        // Skip if language or theme data is not provided
+        if (!langData || !themeData) {
+          return
         }
 
         // Check if another loading operation is in progress
@@ -234,5 +267,9 @@ export function useShikiHighlighter({
     isReady,
     error,
     status,
+    getLoadedLanguages,
+    getLoadedThemes,
+    setDefaultLanguage,
+    setDefaultTheme,
   }
 }

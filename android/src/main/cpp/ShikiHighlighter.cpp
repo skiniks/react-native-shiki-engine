@@ -67,6 +67,8 @@ std::string languagesPath;
 
 std::mutex themeMutex;
 
+static std::unordered_map<std::string, std::shared_ptr<shiki::Theme>> loadedThemes;
+
 jni::local_ref<jni::JClass> findClassLocal(const char* name) {
   return jni::findClassLocal(name);
 }
@@ -80,8 +82,16 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
       makeNativeMethod("setupErrorCallback", ShikiHighlighterImpl::setupErrorCallback),
       makeNativeMethod("registerRecoveryStrategies", ShikiHighlighterImpl::registerRecoveryStrategies),
       makeNativeMethod("getStyleCacheNative", ShikiHighlighterImpl::getStyleCacheNative),
-      makeNativeMethod("loadGrammarNative", ShikiHighlighterImpl::loadGrammarNative),
-      makeNativeMethod("loadThemeNative", ShikiHighlighterImpl::loadThemeNative),
+      makeNativeMethod(
+        "loadGrammarNative",
+        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J",
+        ShikiHighlighterImpl::loadGrammarNative
+      ),
+      makeNativeMethod(
+        "loadThemeNative",
+        "(Ljava/lang/String;Ljava/lang/String;)J",
+        ShikiHighlighterImpl::loadThemeNative
+      ),
       makeNativeMethod(
         "tokenizeNative",
         "(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;",
@@ -133,11 +143,11 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
     LOGD("registerRecoveryStrategies called");
   }
 
-  void
+  jlong
   loadGrammarNative(jni::alias_ref<jstring> name, jni::alias_ref<jstring> scopeName, jni::alias_ref<jstring> json) {
     if (!name || !scopeName || !json) {
       LOGE("loadGrammarNative: One or more parameters are null");
-      return;
+      return 0;
     }
 
     try {
@@ -151,13 +161,13 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
         // Parse the grammar JSON properly using the fromJson method
         if (!shiki::Grammar::validateJson(jsonStr)) {
           LOGE("Invalid grammar JSON format for %s", nameStr.c_str());
-          return;
+          return 0;
         }
 
         auto grammar = shiki::Grammar::fromJson(jsonStr);
         if (!grammar) {
           LOGE("Failed to parse grammar JSON for %s", nameStr.c_str());
-          return;
+          return 0;
         }
 
         // Set the name and scope name
@@ -171,21 +181,27 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
         // Store the grammar in the class member
         currentGrammar = grammar;
         LOGD("Grammar loaded successfully: %s with %zu patterns", nameStr.c_str(), grammar->getPatterns().size());
+
+        // Return the pointer to the grammar object as a long value
+        return reinterpret_cast<jlong>(grammar.get());
       } catch (const std::exception& e) {
         LOGE("Error creating grammar object: %s", e.what());
         // Don't rethrow, just log the error and return
+        return 0;
       }
     } catch (const std::exception& e) {
       LOGE("Error in loadGrammarNative: %s", e.what());
+      return 0;
     } catch (...) {
       LOGE("Unknown error in loadGrammarNative");
+      return 0;
     }
   }
 
-  void loadThemeNative(jni::alias_ref<jstring> name, jni::alias_ref<jstring> jsonStr) {
+  jlong loadThemeNative(jni::alias_ref<jstring> name, jni::alias_ref<jstring> jsonStr) {
     if (!name || !jsonStr) {
       LOGE("loadThemeNative: name or jsonStr is null");
-      return;
+      return 0;
     }
 
     try {
@@ -195,6 +211,26 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
       LOGD("Loading theme: %s", nameStr.c_str());
 
       try {
+        // Check if theme is already loaded
+        {
+          std::lock_guard<std::mutex> lock(themeMutex);
+          auto it = loadedThemes.find(nameStr);
+          if (it != loadedThemes.end()) {
+            LOGD("Theme already loaded, reusing: %s", nameStr.c_str());
+            // Store the theme in the class member
+            currentTheme = it->second;
+
+            // Set the theme in the tokenizer
+            auto& tokenizer = shiki::ShikiTokenizer::getInstance();
+            tokenizer.setTheme(currentTheme);
+
+            LOGD("Theme reused successfully: %s", nameStr.c_str());
+
+            // Return the pointer to the theme object as a long value
+            return reinterpret_cast<jlong>(currentTheme.get());
+          }
+        }
+
         // Create a new theme object
         auto theme = std::make_shared<shiki::Theme>(nameStr);
 
@@ -217,6 +253,12 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
           LOGD("No theme rules found!");
         }
 
+        // Store the theme in the static map to prevent destruction
+        {
+          std::lock_guard<std::mutex> lock(themeMutex);
+          loadedThemes[nameStr] = theme;
+        }
+
         // Store the theme in the class member
         currentTheme = theme;
 
@@ -225,14 +267,17 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
         tokenizer.setTheme(currentTheme);
 
         LOGD("Theme loaded successfully: %s", nameStr.c_str());
+
+        // Return the pointer to the theme object as a long value
+        return reinterpret_cast<jlong>(theme.get());
       } catch (const std::exception& e) {
         LOGE("Error creating theme object: %s", e.what());
         // Don't rethrow, just log the error and return
+        return 0;
       }
     } catch (const std::exception& e) {
       LOGE("Error in loadThemeNative: %s", e.what());
-    } catch (...) {
-      LOGE("Unknown error in loadThemeNative");
+      return 0;
     }
   }
 
@@ -442,6 +487,25 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
       // Check if we already have this theme loaded and set
       if (currentTheme && currentTheme->name == themeName && tokenizer.getTheme() == currentTheme) {
         LOGD("Theme %s is already set, skipping", themeName.c_str());
+        return;
+      }
+
+      // Look for the theme in our static map
+      std::shared_ptr<shiki::Theme> themeToSet;
+      {
+        std::lock_guard<std::mutex> lock(themeMutex);
+        auto it = loadedThemes.find(themeName);
+        if (it != loadedThemes.end()) {
+          themeToSet = it->second;
+        }
+      }
+
+      // If we found the theme, set it
+      if (themeToSet) {
+        LOGD("Using already loaded theme from map: %s", themeName.c_str());
+        currentTheme = themeToSet;
+        tokenizer.setTheme(currentTheme);
+        LOGD("Theme set successfully: %s", themeName.c_str());
         return;
       }
 

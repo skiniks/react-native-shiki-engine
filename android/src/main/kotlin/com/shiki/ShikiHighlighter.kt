@@ -108,6 +108,12 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   @OptIn(ExperimentalCoroutinesApi::class)
   private val highlightQueue = Dispatchers.IO.limitedParallelism(1)
 
+  private val grammars = mutableMapOf<String, Long>() // Name -> Native pointer
+  private val themes = mutableMapOf<String, Long>() // Name -> Native pointer
+
+  private var defaultLanguage: String? = null
+  private var defaultTheme: String? = null
+
   private var currentGrammar: Long = 0
   private var currentTheme: Long = 0
 
@@ -199,22 +205,22 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun loadGrammar(name: String, scopeName: String, json: String, promise: Promise) {
-    scope.launch(highlightQueue) {
-      try {
-        loadGrammarNative(name, scopeName, json)
-        promise.resolve(null)
-      } catch (e: Exception) {
-        promise.reject("LOAD_GRAMMAR_ERROR", e)
-      }
-    }
-  }
-
-  @ReactMethod
   fun loadTheme(name: String, json: String, promise: Promise) {
     scope.launch(highlightQueue) {
       try {
-        loadThemeNative(name, json)
+        // Load the theme
+        val themePtr = loadThemeNative(name, json)
+
+        // Store in the map
+        themes[name] = themePtr
+
+        // Set as default if it's the first one
+        if (defaultTheme == null) {
+          defaultTheme = name
+        }
+
+        currentTheme = themePtr
+
         promise.resolve(true)
       } catch (e: Exception) {
         promise.reject("LOAD_THEME_ERROR", e)
@@ -223,13 +229,23 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun tokenize(code: String, language: String, promise: Promise) {
+  fun tokenize(code: String, language: String?, theme: String?, promise: Promise) {
     scope.launch(highlightQueue) {
       try {
-        val tokens = tokenizeNative(code, language)
+        // Use specified language/theme or defaults
+        val lang = language ?: defaultLanguage ?: throw Exception("No language specified or loaded")
+        val thm = theme ?: defaultTheme ?: throw Exception("No theme specified or loaded")
+
+        // Get grammar and theme pointers
+        val grammarPtr = grammars[lang] ?: throw Exception("Language not loaded: $lang")
+        val themePtr = themes[thm] ?: throw Exception("Theme not loaded: $thm")
+
+        // Tokenize with the specified language and theme
+        val tokens = tokenizeWithLangThemeNative(code, grammarPtr, themePtr)
+
         val array = Arguments.createArray()
 
-        Log.d(TAG, "Tokenized ${tokens.size} tokens for language: $language")
+        Log.d(TAG, "Tokenized ${tokens.size} tokens for language: $lang, theme: $thm")
 
         tokens.forEach { token ->
           val tokenMap = Arguments.createMap()
@@ -243,60 +259,16 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
           tokenMap.putArray("scopes", scopesArray)
 
           val styleMap = Arguments.createMap()
-
-          // Use the token's color if available
-          var color = token.style.color
-
-          // If no color is available, try to resolve from each scope in order
-          if (color.isNullOrEmpty() && token.scopes.isNotEmpty()) {
-            // Try each scope in order until we find a color
-            for (scope in token.scopes) {
-              try {
-                val resolvedStyle = resolveStyleNative(scope)
-                if (!resolvedStyle.color.isNullOrEmpty()) {
-                  color = resolvedStyle.color
-                  Log.d(TAG, "Resolved color $color for scope: $scope")
-                  break
-                }
-              } catch (e: Exception) {
-                Log.e(TAG, "Error resolving style for scope: $scope", e)
-                // Continue to the next scope
-              }
-            }
-
-            // If still no color, try the combined scope
-            if (color.isNullOrEmpty() && token.scopes.size > 1) {
-              val combinedScope = token.scopes.joinToString(" ")
-              try {
-                val resolvedStyle = resolveStyleNative(combinedScope)
-                if (!resolvedStyle.color.isNullOrEmpty()) {
-                  color = resolvedStyle.color
-                  Log.d(TAG, "Resolved color $color for combined scope: $combinedScope")
-                }
-              } catch (e: Exception) {
-                Log.e(TAG, "Error resolving style for combined scope: $combinedScope", e)
-              }
-            }
-          }
-
-          // Default to white if no color was found
-          styleMap.putString("color", color ?: "#ffffff")
+          styleMap.putString("color", token.style.color ?: "#ffffff")
           styleMap.putString("backgroundColor", token.style.backgroundColor ?: "#00000000")
           styleMap.putBoolean("bold", token.style.bold)
           styleMap.putBoolean("italic", token.style.italic)
           styleMap.putBoolean("underline", token.style.underline)
           tokenMap.putMap("style", styleMap)
 
-          // Log token colors for debugging
-          if (token.scopes.isNotEmpty() && color != "#ffffff" && color != "#F8F8F2") {
-            Log.d(TAG, "Token with scope '${token.scopes.joinToString(", ")}' has color: $color")
-          }
-
           array.pushMap(tokenMap)
-
-          // Log token details for debugging
-          Log.d(TAG, "Token: start=${token.start}, length=${token.length}, color=${token.style.color}, scopes=${token.scopes}")
         }
+
         promise.resolve(array)
       } catch (e: Exception) {
         Log.e(TAG, "Error in tokenize: ${e.message}", e)
@@ -306,73 +278,108 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun codeToTokens(code: String, lang: String, theme: String, promise: Promise) {
+  fun setDefaultLanguage(language: String, promise: Promise) {
     scope.launch(highlightQueue) {
       try {
-        Log.d(TAG, "codeToTokens called with code length: ${code.length}, lang: $lang, theme: $theme")
-
-        // Set the theme before tokenizing - simplified logic
-        try {
-          if (!theme.isNullOrEmpty()) {
-            Log.d(TAG, "Setting theme for tokenization: $theme")
-
-            // Get current theme
-            val currentTheme = try {
-              getThemeNative()
-            } catch (e: Exception) {
-              ""
-            }
-
-            // Only set the theme if it's different from the current one
-            if (currentTheme != theme) {
-              Log.d(TAG, "Current theme is '$currentTheme', setting new theme: $theme")
-              setThemeNative(theme)
-            } else {
-              Log.d(TAG, "Theme '$theme' is already set, skipping")
-            }
-          }
-        } catch (e: Exception) {
-          Log.w(TAG, "Error setting theme, will use default: ${e.message}")
-          // Continue with tokenization even if theme setting fails
+        // Check if the language exists
+        if (!grammars.containsKey(language)) {
+          promise.reject("INVALID_LANGUAGE", "Language not loaded: $language")
+          return@launch
         }
 
-        // Tokenize the code
-        val tokens = tokenizeNative(code, lang)
+        // Set as default
+        defaultLanguage = language
 
-        // Create response array
-        val response = Arguments.createArray()
+        currentGrammar = grammars[language]!!
 
-        // Process tokens
-        for (token in tokens) {
-          val tokenMap = Arguments.createMap()
-          tokenMap.putInt("start", token.start)
-          tokenMap.putInt("length", token.length)
-
-          // Add scopes
-          val scopesArray = Arguments.createArray()
-          token.scopes.forEach { scope ->
-            scopesArray.pushString(scope)
-          }
-          tokenMap.putArray("scopes", scopesArray)
-
-          // Add style
-          val styleMap = Arguments.createMap()
-          // Ensure color is never null - use default if null
-          styleMap.putString("color", token.style.color ?: "#ffffff")
-          // Ensure backgroundColor is never null - use default if null
-          styleMap.putString("backgroundColor", token.style.backgroundColor ?: "#00000000")
-          styleMap.putBoolean("bold", token.style.bold)
-          styleMap.putBoolean("italic", token.style.italic)
-          styleMap.putBoolean("underline", token.style.underline)
-          tokenMap.putMap("style", styleMap)
-
-          response.pushMap(tokenMap)
-        }
-
-        promise.resolve(response)
+        promise.resolve(true)
       } catch (e: Exception) {
-        Log.e(TAG, "Error in codeToTokens: ${e.message}", e)
-        promise.reject("TOKENIZE_ERROR", "Failed to tokenize code: ${e.message}", e)
+        promise.reject("SET_DEFAULT_LANGUAGE_ERROR", e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun setDefaultTheme(theme: String, promise: Promise) {
+    scope.launch(highlightQueue) {
+      try {
+        // Check if the theme exists
+        if (!themes.containsKey(theme)) {
+          promise.reject("INVALID_THEME", "Theme not loaded: $theme")
+          return@launch
+        }
+
+        // Set as default
+        defaultTheme = theme
+
+        currentTheme = themes[theme]!!
+
+        promise.resolve(true)
+      } catch (e: Exception) {
+        promise.reject("SET_DEFAULT_THEME_ERROR", e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun getLoadedLanguages(promise: Promise) {
+    scope.launch(highlightQueue) {
+      try {
+        val languages = grammars.keys.toList()
+        val array = Arguments.createArray()
+
+        languages.forEach { lang ->
+          array.pushString(lang)
+        }
+
+        promise.resolve(array)
+      } catch (e: Exception) {
+        promise.reject("GET_LANGUAGES_ERROR", e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun getLoadedThemes(promise: Promise) {
+    scope.launch(highlightQueue) {
+      try {
+        val themesList = themes.keys.toList()
+        val array = Arguments.createArray()
+
+        themesList.forEach { theme ->
+          array.pushString(theme)
+        }
+
+        promise.resolve(array)
+      } catch (e: Exception) {
+        promise.reject("GET_THEMES_ERROR", e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun loadLanguage(language: String, grammarData: String, promise: Promise) {
+    scope.launch(highlightQueue) {
+      try {
+        // Extract scope name from grammar data
+        val scopeName = "source.$language" // This is a simplification
+
+        // Load the grammar
+        val grammarPtr = loadGrammarNative(language, scopeName, grammarData)
+
+        // Store in the map
+        grammars[language] = grammarPtr
+
+        // Set as default if it's the first one
+        if (defaultLanguage == null) {
+          defaultLanguage = language
+        }
+
+        currentGrammar = grammarPtr
+
+        promise.resolve(true)
+      } catch (e: Exception) {
+        promise.reject("LOAD_LANGUAGE_ERROR", e)
       }
     }
   }
@@ -583,38 +590,73 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun loadLanguage(language: String, grammarData: String, promise: Promise) {
+  fun codeToTokens(code: String, lang: String, theme: String, promise: Promise) {
     scope.launch(highlightQueue) {
       try {
-        // Extract scope name from grammar data
-        val scopeName = "source.$language" // This is a simplification
-        loadGrammarNative(language, scopeName, grammarData)
-        promise.resolve(true)
+        Log.d(TAG, "codeToTokens called with code length: ${code.length}, lang: $lang, theme: $theme")
+
+        // Set the theme before tokenizing
+        try {
+          if (!theme.isNullOrEmpty()) {
+            Log.d(TAG, "Setting theme for tokenization: $theme")
+
+            // Get current theme
+            val currentTheme = try {
+              getThemeNative()
+            } catch (e: Exception) {
+              ""
+            }
+
+            // Only set the theme if it's different from the current one
+            if (currentTheme != theme) {
+              Log.d(TAG, "Current theme is '$currentTheme', setting new theme: $theme")
+              setThemeNative(theme)
+            } else {
+              Log.d(TAG, "Theme '$theme' is already set, skipping")
+            }
+          }
+        } catch (e: Exception) {
+          Log.w(TAG, "Error setting theme, will use default: ${e.message}")
+          // Continue with tokenization even if theme setting fails
+        }
+
+        // Tokenize the code
+        val tokens = tokenizeNative(code, lang)
+
+        // Create response array
+        val response = Arguments.createArray()
+
+        // Process tokens
+        for (token in tokens) {
+          val tokenMap = Arguments.createMap()
+          tokenMap.putInt("start", token.start)
+          tokenMap.putInt("length", token.length)
+
+          // Add scopes
+          val scopesArray = Arguments.createArray()
+          token.scopes.forEach { scope ->
+            scopesArray.pushString(scope)
+          }
+          tokenMap.putArray("scopes", scopesArray)
+
+          // Add style
+          val styleMap = Arguments.createMap()
+          // Ensure color is never null - use default if null
+          styleMap.putString("color", token.style.color ?: "#ffffff")
+          // Ensure backgroundColor is never null - use default if null
+          styleMap.putString("backgroundColor", token.style.backgroundColor ?: "#00000000")
+          styleMap.putBoolean("bold", token.style.bold)
+          styleMap.putBoolean("italic", token.style.italic)
+          styleMap.putBoolean("underline", token.style.underline)
+          tokenMap.putMap("style", styleMap)
+
+          response.pushMap(tokenMap)
+        }
+
+        promise.resolve(response)
       } catch (e: Exception) {
-        promise.reject("LOAD_LANGUAGE_ERROR", e)
-      }
-    }
-  }
-
-  @ReactMethod
-  fun resolveStyle(scope: String, promise: Promise) {
-    this.scope.launch(highlightQueue) {
-      try {
-        val style = resolveStyleNative(scope)
-        val styleMap = Arguments.createMap()
-
-        // Ensure color is never null - use default if null
-        styleMap.putString("color", style.color ?: "#ffffff")
-        // Ensure backgroundColor is never null - use default if null
-        styleMap.putString("backgroundColor", style.backgroundColor ?: "#00000000")
-        styleMap.putBoolean("bold", style.bold)
-        styleMap.putBoolean("italic", style.italic)
-        styleMap.putBoolean("underline", style.underline)
-
-        promise.resolve(styleMap)
-      } catch (e: Exception) {
-        Log.e(TAG, "Error in resolveStyle: ${e.message}", e)
-        promise.reject("RESOLVE_STYLE_ERROR", e)
+        Log.e(TAG, "Error in codeToTokens: ${e.message}", e)
+        promise.reject("TOKENIZE_ERROR", "Failed to tokenize code: ${e.message}", e)
       }
     }
   }
@@ -632,13 +674,16 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   private external fun getStyleCacheNative(): HybridData
 
   @DoNotStrip
-  private external fun loadGrammarNative(name: String, scopeName: String, json: String)
+  private external fun loadGrammarNative(name: String, scopeName: String, json: String): Long
 
   @DoNotStrip
-  private external fun loadThemeNative(name: String, json: String)
+  private external fun loadThemeNative(name: String, json: String): Long
 
   @DoNotStrip
   private external fun tokenizeNative(code: String, language: String): ArrayList<Token>
+
+  @DoNotStrip
+  private external fun tokenizeWithLangThemeNative(code: String, grammarPtr: Long, themePtr: Long): ArrayList<Token>
 
   @DoNotStrip
   private external fun enableCacheNative(enabled: Boolean)

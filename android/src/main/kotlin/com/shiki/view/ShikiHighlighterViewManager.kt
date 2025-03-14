@@ -99,4 +99,16 @@ class ShikiHighlighterViewManager :
     Log.d(TAG, "Setting scrollEnabled: $enabled")
     view.setScrollEnabled(enabled)
   }
+
+  @ReactProp(name = "language")
+  override fun setLanguage(view: ShikiHighlighterView, language: String?) {
+    Log.d(TAG, "Setting language: $language")
+    view.setLanguage(language)
+  }
+
+  @ReactProp(name = "theme")
+  override fun setTheme(view: ShikiHighlighterView, theme: String?) {
+    Log.d(TAG, "Setting theme: $theme")
+    view.setTheme(theme)
+  }
 }

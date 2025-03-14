@@ -12,6 +12,10 @@ export {
 
 export {
   codeToTokens,
+  getLoadedLanguages,
+  getLoadedThemes,
   loadLanguage,
   loadTheme,
+  setDefaultLanguage,
+  setDefaultTheme,
 } from './shorthands'

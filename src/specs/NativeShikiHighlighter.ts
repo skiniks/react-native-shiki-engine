@@ -12,7 +12,7 @@ export interface ThemeStyle {
 export interface Token {
   start: number
   length: number
-  scope: string
+  scopes: string[]
   style: ThemeStyle
 }
 
@@ -30,8 +30,9 @@ export interface Spec extends TurboModule {
   // Required methods
   /**
    * Convert code to tokens using the specified language and theme
+   * If language or theme are not provided, the default ones will be used
    */
-  codeToTokens: (code: string, language: string, theme: string) => Promise<Token[]>
+  codeToTokens: (code: string, language?: string, theme?: string) => Promise<Token[]>
 
   /**
    * Load a language grammar into the highlighter
@@ -42,6 +43,26 @@ export interface Spec extends TurboModule {
    * Load a theme into the highlighter
    */
   loadTheme: (theme: string, themeData: string) => Promise<boolean>
+
+  /**
+   * Set the default language to use when none is specified
+   */
+  setDefaultLanguage: (language: string) => Promise<boolean>
+
+  /**
+   * Set the default theme to use when none is specified
+   */
+  setDefaultTheme: (theme: string) => Promise<boolean>
+
+  /**
+   * Get a list of all loaded languages
+   */
+  getLoadedLanguages: () => Promise<string[]>
+
+  /**
+   * Get a list of all loaded themes
+   */
+  getLoadedThemes: () => Promise<string[]>
 
   /**
    * Enable or disable the token cache

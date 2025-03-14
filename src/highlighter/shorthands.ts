@@ -14,10 +14,11 @@ async function getHighlighter(options: HighlighterOptions = {}) {
 /**
  * Tokenize code with the specified language and theme.
  * This function will create and cache a highlighter instance internally.
+ * If language or theme are not provided, the default ones will be used.
  */
 export async function codeToTokens(
   code: string,
-  options: TokenizeOptions,
+  options?: TokenizeOptions,
   highlighterOptions: HighlighterOptions = {},
 ): Promise<Token[]> {
   const highlighter = await getHighlighter(highlighterOptions)
@@ -38,4 +39,36 @@ export async function loadLanguage(language: string): Promise<void> {
 export async function loadTheme(theme: string): Promise<void> {
   const highlighter = await getHighlighter()
   await highlighter.loadTheme(theme)
+}
+
+/**
+ * Set the default language to use when none is specified
+ */
+export async function setDefaultLanguage(language: string): Promise<void> {
+  const highlighter = await getHighlighter()
+  await highlighter.setDefaultLanguage(language)
+}
+
+/**
+ * Set the default theme to use when none is specified
+ */
+export async function setDefaultTheme(theme: string): Promise<void> {
+  const highlighter = await getHighlighter()
+  await highlighter.setDefaultTheme(theme)
+}
+
+/**
+ * Get a list of all loaded languages
+ */
+export async function getLoadedLanguages(): Promise<string[]> {
+  const highlighter = await getHighlighter()
+  return highlighter.getLoadedLanguages()
+}
+
+/**
+ * Get a list of all loaded themes
+ */
+export async function getLoadedThemes(): Promise<string[]> {
+  const highlighter = await getHighlighter()
+  return highlighter.getLoadedThemes()
 }

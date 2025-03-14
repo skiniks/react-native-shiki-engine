@@ -1,25 +1,25 @@
-import rust from '@shikijs/langs/rust'
-import dracula from '@shikijs/themes/dracula'
+import typescript from '@shikijs/langs/typescript'
+import githubDark from '@shikijs/themes/github-dark'
 import React, { useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { ShikiHighlighterView, useClipboard, useShikiHighlighter } from 'react-native-shiki'
 import { AdvancedView } from './AdvancedView'
 import { BackArrow } from './components/BackArrow'
-import { rustSnippet } from './snippets/rust'
+import { typescriptSnippet } from './snippets/typescript'
 import { styles } from './styles'
 
 function App() {
   const [showAdvanced, setShowAdvanced] = useState(false)
   const { copyStatus, copyToClipboard } = useClipboard()
   const { tokens, isReady, error, status } = useShikiHighlighter({
-    code: rustSnippet,
-    lang: 'rust',
-    theme: 'dracula',
-    langData: rust,
-    themeData: dracula,
+    code: typescriptSnippet,
+    lang: 'typescript',
+    theme: 'github-dark',
+    langData: typescript,
+    themeData: githubDark,
   })
 
-  const handleCopy = () => copyToClipboard(rustSnippet)
+  const handleCopy = () => copyToClipboard(typescriptSnippet)
 
   if (showAdvanced) {
     return (
@@ -84,7 +84,7 @@ function App() {
                   <ShikiHighlighterView
                     style={styles.codeContainer}
                     tokens={tokens}
-                    text={rustSnippet}
+                    text={typescriptSnippet}
                     fontSize={14}
                     scrollEnabled
                     selectable

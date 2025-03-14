@@ -168,11 +168,13 @@ using namespace facebook::react;
   UIFont *font = nil;
 
   if (_fontFamily && _fontFamily.length > 0) {
-    NSLog(@"ShikiHighlighterView: Trying to use provided font family: %@", _fontFamily);
+    NSLog(@"ShikiHighlighterView: Trying to use provided font family: %@",
+          _fontFamily);
     font = [UIFont fontWithName:_fontFamily size:_fontSize];
   }
 
-  // If the provided font family isn't available, fall back to system monospaced font
+  // If the provided font family isn't available, fall back to system monospaced
+  // font
   if (!font) {
     NSLog(@"ShikiHighlighterView: Falling back to system monospaced font");
     if (@available(iOS 13.0, *)) {

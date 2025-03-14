@@ -48,6 +48,12 @@ export const styles = StyleSheet.create({
     color: '#ECEFF4',
     fontWeight: '600',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 10,
+  },
   demoSection: {
     flex: 1,
   },
@@ -114,7 +120,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
     alignSelf: 'flex-start',
-    marginHorizontal: 16,
   },
   advancedButtonText: {
     color: '#F8F8F2',

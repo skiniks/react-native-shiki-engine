@@ -10,6 +10,8 @@
 namespace shiki {
 
 class ConfigurationValidator;
+class Grammar;
+class Theme;
 
 struct Configuration {
   Configuration(const Configuration&) = delete;
@@ -19,8 +21,10 @@ struct Configuration {
   Configuration& operator=(Configuration&&) = default;
 
   struct Core {
-    std::string language;
-    std::string theme;
+    std::unordered_map<std::string, std::shared_ptr<Grammar>> languages;
+    std::unordered_map<std::string, std::shared_ptr<Theme>> themes;
+    std::string defaultLanguage;
+    std::string defaultTheme;
   } core;
 
   struct View {
@@ -69,6 +73,72 @@ struct Configuration {
 
   const Defaults& getDefaults() const {
     return defaults_;
+  }
+
+  void addLanguage(const std::string& name, std::shared_ptr<Grammar> grammar) {
+    core.languages[name] = grammar;
+    if (core.defaultLanguage.empty()) {
+      core.defaultLanguage = name;
+    }
+  }
+
+  void addTheme(const std::string& name, std::shared_ptr<Theme> theme) {
+    core.themes[name] = theme;
+    if (core.defaultTheme.empty()) {
+      core.defaultTheme = name;
+    }
+  }
+
+  void setDefaultLanguage(const std::string& name) {
+    if (core.languages.find(name) != core.languages.end()) {
+      core.defaultLanguage = name;
+    }
+  }
+
+  void setDefaultTheme(const std::string& name) {
+    if (core.themes.find(name) != core.themes.end()) {
+      core.defaultTheme = name;
+    }
+  }
+
+  std::shared_ptr<Grammar> getLanguage(const std::string& name) const {
+    auto it = core.languages.find(name);
+    if (it != core.languages.end()) {
+      return it->second;
+    }
+    return nullptr;
+  }
+
+  std::shared_ptr<Theme> getTheme(const std::string& name) const {
+    auto it = core.themes.find(name);
+    if (it != core.themes.end()) {
+      return it->second;
+    }
+    return nullptr;
+  }
+
+  std::shared_ptr<Grammar> getDefaultLanguage() const {
+    return getLanguage(core.defaultLanguage);
+  }
+
+  std::shared_ptr<Theme> getDefaultTheme() const {
+    return getTheme(core.defaultTheme);
+  }
+
+  std::vector<std::string> getLoadedLanguages() const {
+    std::vector<std::string> result;
+    for (const auto& [name, _] : core.languages) {
+      result.push_back(name);
+    }
+    return result;
+  }
+
+  std::vector<std::string> getLoadedThemes() const {
+    std::vector<std::string> result;
+    for (const auto& [name, _] : core.themes) {
+      result.push_back(name);
+    }
+    return result;
   }
 
   bool validate(std::string& error) const;

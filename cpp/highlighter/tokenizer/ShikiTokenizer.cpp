@@ -49,8 +49,8 @@ void ShikiTokenizer::setGrammar(std::shared_ptr<Grammar> grammar) {
   clearCompiledPatterns();
   grammar_ = std::move(grammar);
   if (grammar_) {
+    defaultLanguage_ = grammar_->getName();
     compilePatterns();
-    // Initialize concurrency util with hardware threads
     concurrencyUtil_ = std::make_unique<ConcurrencyUtil>(std::thread::hardware_concurrency());
   }
 }
@@ -58,12 +58,15 @@ void ShikiTokenizer::setGrammar(std::shared_ptr<Grammar> grammar) {
 void ShikiTokenizer::setTheme(std::shared_ptr<Theme> theme) {
   theme_ = std::move(theme);
 
-  // Configure line numbers if theme has line number styles
+  if (theme_) {
+    defaultTheme_ = theme_->getName();
+  }
+
   if (theme_) {
     LineNumbers::Config config;
-    config.show = true;  // Can be made configurable
+    config.show = true;
     config.style = theme_->getLineNumberStyle();
-    config.fontSize = 12.0f;  // Can be made configurable
+    config.fontSize = 12.0f;
     lineNumbers_ = std::make_unique<LineNumbers>(config);
   }
 }
@@ -82,10 +85,8 @@ void ShikiTokenizer::compilePatterns() {
   for (const auto& pattern : patterns) {
     CompiledPattern compiled;
 
-    // Skip patterns without a match
     if (pattern.match.empty()) continue;
 
-    // Special handling for comment patterns
     bool isComment = pattern.name.find("comment") != std::string::npos;
     OnigOptionType options = ONIG_OPTION_CAPTURE_GROUP;
     if (isComment) {
@@ -166,7 +167,12 @@ std::optional<std::vector<Token>> ShikiTokenizer::tryGetCachedTokens(const std::
   std::string hash = computeTextHash(text);
   std::lock_guard<std::mutex> lock(tokenCacheMutex_);
 
-  auto it = tokenCache_.find(hash);
+  TokenCacheKey key;
+  key.language = defaultLanguage_.empty() ? "default" : defaultLanguage_;
+  key.theme = defaultTheme_.empty() ? "default" : defaultTheme_;
+  key.codeHash = hash;
+
+  auto it = tokenCache_.find(key);
   if (it != tokenCache_.end() && it->second.textHash == hash) {
     it->second.lastUsed = ++cacheTimestamp_;
     return it->second.tokens;
@@ -183,13 +189,16 @@ void ShikiTokenizer::cacheTokens(const std::string& text, const std::vector<Toke
   std::string hash = computeTextHash(text);
   std::lock_guard<std::mutex> lock(tokenCacheMutex_);
 
-  // Evict if needed
   if (tokenCache_.size() >= MAX_TOKEN_CACHE_ENTRIES) {
     evictOldestTokenCache();
   }
 
-  // Add to cache
-  tokenCache_.insert_or_assign(hash, TokenCacheEntry(tokens, hash, ++cacheTimestamp_));
+  TokenCacheKey key;
+  key.language = defaultLanguage_.empty() ? "default" : defaultLanguage_;
+  key.theme = defaultTheme_.empty() ? "default" : defaultTheme_;
+  key.codeHash = hash;
+
+  tokenCache_.insert_or_assign(key, TokenCacheEntry(tokens, hash, ++cacheTimestamp_));
 }
 
 void ShikiTokenizer::evictOldestTokenCache() {

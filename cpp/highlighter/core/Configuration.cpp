@@ -6,7 +6,9 @@
 
 #include <sstream>
 
+#include "highlighter/grammar/Grammar.h"
 #include "highlighter/platform/PlatformHighlighter.h"
+#include "highlighter/theme/Theme.h"
 
 namespace shiki {
 
@@ -15,17 +17,33 @@ ConfigurationValidator& Configuration::getValidator() {
   static bool initialized = false;
 
   if (!initialized) {
-    validator.addRule("core.language", [](const Configuration& config, std::string& error) {
-      if (config.core.language.empty()) {
-        error = "Language must be specified";
+    validator.addRule("core.defaultLanguage", [](const Configuration& config, std::string& error) {
+      if (config.core.languages.empty()) {
+        error = "At least one language must be loaded";
+        return false;
+      }
+      if (config.core.defaultLanguage.empty()) {
+        error = "Default language must be specified";
+        return false;
+      }
+      if (config.core.languages.find(config.core.defaultLanguage) == config.core.languages.end()) {
+        error = "Default language must be loaded";
         return false;
       }
       return true;
     });
 
-    validator.addRule("core.theme", [](const Configuration& config, std::string& error) {
-      if (config.core.theme.empty()) {
-        error = "Theme must be specified";
+    validator.addRule("core.defaultTheme", [](const Configuration& config, std::string& error) {
+      if (config.core.themes.empty()) {
+        error = "At least one theme must be loaded";
+        return false;
+      }
+      if (config.core.defaultTheme.empty()) {
+        error = "Default theme must be specified";
+        return false;
+      }
+      if (config.core.themes.find(config.core.defaultTheme) == config.core.themes.end()) {
+        error = "Default theme must be loaded";
         return false;
       }
       return true;
@@ -81,10 +99,27 @@ std::string Configuration::toJson() const {
 
   writer.Key("core");
   writer.StartObject();
-  writer.Key("language");
-  writer.String(core.language.c_str());
-  writer.Key("theme");
-  writer.String(core.theme.c_str());
+
+  writer.Key("defaultLanguage");
+  writer.String(core.defaultLanguage.c_str());
+
+  writer.Key("defaultTheme");
+  writer.String(core.defaultTheme.c_str());
+
+  writer.Key("languages");
+  writer.StartArray();
+  for (const auto& [name, _] : core.languages) {
+    writer.String(name.c_str());
+  }
+  writer.EndArray();
+
+  writer.Key("themes");
+  writer.StartArray();
+  for (const auto& [name, _] : core.themes) {
+    writer.String(name.c_str());
+  }
+  writer.EndArray();
+
   writer.EndObject();
 
   writer.Key("view");
@@ -156,8 +191,8 @@ std::optional<Configuration> Configuration::fromJson(const std::string& json) {
 
   if (doc.HasMember("core") && doc["core"].IsObject()) {
     const auto& core = doc["core"];
-    if (core.HasMember("language")) config.core.language = core["language"].GetString();
-    if (core.HasMember("theme")) config.core.theme = core["theme"].GetString();
+    if (core.HasMember("defaultLanguage")) config.core.defaultLanguage = core["defaultLanguage"].GetString();
+    if (core.HasMember("defaultTheme")) config.core.defaultTheme = core["defaultTheme"].GetString();
   }
 
   if (doc.HasMember("view") && doc["view"].IsObject()) {
@@ -199,19 +234,14 @@ std::optional<Configuration> Configuration::fromJson(const std::string& json) {
       config.memory.preserveStateOnMemoryWarning = mem["preserveStateOnMemoryWarning"].GetBool();
   }
 
-  std::string error;
-  if (!config.validate(error)) {
-    return std::nullopt;
-  }
-
   return std::optional<Configuration>(std::move(config));
 }
 
 template <>
 PlatformViewConfig Configuration::toPlatformConfig<PlatformViewConfig>() const {
   PlatformViewConfig config;
-  config.language = core.language;
-  config.theme = core.theme;
+  config.language = core.defaultLanguage;
+  config.theme = core.defaultTheme;
   config.fontSize = view.fontSize;
   config.fontFamily = view.fontFamily;
   config.fontWeight = view.fontWeight;

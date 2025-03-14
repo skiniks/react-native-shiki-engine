@@ -13,7 +13,7 @@ export interface ThemeStyle {
 export interface Token {
   start: Int32
   length: Int32
-  scope: string
+  scopes: string[]
   style: ThemeStyle
 }
 
@@ -27,6 +27,8 @@ export interface ContentInset {
 export interface ShikiHighlighterViewProps extends ViewProps {
   tokens: Token[]
   text: string
+  language?: string
+  theme?: string
   fontSize?: Float
   fontFamily?: string
   fontWeight?: string

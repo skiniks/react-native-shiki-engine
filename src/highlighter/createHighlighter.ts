@@ -13,18 +13,35 @@ export interface HighlighterOptions {
    * Disabling cache can reduce memory usage at the cost of performance.
    */
   enableCache?: boolean
+  /**
+   * Default language to use when none is specified
+   */
+  defaultLanguage?: string
+  /**
+   * Default theme to use when none is specified
+   */
+  defaultTheme?: string
 }
 
 export interface TokenizeOptions {
-  lang: string
-  theme: string
+  /**
+   * Language to use for tokenization
+   * If not provided, the default language will be used
+   */
+  lang?: string
+  /**
+   * Theme to use for tokenization
+   * If not provided, the default theme will be used
+   */
+  theme?: string
 }
 
 export interface Highlighter {
   /**
    * Tokenize the code with the given language and theme
+   * If language or theme are not provided, the default ones will be used
    */
-  tokenize: (code: string, options: TokenizeOptions) => Promise<Token[]>
+  tokenize: (code: string, options?: TokenizeOptions) => Promise<Token[]>
 
   /**
    * Load a language by name
@@ -35,6 +52,26 @@ export interface Highlighter {
    * Load a theme by name
    */
   loadTheme: (theme: string) => Promise<void>
+
+  /**
+   * Set the default language to use when none is specified
+   */
+  setDefaultLanguage: (language: string) => Promise<void>
+
+  /**
+   * Set the default theme to use when none is specified
+   */
+  setDefaultTheme: (theme: string) => Promise<void>
+
+  /**
+   * Get a list of all loaded languages
+   */
+  getLoadedLanguages: () => Promise<string[]>
+
+  /**
+   * Get a list of all loaded themes
+   */
+  getLoadedThemes: () => Promise<string[]>
 }
 
 /**
@@ -81,8 +118,16 @@ export async function createHighlighter(options: HighlighterOptions = {}): Promi
     }
   }
 
+  if (options.defaultLanguage) {
+    await NativeShikiHighlighter.setDefaultLanguage(options.defaultLanguage)
+  }
+
+  if (options.defaultTheme) {
+    await NativeShikiHighlighter.setDefaultTheme(options.defaultTheme)
+  }
+
   return {
-    tokenize: async (code: string, options: TokenizeOptions) => {
+    tokenize: async (code: string, options: TokenizeOptions = {}) => {
       return NativeShikiHighlighter.codeToTokens(code, options.lang, options.theme)
     },
 
@@ -100,6 +145,22 @@ export async function createHighlighter(options: HighlighterOptions = {}): Promi
         throw new Error(`Theme '${theme}' not found. Make sure to register it first using registerTheme.`)
       }
       await NativeShikiHighlighter.loadTheme(theme, themeData)
+    },
+
+    setDefaultLanguage: async (language: string) => {
+      await NativeShikiHighlighter.setDefaultLanguage(language)
+    },
+
+    setDefaultTheme: async (theme: string) => {
+      await NativeShikiHighlighter.setDefaultTheme(theme)
+    },
+
+    getLoadedLanguages: async () => {
+      return NativeShikiHighlighter.getLoadedLanguages()
+    },
+
+    getLoadedThemes: async () => {
+      return NativeShikiHighlighter.getLoadedThemes()
     },
   }
 }

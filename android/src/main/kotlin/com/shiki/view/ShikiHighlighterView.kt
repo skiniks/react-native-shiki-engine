@@ -30,6 +30,8 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
   private var fontStyle: String = "normal"
   private var showLineNumbers: Boolean = false
   private var selectable: Boolean = true
+  private var language: String? = null
+  private var theme: String? = null
   private var contentInset = mapOf(
     "top" to 0,
     "right" to 0,
@@ -351,6 +353,35 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
     }
   }
 
+  fun setLanguage(language: String?) {
+    try {
+      Log.d(TAG, "Setting language: $language")
+      // Store the language value, but don't do anything with it yet
+      // We'll use it when we actually need to tokenize
+      this.language = language
+
+      // Don't trigger any processing here, just store the value
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in setLanguage: ${e.message}", e)
+    }
+  }
+
+  fun setTheme(theme: String?) {
+    try {
+      Log.d(TAG, "Setting theme: $theme")
+      // Store the theme value, but don't do anything with it yet
+      // We'll use it when we actually need to tokenize
+      this.theme = theme
+
+      // If we have text and tokens, we might need to reapply formatting
+      if (!text.isEmpty() && tokens != null) {
+        applyTextFormatting()
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Error in setTheme: ${e.message}", e)
+    }
+  }
+
   private fun updateFont() {
     try {
       Log.d(TAG, "Updating font to family: $fontFamily, weight: $fontWeight, style: $fontStyle")
@@ -452,11 +483,11 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
         }
       }
 
-      // Ensure the text is visible by checking its properties
       Log.d(TAG, "TextView text length: ${textView.text?.length}")
       Log.d(TAG, "TextView text color: ${textView.currentTextColor}")
       Log.d(TAG, "TextView visibility: ${textView.visibility}")
       Log.d(TAG, "TextView width: ${textView.width}, height: ${textView.height}")
+      Log.d(TAG, "Language: $language, Theme: $theme")
 
       Log.d(TAG, "processTextWithBatches completed")
     } catch (e: Exception) {
@@ -930,6 +961,7 @@ class ShikiHighlighterView(context: Context) : ReactViewGroup(context) {
 
         // Log success
         Log.d(TAG, "Successfully set text to TextView with ${textView.text.length} characters")
+        Log.d(TAG, "Using language: $language, theme: $theme")
       } catch (e: Exception) {
         Log.e(TAG, "Error setting text to TextView: ${e.message}", e)
         // Fallback to plain text if setting text fails
