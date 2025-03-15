@@ -300,9 +300,10 @@ using namespace facebook::react;
 
   if (!newProps.tokens.empty()) {
     const auto &firstToken = newProps.tokens[0];
-    NSLog(
-        @"ShikiHighlighterView: First token - start: %d, length: %d, scope: %s",
-        firstToken.start, firstToken.length, firstToken.scope.c_str());
+    NSLog(@"ShikiHighlighterView: First token - start: %d, length: %d, scopes: "
+          @"%lu",
+          firstToken.start, firstToken.length,
+          (unsigned long)firstToken.scopes.size());
   }
 
   _scrollView.scrollEnabled = newProps.scrollEnabled;

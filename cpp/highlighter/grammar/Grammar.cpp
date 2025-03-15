@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "GrammarParser.h"
+#include "highlighter/core/Configuration.h"
 
 namespace shiki {
 
@@ -117,6 +118,7 @@ std::vector<GrammarPattern> Grammar::resolveInclude(const std::string& include, 
   }
 
   std::vector<GrammarPattern> resolvedPatterns;
+  auto& config = Configuration::getInstance();
 
   // Resolve based on include type
   if (include[0] == '#') {
@@ -124,8 +126,31 @@ std::vector<GrammarPattern> Grammar::resolveInclude(const std::string& include, 
     resolvedPatterns = resolveRepositoryReference(include.substr(1));
   } else if (include == "$self") {
     resolvedPatterns = resolveSelfReference();
+  } else if (include[0] == '$') {
+    // Special built-in rule (TextMate specific)
+    if (include == "$base") {
+      // Base grammar patterns (top-level patterns)
+      resolvedPatterns = patterns;
+    } else {
+      // Other special rules not yet supported
+      if (config.isDebugMode()) {
+        config.log(Configuration::LogLevel::Warning, "Unsupported built-in rule: %s", include.c_str());
+      }
+    }
   } else {
-    throw GrammarError(GrammarErrorCode::InvalidInclude, "Unsupported include type: " + include);
+    // External grammar reference (TextMate specific)
+    // This would require loading another grammar file
+    if (config.isDebugMode()) {
+      config.log(Configuration::LogLevel::Warning, "External grammar reference not supported: %s", include.c_str());
+    }
+
+    // Try to find the grammar in the loaded languages
+    auto externalGrammar = config.getLanguage(include);
+    if (externalGrammar) {
+      resolvedPatterns = externalGrammar->getPatterns();
+    } else {
+      throw GrammarError(GrammarErrorCode::InvalidInclude, "Unsupported include type: " + include);
+    }
   }
 
   // Cache the result
@@ -190,6 +215,12 @@ Grammar::processPatterns(const rapidjson::Value& patternsJson, const std::string
         }
         p.name = pattern["name"].GetString();
       }
+      if (pattern.HasMember("contentName")) {
+        if (!pattern["contentName"].IsString()) {
+          throw GrammarError(GrammarErrorCode::InvalidPattern, "ContentName must be a string");
+        }
+        p.contentName = pattern["contentName"].GetString();
+      }
       if (pattern.HasMember("begin")) {
         if (!pattern["begin"].IsString()) {
           throw GrammarError(GrammarErrorCode::InvalidPattern, "Begin must be a string");
@@ -202,6 +233,12 @@ Grammar::processPatterns(const rapidjson::Value& patternsJson, const std::string
         }
         p.end = pattern["end"].GetString();
       }
+      if (pattern.HasMember("applyEndPatternLast")) {
+        if (!pattern["applyEndPatternLast"].IsBool()) {
+          throw GrammarError(GrammarErrorCode::InvalidPattern, "ApplyEndPatternLast must be a boolean");
+        }
+        p.applyEndPatternLast = pattern["applyEndPatternLast"].GetBool();
+      }
 
       // Process captures
       auto processCaptureObject = [](const rapidjson::Value& obj) -> std::unordered_map<int, std::string> {
@@ -210,10 +247,17 @@ Grammar::processPatterns(const rapidjson::Value& patternsJson, const std::string
           throw GrammarError(GrammarErrorCode::InvalidPattern, "Captures must be an object");
         }
         for (auto it = obj.MemberBegin(); it != obj.MemberEnd(); ++it) {
-          if (!it->value.HasMember("name") || !it->value["name"].IsString()) {
-            throw GrammarError(GrammarErrorCode::InvalidPattern, "Capture must have a string name property");
+          // TextMate format: captures can be either an object with a name property or a direct string
+          if (it->value.IsObject() && it->value.HasMember("name") && it->value["name"].IsString()) {
+            captures[std::stoi(it->name.GetString())] = it->value["name"].GetString();
+          } else if (it->value.IsString()) {
+            captures[std::stoi(it->name.GetString())] = it->value.GetString();
+          } else {
+            throw GrammarError(
+              GrammarErrorCode::InvalidPattern,
+              "Capture must have a string name property or be a string"
+            );
           }
-          captures[std::stoi(it->name.GetString())] = it->value["name"].GetString();
         }
         return captures;
       };
@@ -223,9 +267,16 @@ Grammar::processPatterns(const rapidjson::Value& patternsJson, const std::string
       }
       if (pattern.HasMember("beginCaptures")) {
         p.beginCaptures = processCaptureObject(pattern["beginCaptures"]);
+      } else if (!p.begin.empty() && !p.captures.empty()) {
+        // If no beginCaptures but we have captures and a begin pattern, use captures for beginCaptures (TextMate
+        // behavior)
+        p.beginCaptures = p.captures;
       }
       if (pattern.HasMember("endCaptures")) {
         p.endCaptures = processCaptureObject(pattern["endCaptures"]);
+      } else if (!p.end.empty() && !p.captures.empty()) {
+        // If no endCaptures but we have captures and an end pattern, use captures for endCaptures (TextMate behavior)
+        p.endCaptures = p.captures;
       }
 
       // Process nested patterns
@@ -247,17 +298,54 @@ Grammar::processPatterns(const rapidjson::Value& patternsJson, const std::string
 }
 
 std::shared_ptr<Grammar> Grammar::fromJson(const std::string& content) {
+  auto& config = Configuration::getInstance();
+
   try {
+    if (config.isDebugMode()) {
+      config.log(
+        Configuration::LogLevel::Debug,
+        "[DEBUG] Grammar::fromJson - Parsing JSON content of length %zu",
+        content.length()
+      );
+    }
+
     rapidjson::Document doc;
     if (doc.Parse(content.c_str()).HasParseError()) {
-      throw GrammarError(GrammarErrorCode::ValidationError, "Invalid JSON syntax in grammar definition");
+      auto error = std::string(rapidjson::GetParseError_En(doc.GetParseError()));
+      auto offset = doc.GetErrorOffset();
+
+      if (config.isDebugMode()) {
+        config.log(Configuration::LogLevel::Error, "[DEBUG] JSON parse error at offset %zu: %s", offset, error.c_str());
+
+        // Show the context around the error
+        size_t start = offset > 20 ? offset - 20 : 0;
+        size_t end = start + 40 < content.length() ? start + 40 : content.length();
+        std::string context = content.substr(start, end - start);
+        config.log(Configuration::LogLevel::Error, "[DEBUG] Error context: %s", context.c_str());
+      }
+
+      throw GrammarError(GrammarErrorCode::ValidationError, "Invalid JSON syntax in grammar definition: " + error);
     }
 
     // Validate the overall grammar schema
     GrammarPatternValidator::validateGrammarSchema(doc);
 
-    return GrammarParser::parse(content);
+    auto grammar = GrammarParser::parse(content);
+
+    if (config.isDebugMode()) {
+      config.log(
+        Configuration::LogLevel::Debug,
+        "[DEBUG] Successfully parsed grammar '%s' with %zu patterns",
+        grammar->getName().c_str(),
+        grammar->getPatterns().size()
+      );
+    }
+
+    return grammar;
   } catch (const HighlightError& e) {
+    if (config.isDebugMode()) {
+      config.log(Configuration::LogLevel::Error, "[DEBUG] Failed to parse grammar JSON: %s", e.what());
+    }
     throw GrammarError(GrammarErrorCode::ValidationError, "Failed to parse grammar JSON: " + std::string(e.what()));
   }
 }

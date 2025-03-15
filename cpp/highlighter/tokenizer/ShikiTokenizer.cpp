@@ -22,6 +22,7 @@
 #include "highlighter/cache/StyleCache.h"
 #include "highlighter/core/Configuration.h"
 #include "highlighter/memory/TokenPool.h"
+#include "highlighter/theme/ScopeMatcher.h"
 #include "highlighter/utils/ScopedResource.h"
 #include "highlighter/utils/WorkPrioritizer.h"
 
@@ -160,6 +161,15 @@ std::string ShikiTokenizer::computeTextHash(const std::string& text) const {
 }
 
 std::optional<std::vector<Token>> ShikiTokenizer::tryGetCachedTokens(const std::string& text) {
+  return tryGetCachedTokens(text, defaultLanguage_, defaultTheme_);
+}
+
+void ShikiTokenizer::cacheTokens(const std::string& text, const std::vector<Token>& tokens) {
+  cacheTokens(text, tokens, defaultLanguage_, defaultTheme_);
+}
+
+std::optional<std::vector<Token>>
+ShikiTokenizer::tryGetCachedTokens(const std::string& text, const std::string& language, const std::string& theme) {
   if (text.length() < MIN_CACHE_REGION_SIZE) {
     return std::nullopt;
   }
@@ -168,8 +178,8 @@ std::optional<std::vector<Token>> ShikiTokenizer::tryGetCachedTokens(const std::
   std::lock_guard<std::mutex> lock(tokenCacheMutex_);
 
   TokenCacheKey key;
-  key.language = defaultLanguage_.empty() ? "default" : defaultLanguage_;
-  key.theme = defaultTheme_.empty() ? "default" : defaultTheme_;
+  key.language = language.empty() ? "default" : language;
+  key.theme = theme.empty() ? "default" : theme;
   key.codeHash = hash;
 
   auto it = tokenCache_.find(key);
@@ -181,7 +191,12 @@ std::optional<std::vector<Token>> ShikiTokenizer::tryGetCachedTokens(const std::
   return std::nullopt;
 }
 
-void ShikiTokenizer::cacheTokens(const std::string& text, const std::vector<Token>& tokens) {
+void ShikiTokenizer::cacheTokens(
+  const std::string& text,
+  const std::vector<Token>& tokens,
+  const std::string& language,
+  const std::string& theme
+) {
   if (text.length() < MIN_CACHE_REGION_SIZE) {
     return;
   }
@@ -194,8 +209,8 @@ void ShikiTokenizer::cacheTokens(const std::string& text, const std::vector<Toke
   }
 
   TokenCacheKey key;
-  key.language = defaultLanguage_.empty() ? "default" : defaultLanguage_;
-  key.theme = defaultTheme_.empty() ? "default" : defaultTheme_;
+  key.language = language.empty() ? "default" : language;
+  key.theme = theme.empty() ? "default" : theme;
   key.codeHash = hash;
 
   tokenCache_.insert_or_assign(key, TokenCacheEntry(tokens, hash, ++cacheTimestamp_));
@@ -704,15 +719,17 @@ std::vector<Token> ShikiTokenizer::tokenizeBatch(const std::string& code, size_t
       OnigRegion* region = onig_region_new();
       std::unique_ptr<OnigRegion, decltype(&onigRegionDeleter)> regionGuard(region, onigRegionDeleter);
 
-      if (onig_search(
-            compiled.regex.get(),
-            (OnigUChar*)code.c_str(),
-            (OnigUChar*)(code.c_str() + code.length()),
-            (OnigUChar*)(code.c_str() + pos),
-            (OnigUChar*)(code.c_str() + code.length()),
-            region,
-            ONIG_OPTION_NONE
-          ) >= 0) {
+      int result = onig_search(
+        compiled.regex.get(),
+        (OnigUChar*)code.c_str(),
+        (OnigUChar*)(code.c_str() + code.length()),
+        (OnigUChar*)(code.c_str() + pos),
+        (OnigUChar*)(code.c_str() + code.length()),
+        region,
+        ONIG_OPTION_NONE
+      );
+
+      if (result >= 0) {
         size_t matchLength = region->end[0] - region->beg[0];
         if (!matched || matchLength > bestMatchLength) {
           matched = true;
@@ -782,84 +799,31 @@ bool ShikiTokenizer::findBestMatch(
   int bestPosition = -1;
   bestRegexIndex = 0;
 
-  OnigRegion* region = onig_region_new();
-  std::unique_ptr<OnigRegion, OnigRegionDeleter> regionGuard(region);
-
   for (size_t i = 0; i < regexes.size(); ++i) {
-    if (onig_search(
-          regexes[i],
-          (OnigUChar*)code.c_str(),
-          (OnigUChar*)(code.c_str() + code.length()),
-          (OnigUChar*)(code.c_str() + pos),
-          (OnigUChar*)(code.c_str() + code.length()),
-          region,
-          ONIG_OPTION_NONE
-        ) >= 0) {
-      if (bestPosition == -1 || region->beg[0] < static_cast<size_t>(bestPosition)) {
-        bestPosition = region->beg[0];
-        bestRegexIndex = i;
-        onig_region_copy(bestRegion, region);
-      }
+    const auto& regex = regexes[i];
+    OnigRegion* region = onig_region_new();
+    ScopedResource<OnigRegion> regionGuard(region, std::function<void(OnigRegion*)>([](OnigRegion* r) {
+                                             onig_region_free(r, 1);
+                                           }));
+
+    int result = onig_search(
+      regex,
+      (OnigUChar*)code.c_str(),
+      (OnigUChar*)(code.c_str() + code.length()),
+      (OnigUChar*)(code.c_str() + pos),
+      (OnigUChar*)(code.c_str() + code.length()),
+      region,
+      ONIG_OPTION_NONE
+    );
+
+    if (result >= 0 && (bestPosition < 0 || result < bestPosition)) {
+      bestPosition = result;
+      bestRegexIndex = i;
+      onig_region_copy(bestRegion, region);
     }
   }
 
   return bestPosition >= 0;
-}
-
-// Helper function to split a scope string into its component parts
-std::vector<std::string> splitScope(const std::string& scope) {
-  std::vector<std::string> parts;
-  std::istringstream stream(scope);
-  std::string part;
-
-  // Split by spaces
-  while (std::getline(stream, part, ' ')) {
-    if (!part.empty()) {
-      parts.push_back(part);
-    }
-  }
-  return parts;
-}
-
-bool isScopeMatch(const std::string& ruleScope, const std::string& tokenScope) {
-  // Remove debug logging and keep core logic
-  auto ruleParts = splitScope(ruleScope);
-  auto tokenParts = splitScope(tokenScope);
-
-  bool isCommentRule = false;
-  bool isCommentToken = false;
-  for (const auto& part : ruleParts) {
-    if (part == "comment" || part.find("comment.") == 0) {
-      isCommentRule = true;
-      break;
-    }
-  }
-  for (const auto& part : tokenParts) {
-    if (part == "comment" || part.find("comment.") == 0) {
-      isCommentToken = true;
-      break;
-    }
-  }
-
-  if (isCommentRule && isCommentToken) return true;
-  if (ruleScope == tokenScope) return true;
-  if (tokenScope.find(ruleScope + ".") == 0) return true;
-
-  if (ruleParts.size() > 1) {
-    for (const auto& rulePart : ruleParts) {
-      bool found = false;
-      for (const auto& tokenPart : tokenParts) {
-        if (isScopeMatch(rulePart, tokenPart)) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) return false;
-    }
-    return true;
-  }
-
-  return false;
 }
 
 void shiki::OnigRegexDeleter::operator()(regex_t* r) const {
@@ -870,8 +834,90 @@ void shiki::OnigRegexDeleter::operator()(regex_t* r) const {
 
 void shiki::OnigRegionDeleter::operator()(OnigRegion* r) const {
   if (r) {
-    onig_region_free(r, 1);  // 1 means free the region itself too
+    onig_region_free(r, 1);
   }
+}
+
+std::vector<Token>
+ShikiTokenizer::tokenize(const std::string& code, const std::string& language, const std::string& theme) {
+  // Try to get from cache first
+  auto cachedTokens = tryGetCachedTokens(code, language, theme);
+  if (cachedTokens) {
+    return *cachedTokens;
+  }
+
+  // Save current grammar and theme
+  auto savedGrammar = grammar_;
+  auto savedTheme = theme_;
+
+  // Get the grammar and theme for this tokenization
+  auto& config = Configuration::getInstance();
+  auto grammarPtr = config.getLanguage(language);
+  auto themePtr = config.getTheme(theme);
+
+  if (!grammarPtr || !themePtr) {
+    // Return empty tokens if grammar or theme not found
+    return {};
+  }
+
+  // Set the grammar and theme temporarily
+  setGrammar(grammarPtr);
+  setTheme(themePtr);
+
+  // Tokenize the code
+  auto tokens = tokenize(code);
+
+  // Restore the original grammar and theme
+  setGrammar(savedGrammar);
+  setTheme(savedTheme);
+
+  // Cache the tokens
+  cacheTokens(code, tokens, language, theme);
+
+  return tokens;
+}
+
+std::vector<Token> ShikiTokenizer::tokenizeParallel(
+  const std::string& code,
+  const std::string& language,
+  const std::string& theme,
+  size_t batchSize
+) {
+  // Try to get from cache first
+  auto cachedTokens = tryGetCachedTokens(code, language, theme);
+  if (cachedTokens) {
+    return *cachedTokens;
+  }
+
+  // Save current grammar and theme
+  auto savedGrammar = grammar_;
+  auto savedTheme = theme_;
+
+  // Get the grammar and theme for this tokenization
+  auto& config = Configuration::getInstance();
+  auto grammarPtr = config.getLanguage(language);
+  auto themePtr = config.getTheme(theme);
+
+  if (!grammarPtr || !themePtr) {
+    // Return empty tokens if grammar or theme not found
+    return {};
+  }
+
+  // Set the grammar and theme temporarily
+  setGrammar(grammarPtr);
+  setTheme(themePtr);
+
+  // Tokenize the code in parallel
+  auto tokens = tokenizeParallel(code, batchSize);
+
+  // Restore the original grammar and theme
+  setGrammar(savedGrammar);
+  setTheme(savedTheme);
+
+  // Cache the tokens
+  cacheTokens(code, tokens, language, theme);
+
+  return tokens;
 }
 
 }  // namespace shiki

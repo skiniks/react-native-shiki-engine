@@ -29,6 +29,8 @@ class Theme {
  public:
   Theme() : configuration_(&Configuration::getInstance()) {}
   explicit Theme(const std::string& name) : name(name), configuration_(&Configuration::getInstance()) {}
+  Theme(const Theme& other);
+  Theme& operator=(const Theme& other);
   virtual ~Theme() = default;
 
   void addStyle(const ThemeStyle& style);

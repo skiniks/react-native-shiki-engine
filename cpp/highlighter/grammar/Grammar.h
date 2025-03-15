@@ -58,10 +58,12 @@ class GrammarError : public HighlightError {
 
 struct GrammarPattern {
   std::string name;
+  std::string contentName;
   std::string match;
   std::string begin;
   std::string end;
   std::string include;
+  bool applyEndPatternLast{false};
   std::unordered_map<int, std::string> captures;
   std::unordered_map<int, std::string> beginCaptures;
   std::unordered_map<int, std::string> endCaptures;

@@ -18,24 +18,62 @@ using namespace facebook::react;
 #import "highlighter/cache/CacheManager.h"
 #import "highlighter/core/Configuration.h"
 #import "highlighter/grammar/Grammar.h"
+#import "highlighter/grammar/GrammarLoader.h"
 #import "highlighter/theme/Theme.h"
 #import "highlighter/theme/ThemeParser.h"
 #import "highlighter/tokenizer/ShikiTokenizer.h"
+#import "highlighter/tokenizer/Token.h"
+
+#include <memory>
+#include <string>
+#include <vector>
+
+@interface ShikiGrammarWrapper : NSObject
+@property(nonatomic, assign) std::shared_ptr<shiki::Grammar> grammar;
+- (instancetype)initWithGrammar:(std::shared_ptr<shiki::Grammar>)grammar;
+@end
+
+@implementation ShikiGrammarWrapper
+- (instancetype)initWithGrammar:(std::shared_ptr<shiki::Grammar>)grammar {
+  self = [super init];
+  if (self) {
+    _grammar = grammar;
+  }
+  return self;
+}
+@end
+
+@interface ShikiThemeWrapper : NSObject
+@property(nonatomic, assign) std::shared_ptr<shiki::Theme> theme;
+- (instancetype)initWithTheme:(std::shared_ptr<shiki::Theme>)theme;
+@end
+
+@implementation ShikiThemeWrapper
+- (instancetype)initWithTheme:(std::shared_ptr<shiki::Theme>)theme {
+  self = [super init];
+  if (self) {
+    _theme = theme;
+  }
+  return self;
+}
+@end
+
+static NSString *NSStringFromStdString(const std::string &str) {
+  return [NSString stringWithUTF8String:str.c_str()];
+}
 
 @implementation RCTShikiHighlighterModule {
   __weak RCTBridge *_bridge;
   shiki::ShikiTokenizer *tokenizer_;
 
-  // Maps to store multiple grammars and themes
-  NSMutableDictionary<NSString *, std::shared_ptr<shiki::Grammar>> *grammars_;
-  NSMutableDictionary<NSString *, std::shared_ptr<shiki::Theme>> *themes_;
-
-  // Default language and theme
-  NSString *defaultLanguage_;
-  NSString *defaultTheme_;
+  NSMutableDictionary<NSString *, ShikiGrammarWrapper *> *grammars_;
+  NSMutableDictionary<NSString *, ShikiThemeWrapper *> *themes_;
 
   std::shared_ptr<shiki::Grammar> currentGrammar_;
   std::shared_ptr<shiki::Theme> currentTheme_;
+
+  NSString *defaultLanguage_;
+  NSString *defaultTheme_;
 
   dispatch_queue_t highlightQueue_;
 }
@@ -55,10 +93,11 @@ RCT_EXPORT_MODULE(ShikiHighlighter)
     tokenizer_ = &shiki::ShikiTokenizer::getInstance();
     highlightQueue_ =
         dispatch_queue_create("com.shiki.highlight", DISPATCH_QUEUE_SERIAL);
-    _hasListeners = NO;
 
     grammars_ = [NSMutableDictionary dictionary];
     themes_ = [NSMutableDictionary dictionary];
+
+    _hasListeners = NO;
 
     [self setupErrorHandling];
   }
@@ -186,11 +225,13 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
         tokenDict[@"scopes"] = scopes;
 
         NSMutableDictionary *style = [NSMutableDictionary dictionary];
-        style[@"color"] =
-            token.style.color ? @(token.style.color) : [NSNull null];
-        style[@"backgroundColor"] = token.style.backgroundColor
-                                        ? @(token.style.backgroundColor)
-                                        : [NSNull null];
+        style[@"color"] = token.style.color.empty()
+                              ? [NSNull null]
+                              : NSStringFromStdString(token.style.color);
+        style[@"backgroundColor"] =
+            token.style.backgroundColor.empty()
+                ? [NSNull null]
+                : NSStringFromStdString(token.style.backgroundColor);
         style[@"bold"] = @(token.style.bold);
         style[@"italic"] = @(token.style.italic);
         style[@"underline"] = @(token.style.underline);
@@ -244,7 +285,9 @@ RCT_EXPORT_METHOD(loadLanguage : (NSString *)language grammarData : (NSString *)
       }
 
       // Store in the map
-      strongSelf->grammars_[language] = grammar;
+      ShikiGrammarWrapper *grammarWrapper =
+          [[ShikiGrammarWrapper alloc] initWithGrammar:grammar];
+      strongSelf->grammars_[language] = grammarWrapper;
 
       // Set as default if it's the first one
       if (!strongSelf->defaultLanguage_) {
@@ -293,7 +336,9 @@ RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
       parser.parseThemeStyle(themeStr);
 
       // Store in the map
-      strongSelf->themes_[theme] = themeObj;
+      ShikiThemeWrapper *themeWrapper =
+          [[ShikiThemeWrapper alloc] initWithTheme:themeObj];
+      strongSelf->themes_[theme] = themeWrapper;
 
       // Set as default if it's the first one
       if (!strongSelf->defaultTheme_) {
@@ -344,7 +389,7 @@ RCT_EXPORT_METHOD(setDefaultLanguage : (NSString *)language resolve : (
       // Set as default
       strongSelf->defaultLanguage_ = language;
 
-      strongSelf->currentGrammar_ = strongSelf->grammars_[language];
+      strongSelf->currentGrammar_ = strongSelf->grammars_[language].grammar;
       strongSelf->tokenizer_->setGrammar(strongSelf->currentGrammar_);
 
       // Update Configuration
@@ -388,7 +433,7 @@ RCT_EXPORT_METHOD(setDefaultTheme : (NSString *)theme resolve : (
       // Set as default
       strongSelf->defaultTheme_ = theme;
 
-      strongSelf->currentTheme_ = strongSelf->themes_[theme];
+      strongSelf->currentTheme_ = strongSelf->themes_[theme].theme;
       strongSelf->tokenizer_->setTheme(strongSelf->currentTheme_);
 
       // Update Configuration

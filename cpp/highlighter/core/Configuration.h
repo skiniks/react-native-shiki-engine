@@ -1,11 +1,13 @@
 #pragma once
 #include <xxhash.h>
 
+#include <cstdarg>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace shiki {
 
@@ -20,11 +22,15 @@ struct Configuration {
   Configuration(Configuration&&) = default;
   Configuration& operator=(Configuration&&) = default;
 
+  enum class LogLevel { Debug, Info, Warning, Error };
+
   struct Core {
     std::unordered_map<std::string, std::shared_ptr<Grammar>> languages;
     std::unordered_map<std::string, std::shared_ptr<Theme>> themes;
     std::string defaultLanguage;
     std::string defaultTheme;
+    bool debugMode{false};
+    bool strictThemeMode{false};
   } core;
 
   struct View {
@@ -227,6 +233,52 @@ struct Configuration {
       total += value.memoryUsage;
     }
     return total;
+  }
+
+  bool isDebugMode() const {
+    return core.debugMode;
+  }
+
+  void setDebugMode(bool debug) {
+    core.debugMode = debug;
+  }
+
+  bool isStrictThemeMode() const {
+    return core.strictThemeMode;
+  }
+
+  void setStrictThemeMode(bool strict) {
+    core.strictThemeMode = strict;
+  }
+
+  void log(LogLevel level, const char* format, ...) const {
+    if (!isDebugMode() && level != LogLevel::Error) {
+      return;
+    }
+
+    va_list args;
+    va_start(args, format);
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    const char* levelStr = "";
+    switch (level) {
+      case LogLevel::Debug:
+        levelStr = "DEBUG";
+        break;
+      case LogLevel::Info:
+        levelStr = "INFO";
+        break;
+      case LogLevel::Warning:
+        levelStr = "WARNING";
+        break;
+      case LogLevel::Error:
+        levelStr = "ERROR";
+        break;
+    }
+
+    fprintf(stderr, "[SHIKI %s] %s\n", levelStr, buffer);
   }
 
  private:
