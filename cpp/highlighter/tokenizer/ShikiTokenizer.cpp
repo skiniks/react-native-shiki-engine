@@ -617,7 +617,7 @@ void ShikiTokenizer::resolveStylesBatch(
 
     // If not in cache, resolve from theme and cache the result
     auto combinedStyle = theme_->resolveStyle(combinedScope);
-    if (!combinedStyle.color.empty()) {
+    if (!combinedStyle.foreground.empty()) {
       styleCache.cacheStyle(combinedScope, combinedStyle);
       token.style = combinedStyle;
       bestSpecificity = combinedScope.length();
@@ -626,7 +626,7 @@ void ShikiTokenizer::resolveStylesBatch(
       // Try individual scopes
       for (const auto& scope : token.scopes) {
         auto style = theme_->resolveStyle(scope);
-        if (!style.color.empty()) {
+        if (!style.foreground.empty()) {
           styleCache.cacheStyle(scope, style);
           int specificity = scope.length();
           if (specificity > bestSpecificity) {
@@ -636,7 +636,7 @@ void ShikiTokenizer::resolveStylesBatch(
         }
       }
 
-      token.style = bestStyle.color.empty() ? ThemeStyle{theme_->getForeground().toHex()} : bestStyle;
+      token.style = bestStyle.foreground.empty() ? ThemeStyle{theme_->getForeground().toHex()} : bestStyle;
     }
   }
 }

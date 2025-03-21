@@ -26,7 +26,19 @@ data class ThemeStyle(
   @DoNotStrip var bold: Boolean = false,
   @DoNotStrip var italic: Boolean = false,
   @DoNotStrip var underline: Boolean = false
-)
+) {
+  var foreground: String?
+    get() = color
+    set(value) {
+      color = value
+    }
+
+  var background: String?
+    get() = backgroundColor
+    set(value) {
+      backgroundColor = value
+    }
+}
 
 @DoNotStrip
 data class Token(
@@ -122,8 +134,8 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   init {
     mHybridData = initHybrid()
     setupErrorCallback(object : JCallback {
-      override fun invoke(error: String) {
-        sendEvent("onError", error)
+      override fun invoke(message: String) {
+        sendEvent("onError", message)
       }
     })
     registerRecoveryStrategies()
@@ -149,7 +161,7 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
 
   private fun setupErrorHandling() {
     setupErrorCallback(object : JCallback {
-      override fun invoke(errorJson: String) {
+      override fun invoke(message: String) {
         if (hasListeners) {
           scope.launch(Dispatchers.Main) {
             reactContext
@@ -157,7 +169,7 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
               .emit(
                 "ShikiError",
                 Arguments.createMap().apply {
-                  putString("error", errorJson)
+                  putString("error", message)
                 }
               )
           }
@@ -195,12 +207,12 @@ class ShikiHighlighter(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun addListener(eventName: String) {
+  fun addListener(@Suppress("UNUSED_PARAMETER") eventName: String) {
     hasListeners = true
   }
 
   @ReactMethod
-  fun removeListeners(count: Int) {
+  fun removeListeners(@Suppress("UNUSED_PARAMETER") count: Int) {
     hasListeners = false
   }
 

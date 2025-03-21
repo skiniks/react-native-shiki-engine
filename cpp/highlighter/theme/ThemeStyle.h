@@ -8,10 +8,10 @@
 namespace shiki {
 
 struct ThemeStyle {
-  std::string color;
-  std::string backgroundColor;  // Only set if explicitly specified
+  std::string foreground;
+  std::string background;
   std::string fontStyle;
-  std::string scope;  // Added scope field for theme parsing
+  std::string scope;
 
   bool bold{false};
   bool italic{false};
@@ -19,24 +19,24 @@ struct ThemeStyle {
 
   // Line number specific styling
   struct LineNumberStyle {
-    std::optional<std::string> color;
-    std::optional<std::string> backgroundColor;
+    std::optional<std::string> foreground;
+    std::optional<std::string> background;
     bool bold = false;
     bool italic = false;
   } lineNumbers;
 
   bool isEmpty() const {
-    return color.empty() && backgroundColor.empty() && fontStyle.empty() && scope.empty() && !bold && !italic &&
+    return foreground.empty() && background.empty() && fontStyle.empty() && scope.empty() && !bold && !italic &&
       !underline;
   }
 
   void applySettings(const ThemeStyle& style) {
-    if (!style.color.empty()) {
-      color = style.color;
+    if (!style.foreground.empty()) {
+      foreground = style.foreground;
     }
-    // Only apply background color if explicitly set
-    if (!style.backgroundColor.empty()) {
-      backgroundColor = style.backgroundColor;
+    // Only apply background if explicitly set
+    if (!style.background.empty()) {
+      background = style.background;
     }
     if (!style.fontStyle.empty()) {
       fontStyle = style.fontStyle;
@@ -51,32 +51,32 @@ struct ThemeStyle {
 
   // Helper method to get line number style
   LineNumberStyle getLineNumberStyle() const {
-    if (!lineNumbers.color && !color.empty()) {
+    if (!lineNumbers.foreground && !foreground.empty()) {
       LineNumberStyle style;
-      style.color = color;
-      style.backgroundColor = backgroundColor;  // Only if set
+      style.foreground = foreground;
+      style.background = background;  // Only if set
       return style;
     }
     return lineNumbers;
   }
 
   ThemeColor getThemeColor() const {
-    // Don't create a ThemeColor if no color is specified
-    return color.empty() ? ThemeColor() : ThemeColor(color);
+    // Don't create a ThemeColor if no foreground is specified
+    return foreground.empty() ? ThemeColor() : ThemeColor(foreground);
   }
 
   ThemeColor getBackgroundColor() const {
     // Only return a background color if explicitly set
-    return backgroundColor.empty() ? ThemeColor() : ThemeColor(backgroundColor);
+    return background.empty() ? ThemeColor() : ThemeColor(background);
   }
 
   // Merge another style into this one
   void merge(const ThemeStyle& other) {
-    if (!other.color.empty()) {
-      color = other.color[0] == '#' ? other.color : "#" + other.color;
+    if (!other.foreground.empty()) {
+      foreground = other.foreground[0] == '#' ? other.foreground : "#" + other.foreground;
     }
-    if (!other.backgroundColor.empty()) {
-      backgroundColor = other.backgroundColor[0] == '#' ? other.backgroundColor : "#" + other.backgroundColor;
+    if (!other.background.empty()) {
+      background = other.background[0] == '#' ? other.background : "#" + other.background;
     }
     if (!other.fontStyle.empty()) {
       fontStyle = other.fontStyle;
@@ -88,11 +88,11 @@ struct ThemeStyle {
 
   // Check if this style has any properties set
   bool hasProperties() const {
-    return !color.empty() || !backgroundColor.empty() || !fontStyle.empty() || bold || italic || underline;
+    return !foreground.empty() || !background.empty() || !fontStyle.empty() || bold || italic || underline;
   }
 
   bool operator==(const ThemeStyle& other) const {
-    return color == other.color && backgroundColor == other.backgroundColor && fontStyle == other.fontStyle &&
+    return foreground == other.foreground && background == other.background && fontStyle == other.fontStyle &&
       bold == other.bold && italic == other.italic && underline == other.underline;
   }
 

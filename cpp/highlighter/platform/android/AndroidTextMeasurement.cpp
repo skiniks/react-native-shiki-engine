@@ -67,9 +67,9 @@ jobject AndroidTextMeasurement::createTypeface(bool isBold, bool isItalic) {
 
 void AndroidTextMeasurement::applyStyle(const ThemeStyle& style) {
   // Apply color
-  if (!style.color.empty()) {
+  if (!style.foreground.empty()) {
     // Create a ThemeColor from the hex string
-    ThemeColor themeColor(style.color);
+    ThemeColor themeColor(style.foreground);
 
     // Convert to Android ARGB format
     jint color = ((int)(themeColor.alpha * 255) & 0xFF) << 24 | ((int)(themeColor.red * 255) & 0xFF) << 16 |

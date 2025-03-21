@@ -225,13 +225,13 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
         tokenDict[@"scopes"] = scopes;
 
         NSMutableDictionary *style = [NSMutableDictionary dictionary];
-        style[@"color"] = token.style.color.empty()
+        style[@"color"] = token.style.foreground.empty()
                               ? [NSNull null]
-                              : NSStringFromStdString(token.style.color);
+                              : NSStringFromStdString(token.style.foreground);
         style[@"backgroundColor"] =
-            token.style.backgroundColor.empty()
+            token.style.background.empty()
                 ? [NSNull null]
-                : NSStringFromStdString(token.style.backgroundColor);
+                : NSStringFromStdString(token.style.background);
         style[@"bold"] = @(token.style.bold);
         style[@"italic"] = @(token.style.italic);
         style[@"underline"] = @(token.style.underline);

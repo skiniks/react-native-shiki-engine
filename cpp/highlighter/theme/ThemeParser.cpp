@@ -41,12 +41,12 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     if (colors.HasMember("editor.foreground")) {
       std::string color = colors["editor.foreground"].GetString();
       theme_->setForeground(*ThemeColor::fromHex(color));
-      style.color = color[0] == '#' ? color : "#" + color;
+      style.foreground = color[0] == '#' ? color : "#" + color;
     }
     if (colors.HasMember("editor.background")) {
       std::string color = colors["editor.background"].GetString();
       theme_->setBackground(*ThemeColor::fromHex(color));
-      style.backgroundColor = color[0] == '#' ? color : "#" + color;
+      style.background = color[0] == '#' ? color : "#" + color;
     }
   }
 
@@ -57,20 +57,20 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
         const auto& settingsObj = setting["settings"];
         if (settingsObj.HasMember("foreground")) {
           std::string color = settingsObj["foreground"].GetString();
-          style.color = color[0] == '#' ? color : "#" + color;
-          theme_->setForeground(*ThemeColor::fromHex(style.color));
+          style.foreground = color[0] == '#' ? color : "#" + color;
+          theme_->setForeground(*ThemeColor::fromHex(style.foreground));
         }
         if (settingsObj.HasMember("background")) {
           std::string color = settingsObj["background"].GetString();
-          style.backgroundColor = color[0] == '#' ? color : "#" + color;
-          theme_->setBackground(*ThemeColor::fromHex(style.backgroundColor));
+          style.background = color[0] == '#' ? color : "#" + color;
+          theme_->setBackground(*ThemeColor::fromHex(style.background));
         }
         break;
       }
     }
   }
 
-  if (style.color.empty() || style.backgroundColor.empty()) {
+  if (style.foreground.empty() || style.background.empty()) {
     throw std::runtime_error("Theme must specify both foreground and background colors");
   }
 
@@ -86,11 +86,11 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
 
       if (settings.HasMember("foreground")) {
         std::string color = settings["foreground"].GetString();
-        tokenStyle.color = color[0] == '#' ? color : "#" + color;
+        tokenStyle.foreground = color[0] == '#' ? color : "#" + color;
       }
       if (settings.HasMember("background")) {
         std::string color = settings["background"].GetString();
-        tokenStyle.backgroundColor = color[0] == '#' ? color : "#" + color;
+        tokenStyle.background = color[0] == '#' ? color : "#" + color;
       }
       if (settings.HasMember("fontStyle")) {
         std::string fontStyle = settings["fontStyle"].GetString();
@@ -156,10 +156,10 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
   };
 
   for (auto& rule : theme_->rules) {
-    if (!rule.style.color.empty() && rule.style.color[0] != '#')
-      rule.style.color = getReplacementColor(rule.style.color);
-    if (!rule.style.backgroundColor.empty() && rule.style.backgroundColor[0] != '#')
-      rule.style.backgroundColor = getReplacementColor(rule.style.backgroundColor);
+    if (!rule.style.foreground.empty() && rule.style.foreground[0] != '#')
+      rule.style.foreground = getReplacementColor(rule.style.foreground);
+    if (!rule.style.background.empty() && rule.style.background[0] != '#')
+      rule.style.background = getReplacementColor(rule.style.background);
   }
 
   if (doc.HasMember("colors") && doc["colors"].IsObject()) {
@@ -262,10 +262,10 @@ ThemeStyle ThemeParser::parseStyle(const std::string& json) {
     style.fontStyle = doc["scope"].GetString();
   }
   if (doc.HasMember("foreground")) {
-    style.color = doc["foreground"].GetString();
+    style.foreground = doc["foreground"].GetString();
   }
   if (doc.HasMember("background")) {
-    style.backgroundColor = doc["background"].GetString();
+    style.background = doc["background"].GetString();
   }
   if (doc.HasMember("fontStyle")) {
     std::string fontStyle = doc["fontStyle"].GetString();
@@ -306,10 +306,10 @@ std::vector<ThemeStyle> ThemeParser::parseStyles(const std::string& json) {
     }
 
     if (styleJson.HasMember("foreground")) {
-      style.color = styleJson["foreground"].GetString();
+      style.foreground = styleJson["foreground"].GetString();
     }
     if (styleJson.HasMember("background")) {
-      style.backgroundColor = styleJson["background"].GetString();
+      style.background = styleJson["background"].GetString();
     }
     if (styleJson.HasMember("fontStyle")) {
       std::string fontStyle = styleJson["fontStyle"].GetString();
@@ -392,10 +392,10 @@ std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name, const st
       if (tokenColor.HasMember("settings") && tokenColor["settings"].IsObject()) {
         const auto& settings = tokenColor["settings"];
         if (settings.HasMember("foreground")) {
-          style.color = settings["foreground"].GetString();
+          style.foreground = settings["foreground"].GetString();
         }
         if (settings.HasMember("background")) {
-          style.backgroundColor = settings["background"].GetString();
+          style.background = settings["background"].GetString();
         }
         if (settings.HasMember("fontStyle")) {
           std::string fontStyle = settings["fontStyle"].GetString();
@@ -478,10 +478,10 @@ std::shared_ptr<Theme> ThemeParser::parseThemeFromObject(const rapidjson::Value&
       if (tokenColor.HasMember("settings") && tokenColor["settings"].IsObject()) {
         const auto& settings = tokenColor["settings"];
         if (settings.HasMember("foreground")) {
-          style.color = settings["foreground"].GetString();
+          style.foreground = settings["foreground"].GetString();
         }
         if (settings.HasMember("background")) {
-          style.backgroundColor = settings["background"].GetString();
+          style.background = settings["background"].GetString();
         }
         if (settings.HasMember("fontStyle")) {
           std::string fontStyle = settings["fontStyle"].GetString();

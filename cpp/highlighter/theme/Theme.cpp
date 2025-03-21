@@ -167,7 +167,7 @@ ThemeStyle Theme::getLineNumberStyle() const {
 
   // If no line number style specified, use foreground color with reduced opacity
   ThemeStyle style;
-  style.color = foreground_.toHex();
+  style.foreground = foreground_.toHex();
   return style;
 }
 
@@ -205,7 +205,7 @@ ThemeStyle Theme::resolveStyle(const std::string& scope) const {
   }
 
   ThemeStyle defaultStyle;
-  defaultStyle.color = foreground_.toHex();
+  defaultStyle.foreground = foreground_.toHex();
   return defaultStyle;
 }
 
@@ -249,18 +249,18 @@ ThemeStyle Theme::mergeParentStyles(const std::vector<std::string>& scopes) cons
   ThemeStyle result;
 
   // Start with default foreground color
-  result.color = foreground_.toHex();
+  result.foreground = foreground_.toHex();
 
   // Apply styles from least to most specific
   for (const auto& scope : scopes) {
     const ThemeRule* rule = findBestMatchingRule(scope);
     if (rule) {
       // Only override non-empty properties
-      if (!rule->style.color.empty()) {
-        result.color = rule->style.color;
+      if (!rule->style.foreground.empty()) {
+        result.foreground = rule->style.foreground;
       }
-      if (!rule->style.backgroundColor.empty()) {
-        result.backgroundColor = rule->style.backgroundColor;
+      if (!rule->style.background.empty()) {
+        result.background = rule->style.background;
       }
       if (!rule->style.fontStyle.empty()) {
         result.fontStyle = rule->style.fontStyle;

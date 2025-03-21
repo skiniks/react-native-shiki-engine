@@ -95,7 +95,7 @@ class StyleCache {
 
   size_t estimateStyleSize(const ThemeStyle& style) const {
     // Base size + color strings + font info
-    return sizeof(ThemeStyle) + style.color.capacity() + style.backgroundColor.capacity();
+    return sizeof(ThemeStyle) + style.foreground.capacity() + style.background.capacity();
   }
 
   Cache<uint64_t, ThemeStyle> cache_;

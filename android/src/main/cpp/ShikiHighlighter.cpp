@@ -247,7 +247,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
           size_t sampleCount = std::min(theme->getRuleCount(), size_t(10));
           for (size_t i = 0; i < sampleCount; i++) {
             const auto& rule = theme->getRuleAt(i);
-            LOGD("  Rule %zu: scope='%s', color='%s'", i, rule.scope.c_str(), rule.style.color.c_str());
+            LOGD("  Rule %zu: scope='%s', color='%s'", i, rule.scope.c_str(), rule.style.foreground.c_str());
           }
         } else {
           LOGD("No theme rules found!");
@@ -320,7 +320,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
             token.start,
             token.length,
             scopesStr.c_str(),
-            token.style.color.c_str()
+            token.style.foreground.c_str()
           );
         }
 
@@ -341,8 +341,8 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
               for (const auto& rule : rules) {
                 // Simple scope matching - could be improved with proper TextMate scope matching
                 if (scope == rule.scope || scope.find(rule.scope + ".") == 0 || rule.scope.find(scope + ".") == 0) {
-                  if (!rule.style.color.empty()) {
-                    token.style.color = rule.style.color;
+                  if (!rule.style.foreground.empty()) {
+                    token.style.foreground = rule.style.foreground;
                     token.style.bold = rule.style.bold;
                     token.style.italic = rule.style.italic;
                     token.style.underline = rule.style.underline;
@@ -350,7 +350,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
                       "Direct rule match: scope '%s' matched rule '%s' with color '%s'",
                       scope.c_str(),
                       rule.scope.c_str(),
-                      rule.style.color.c_str()
+                      rule.style.foreground.c_str()
                     );
                     foundMatch = true;
                     directMatchTokens++;
@@ -366,9 +366,9 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
               std::string combinedScope = token.getCombinedScope();
               try {
                 shiki::ThemeStyle resolvedStyle = theme->resolveStyle(combinedScope);
-                if (!resolvedStyle.color.empty()) {
+                if (!resolvedStyle.foreground.empty()) {
                   token.style = resolvedStyle;
-                  LOGD("Resolved style for scope %s: color=%s", combinedScope.c_str(), token.style.color.c_str());
+                  LOGD("Resolved style for scope %s: color=%s", combinedScope.c_str(), token.style.foreground.c_str());
                   resolvedStyleTokens++;
                   foundMatch = true;
                 } else {
@@ -383,13 +383,13 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
           // If we didn't find a match, use the default color
           if (!foundMatch) {
             // If no match was found, use theme's foreground color
-            std::string oldColor = token.style.color;
-            token.style.color = theme->getForeground().toHex();
+            std::string oldColor = token.style.foreground;
+            token.style.foreground = theme->getForeground().toHex();
             defaultColorTokens++;
 
             // Log if we're changing from a non-default color
-            if (!oldColor.empty() && oldColor != token.style.color) {
-              LOGD("Changed token color from %s to %s (default)", oldColor.c_str(), token.style.color.c_str());
+            if (!oldColor.empty() && oldColor != token.style.foreground) {
+              LOGD("Changed token color from %s to %s (default)", oldColor.c_str(), token.style.foreground.c_str());
             }
           } else {
             coloredTokens++;
@@ -583,22 +583,22 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
         LOGE("No theme set in tokenizer when resolving style for: %s", scopeStr.c_str());
         // Create a default style with default color
         shiki::ThemeStyle defaultStyle;
-        defaultStyle.color = "#ffffff";  // Default to white if no theme is available
+        defaultStyle.foreground = "#ffffff";  // Default to white if no theme is available
         return createThemeStyle(defaultStyle);
       }
 
       try {
         // Resolve the style with proper error handling
         shiki::ThemeStyle style = theme->resolveStyle(scopeStr);
-        LOGD("Style resolved for scope %s: color=%s", scopeStr.c_str(), style.color.c_str());
+        LOGD("Style resolved for scope %s: color=%s", scopeStr.c_str(), style.foreground.c_str());
         return createThemeStyle(style);
       } catch (const std::exception& e) {
         LOGE("Error resolving style for scope %s: %s", scopeStr.c_str(), e.what());
         // Create a default style with the theme's foreground color
         shiki::ThemeStyle defaultStyle;
-        defaultStyle.color = theme->getForeground().toHex();
-        if (defaultStyle.color.empty()) {
-          defaultStyle.color = "#ffffff";  // Default to white if foreground color is not set
+        defaultStyle.foreground = theme->getForeground().toHex();
+        if (defaultStyle.foreground.empty()) {
+          defaultStyle.foreground = "#ffffff";  // Default to white if foreground color is not set
         }
         return createThemeStyle(defaultStyle);
       }
@@ -606,13 +606,13 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
       LOGE("Error in resolveStyleNative: %s", e.what());
       // Create a default style with default color
       shiki::ThemeStyle defaultStyle;
-      defaultStyle.color = "#ffffff";  // Default to white
+      defaultStyle.foreground = "#ffffff";  // Default to white
       return createThemeStyle(defaultStyle);
     } catch (...) {
       LOGE("Unknown error in resolveStyleNative");
       // Create a default style with default color
       shiki::ThemeStyle defaultStyle;
-      defaultStyle.color = "#ffffff";  // Default to white
+      defaultStyle.foreground = "#ffffff";  // Default to white
       return createThemeStyle(defaultStyle);
     }
   }
@@ -659,8 +659,8 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
         return nullptr;
       }
 
-      jfieldID colorField = env->GetFieldID(themeStyleClass, "color", "Ljava/lang/String;");
-      jfieldID bgColorField = env->GetFieldID(themeStyleClass, "backgroundColor", "Ljava/lang/String;");
+      jfieldID colorField = env->GetFieldID(themeStyleClass, "foreground", "Ljava/lang/String;");
+      jfieldID bgColorField = env->GetFieldID(themeStyleClass, "background", "Ljava/lang/String;");
       jfieldID boldField = env->GetFieldID(themeStyleClass, "bold", "Z");
       jfieldID italicField = env->GetFieldID(themeStyleClass, "italic", "Z");
       jfieldID underlineField = env->GetFieldID(themeStyleClass, "underline", "Z");
@@ -671,9 +671,9 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
       }
 
       try {
-        if (!style.color.empty()) {
+        if (!style.foreground.empty()) {
           // Ensure color begins with '#' if it's a valid hex color
-          std::string colorStr = style.color;
+          std::string colorStr = style.foreground;
           if (colorStr[0] != '#' && isValidHexColor(colorStr)) {
             colorStr = "#" + colorStr;
           }
@@ -683,7 +683,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
             LOGD(
               "Setting color: %s (original: %s) for scope: %s",
               colorStr.c_str(),
-              style.color.c_str(),
+              style.foreground.c_str(),
               style.scope.c_str()
             );
             auto jColorStr = jni::make_jstring(colorStr);
@@ -691,7 +691,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
               env->SetObjectField(themeStyle, colorField, jColorStr.get());
             }
           } else {
-            LOGD("Invalid color format: %s for scope: %s", style.color.c_str(), style.scope.c_str());
+            LOGD("Invalid color format: %s for scope: %s", style.foreground.c_str(), style.scope.c_str());
             // Don't set a default color here - leave it null to be handled by the Kotlin side
           }
         } else {
@@ -705,9 +705,9 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
 
       // Handle background color
       try {
-        if (!style.backgroundColor.empty()) {
+        if (!style.background.empty()) {
           // Ensure backgroundColor begins with '#' if it's a valid hex color
-          std::string bgColorStr = style.backgroundColor;
+          std::string bgColorStr = style.background;
           if (bgColorStr[0] != '#' && isValidHexColor(bgColorStr)) {
             bgColorStr = "#" + bgColorStr;
           }
@@ -717,7 +717,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
             LOGD(
               "Setting backgroundColor: %s (original: %s) for scope: %s",
               bgColorStr.c_str(),
-              style.backgroundColor.c_str(),
+              style.background.c_str(),
               style.scope.c_str()
             );
             auto jBgColorStr = jni::make_jstring(bgColorStr);
@@ -727,7 +727,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
           } else {
             LOGD(
               "Skipping invalid background color format: %s for scope: %s",
-              style.backgroundColor.c_str(),
+              style.background.c_str(),
               style.scope.c_str()
             );
           }
@@ -887,7 +887,7 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_com_shiki_view_ShikiHighlighterVi
 
         // Add a default style for the entire source
         shiki::ThemeStyle defaultStyle;
-        defaultStyle.color = "#ffffff";
+        defaultStyle.foreground = "#ffffff";
         defaultStyle.scope = "source";
         defaultTheme->addStyle(defaultStyle);
 
@@ -978,22 +978,22 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_com_shiki_view_ShikiHighlighterVi
           style = tokenizer.resolveStyle(scope);
 
           // If no color was resolved, set the theme's default foreground color
-          if (style.color.empty()) {
+          if (style.foreground.empty()) {
             LOGD("processBatchNative: No color resolved for scope: %s, using theme's default color", scope.c_str());
-            style.color = defaultColor;
+            style.foreground = defaultColor;
             tokensWithDefaultColor++;
           } else {
             tokensWithColor++;
-            LOGD("processBatchNative: Resolved color %s for scope: %s", style.color.c_str(), scope.c_str());
+            LOGD("processBatchNative: Resolved color %s for scope: %s", style.foreground.c_str(), scope.c_str());
           }
         } catch (const std::exception& e) {
           LOGE("processBatchNative: Exception resolving style for scope %s: %s", scope.c_str(), e.what());
-          style.color = defaultColor;
+          style.foreground = defaultColor;
           tokensWithDefaultColor++;
         }
       } else {
         LOGD("processBatchNative: Token %zu has no scopes, using default style", i);
-        style.color = defaultColor;
+        style.foreground = defaultColor;
         tokensWithDefaultColor++;
       }
 
@@ -1009,7 +1009,7 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_com_shiki_view_ShikiHighlighterVi
           LOGE("processBatchNative: Failed to create style object for token %zu", i);
           // Create a default style with the theme's default color
           shiki::ThemeStyle defaultStyle;
-          defaultStyle.color = defaultColor;
+          defaultStyle.foreground = defaultColor;
 
           // Use a local variable to hold the reference
           jni::local_ref<jobject> defaultStyleObjRef = ShikiHighlighterImpl::createThemeStyle(defaultStyle);
@@ -1026,7 +1026,7 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_com_shiki_view_ShikiHighlighterVi
         // Create a default style with the theme's default color
         try {
           shiki::ThemeStyle defaultStyle;
-          defaultStyle.color = defaultColor;
+          defaultStyle.foreground = defaultColor;
 
           // Use a local variable to hold the reference
           jni::local_ref<jobject> defaultStyleObjRef = ShikiHighlighterImpl::createThemeStyle(defaultStyle);
