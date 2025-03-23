@@ -30,6 +30,14 @@ class ThemeParser {
   static std::vector<ThemeStyle> parseStyles(const std::string& json);
 
  private:
+  static std::vector<std::string> processScopes(const rapidjson::Value& scopeValue);
+
+  static ThemeStyle processTokenSettings(const rapidjson::Value& settings);
+
+  static void processTokenColor(std::shared_ptr<Theme> theme, const rapidjson::Value& tokenColor);
+
+  static void processColors(std::shared_ptr<Theme> theme, const rapidjson::Value& colors);
+
   Theme* theme_;
   friend class Theme;
 };

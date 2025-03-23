@@ -88,12 +88,13 @@ struct ThemeStyle {
 
   // Check if this style has any properties set
   bool hasProperties() const {
-    return !foreground.empty() || !background.empty() || !fontStyle.empty() || bold || italic || underline;
+    return !foreground.empty() || !background.empty() || !fontStyle.empty() || !scope.empty() || bold || italic ||
+      underline;
   }
 
   bool operator==(const ThemeStyle& other) const {
     return foreground == other.foreground && background == other.background && fontStyle == other.fontStyle &&
-      bold == other.bold && italic == other.italic && underline == other.underline;
+      scope == other.scope && bold == other.bold && italic == other.italic && underline == other.underline;
   }
 
   static ThemeStyle getDefaultStyle() {

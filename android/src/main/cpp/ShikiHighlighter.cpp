@@ -339,8 +339,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
             // Try each scope against all theme rules
             for (const auto& scope : token.scopes) {
               for (const auto& rule : rules) {
-                // Simple scope matching - could be improved with proper TextMate scope matching
-                if (scope == rule.scope || scope.find(rule.scope + ".") == 0 || rule.scope.find(scope + ".") == 0) {
+                if (Theme::isScopeMatch(rule.scope, scope, Theme::MatchMode::Standard)) {
                   if (!rule.style.foreground.empty()) {
                     token.style.foreground = rule.style.foreground;
                     token.style.bold = rule.style.bold;

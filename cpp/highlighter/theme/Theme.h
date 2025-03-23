@@ -27,6 +27,8 @@ struct ThemeRule {
 
 class Theme {
  public:
+  enum class MatchMode { Strict, Standard, Relaxed };
+
   Theme() : configuration_(&Configuration::getInstance()) {}
   explicit Theme(const std::string& name) : name(name), configuration_(&Configuration::getInstance()) {}
   Theme(const Theme& other);
@@ -97,6 +99,12 @@ class Theme {
   ThemeStyle getLineNumberStyle() const;
 
   static std::shared_ptr<Theme> fromJson(const std::string& content);
+
+  static std::vector<std::string> splitScope(const std::string& scope);
+  static std::vector<std::string> getSegments(const std::string& scope);
+  static bool
+  isScopeMatch(const std::string& ruleScope, const std::string& tokenScope, MatchMode mode = MatchMode::Standard);
+  static size_t calculateScopeSpecificity(const std::string& ruleScope, const std::string& tokenScope);
 
   std::string name;
   std::string type{"dark"};

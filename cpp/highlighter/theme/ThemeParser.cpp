@@ -21,6 +21,96 @@ namespace shiki {
 
 using Document = rapidjson::Document;
 
+std::vector<std::string> ThemeParser::processScopes(const rapidjson::Value& scopeValue) {
+  std::vector<std::string> scopes;
+
+  if (scopeValue.IsString()) {
+    std::string scopeStr = scopeValue.GetString();
+    std::istringstream scopeStream(scopeStr);
+    std::string scope;
+    while (std::getline(scopeStream, scope, ',')) {
+      scope.erase(0, scope.find_first_not_of(" \t"));
+      scope.erase(scope.find_last_not_of(" \t") + 1);
+      if (!scope.empty()) {
+        scopes.push_back(scope);
+      }
+    }
+  } else if (scopeValue.IsArray()) {
+    for (const auto& scope : scopeValue.GetArray()) {
+      if (scope.IsString()) {
+        std::string scopeStr = scope.GetString();
+        std::istringstream scopeStream(scopeStr);
+        std::string subScope;
+        while (std::getline(scopeStream, subScope, ',')) {
+          subScope.erase(0, subScope.find_first_not_of(" \t"));
+          subScope.erase(subScope.find_last_not_of(" \t") + 1);
+          if (!subScope.empty()) {
+            scopes.push_back(subScope);
+          }
+        }
+      }
+    }
+  }
+
+  return scopes;
+}
+
+ThemeStyle ThemeParser::processTokenSettings(const rapidjson::Value& settings) {
+  ThemeStyle style;
+
+  if (settings.HasMember("foreground")) {
+    std::string color = settings["foreground"].GetString();
+    style.foreground = color[0] == '#' ? color : "#" + color;
+  }
+
+  if (settings.HasMember("background")) {
+    std::string color = settings["background"].GetString();
+    style.background = color[0] == '#' ? color : "#" + color;
+  }
+
+  if (settings.HasMember("fontStyle")) {
+    std::string fontStyle = settings["fontStyle"].GetString();
+    style.fontStyle = fontStyle;
+    style.bold = fontStyle.find("bold") != std::string::npos;
+    style.italic = fontStyle.find("italic") != std::string::npos;
+    style.underline = fontStyle.find("underline") != std::string::npos;
+  }
+
+  return style;
+}
+
+void ThemeParser::processTokenColor(std::shared_ptr<Theme> theme, const rapidjson::Value& tokenColor) {
+  if (!tokenColor.HasMember("scope") || !tokenColor.HasMember("settings")) {
+    return;
+  }
+
+  ThemeStyle style;
+  if (tokenColor.HasMember("settings") && tokenColor["settings"].IsObject()) {
+    style = processTokenSettings(tokenColor["settings"]);
+  }
+
+  if (tokenColor.HasMember("scope")) {
+    std::vector<std::string> scopes = processScopes(tokenColor["scope"]);
+
+    for (const auto& scope : scopes) {
+      style.scope = scope;
+      theme->addStyle(style);
+    }
+  }
+}
+
+void ThemeParser::processColors(std::shared_ptr<Theme> theme, const rapidjson::Value& colors) {
+  if (colors.HasMember("editor.background")) {
+    std::string colorStr = colors["editor.background"].GetString();
+    theme->setBackground(*ThemeColor::fromHex(colorStr));
+  }
+
+  if (colors.HasMember("editor.foreground")) {
+    std::string colorStr = colors["editor.foreground"].GetString();
+    theme->setForeground(*ThemeColor::fromHex(colorStr));
+  }
+}
+
 ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
   ThemeStyle style;
   Document doc;
@@ -55,14 +145,14 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
     for (const auto& setting : settings) {
       if (!setting.HasMember("scope") && !setting.HasMember("name") && setting.HasMember("settings")) {
         const auto& settingsObj = setting["settings"];
-        if (settingsObj.HasMember("foreground")) {
-          std::string color = settingsObj["foreground"].GetString();
-          style.foreground = color[0] == '#' ? color : "#" + color;
+        ThemeStyle baseStyle = processTokenSettings(settingsObj);
+
+        if (!baseStyle.foreground.empty()) {
+          style.foreground = baseStyle.foreground;
           theme_->setForeground(*ThemeColor::fromHex(style.foreground));
         }
-        if (settingsObj.HasMember("background")) {
-          std::string color = settingsObj["background"].GetString();
-          style.background = color[0] == '#' ? color : "#" + color;
+        if (!baseStyle.background.empty()) {
+          style.background = baseStyle.background;
           theme_->setBackground(*ThemeColor::fromHex(style.background));
         }
         break;
@@ -81,55 +171,9 @@ ThemeStyle ThemeParser::parseThemeStyle(const std::string& themeContent) {
         continue;
       }
 
-      const auto& settings = tokenColor["settings"];
-      ThemeStyle tokenStyle;
+      ThemeStyle tokenStyle = processTokenSettings(tokenColor["settings"]);
 
-      if (settings.HasMember("foreground")) {
-        std::string color = settings["foreground"].GetString();
-        tokenStyle.foreground = color[0] == '#' ? color : "#" + color;
-      }
-      if (settings.HasMember("background")) {
-        std::string color = settings["background"].GetString();
-        tokenStyle.background = color[0] == '#' ? color : "#" + color;
-      }
-      if (settings.HasMember("fontStyle")) {
-        std::string fontStyle = settings["fontStyle"].GetString();
-        tokenStyle.fontStyle = fontStyle;
-        tokenStyle.bold = fontStyle.find("bold") != std::string::npos;
-        tokenStyle.italic = fontStyle.find("italic") != std::string::npos;
-        tokenStyle.underline = fontStyle.find("underline") != std::string::npos;
-      }
-
-      const auto& scopeValue = tokenColor["scope"];
-      std::vector<std::string> scopes;
-
-      if (scopeValue.IsString()) {
-        std::string scopeStr = scopeValue.GetString();
-        std::istringstream scopeStream(scopeStr);
-        std::string scope;
-        while (std::getline(scopeStream, scope, ',')) {
-          scope.erase(0, scope.find_first_not_of(" \t"));
-          scope.erase(scope.find_last_not_of(" \t") + 1);
-          if (!scope.empty()) {
-            scopes.push_back(scope);
-          }
-        }
-      } else if (scopeValue.IsArray()) {
-        for (const auto& scope : scopeValue.GetArray()) {
-          if (scope.IsString()) {
-            std::string scopeStr = scope.GetString();
-            std::istringstream scopeStream(scopeStr);
-            std::string subScope;
-            while (std::getline(scopeStream, subScope, ',')) {
-              subScope.erase(0, subScope.find_first_not_of(" \t"));
-              subScope.erase(subScope.find_last_not_of(" \t") + 1);
-              if (!subScope.empty()) {
-                scopes.push_back(subScope);
-              }
-            }
-          }
-        }
-      }
+      std::vector<std::string> scopes = processScopes(tokenColor["scope"]);
 
       for (const auto& scope : scopes) {
         ThemeRule rule;
@@ -340,78 +384,12 @@ std::shared_ptr<Theme> ThemeParser::parseTheme(const std::string& name, const st
   auto theme = std::make_shared<Theme>(name);
 
   if (doc.HasMember("colors") && doc["colors"].IsObject()) {
-    const auto& colors = doc["colors"];
-    if (colors.HasMember("editor.background")) {
-      theme->setBackground(*ThemeColor::fromHex(colors["editor.background"].GetString()));
-    }
-    if (colors.HasMember("editor.foreground")) {
-      theme->setForeground(*ThemeColor::fromHex(colors["editor.foreground"].GetString()));
-    }
+    processColors(theme, doc["colors"]);
   }
 
   if (doc.HasMember("tokenColors") && doc["tokenColors"].IsArray()) {
     for (const auto& tokenColor : doc["tokenColors"].GetArray()) {
-      ThemeStyle style;
-
-      if (tokenColor.HasMember("scope")) {
-        if (tokenColor["scope"].IsString()) {
-          std::string scopeStr = tokenColor["scope"].GetString();
-          std::istringstream scopeStream(scopeStr);
-          std::string scope;
-          while (std::getline(scopeStream, scope, ',')) {
-            scope.erase(0, scope.find_first_not_of(" \t"));
-            scope.erase(scope.find_last_not_of(" \t") + 1);
-            if (!scope.empty()) {
-              ThemeRule rule;
-              rule.scope = scope;
-              rule.style = style;
-              theme->rules.push_back(rule);
-            }
-          }
-        } else if (tokenColor["scope"].IsArray()) {
-          for (const auto& scope : tokenColor["scope"].GetArray()) {
-            if (scope.IsString()) {
-              std::string scopeStr = scope.GetString();
-              std::istringstream scopeStream(scopeStr);
-              std::string subScope;
-              while (std::getline(scopeStream, subScope, ',')) {
-                subScope.erase(0, subScope.find_first_not_of(" \t"));
-                subScope.erase(subScope.find_last_not_of(" \t") + 1);
-                if (!subScope.empty()) {
-                  ThemeRule rule;
-                  rule.scope = subScope;
-                  rule.style = style;
-                  theme->rules.push_back(rule);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (tokenColor.HasMember("settings") && tokenColor["settings"].IsObject()) {
-        const auto& settings = tokenColor["settings"];
-        if (settings.HasMember("foreground")) {
-          style.foreground = settings["foreground"].GetString();
-        }
-        if (settings.HasMember("background")) {
-          style.background = settings["background"].GetString();
-        }
-        if (settings.HasMember("fontStyle")) {
-          std::string fontStyle = settings["fontStyle"].GetString();
-          style.fontStyle = fontStyle;
-          if (fontStyle.find("bold") != std::string::npos) {
-            style.bold = true;
-          }
-          if (fontStyle.find("italic") != std::string::npos) {
-            style.italic = true;
-          }
-        }
-      }
-
-      if (!style.scope.empty()) {
-        theme->addStyle(style);
-      }
+      processTokenColor(theme, tokenColor);
     }
   }
 
@@ -426,78 +404,12 @@ std::shared_ptr<Theme> ThemeParser::parseThemeFromObject(const rapidjson::Value&
   auto theme = std::make_shared<Theme>(themeJson["name"].GetString());
 
   if (themeJson.HasMember("colors") && themeJson["colors"].IsObject()) {
-    const auto& colors = themeJson["colors"];
-    if (colors.HasMember("editor.background")) {
-      theme->setBackground(*ThemeColor::fromHex(colors["editor.background"].GetString()));
-    }
-    if (colors.HasMember("editor.foreground")) {
-      theme->setForeground(*ThemeColor::fromHex(colors["editor.foreground"].GetString()));
-    }
+    processColors(theme, themeJson["colors"]);
   }
 
   if (themeJson.HasMember("tokenColors") && themeJson["tokenColors"].IsArray()) {
     for (const auto& tokenColor : themeJson["tokenColors"].GetArray()) {
-      ThemeStyle style;
-
-      if (tokenColor.HasMember("scope")) {
-        if (tokenColor["scope"].IsString()) {
-          std::string scopeStr = tokenColor["scope"].GetString();
-          std::istringstream scopeStream(scopeStr);
-          std::string scope;
-          while (std::getline(scopeStream, scope, ',')) {
-            scope.erase(0, scope.find_first_not_of(" \t"));
-            scope.erase(scope.find_last_not_of(" \t") + 1);
-            if (!scope.empty()) {
-              ThemeRule rule;
-              rule.scope = scope;
-              rule.style = style;
-              theme->rules.push_back(rule);
-            }
-          }
-        } else if (tokenColor["scope"].IsArray()) {
-          for (const auto& scope : tokenColor["scope"].GetArray()) {
-            if (scope.IsString()) {
-              std::string scopeStr = scope.GetString();
-              std::istringstream scopeStream(scopeStr);
-              std::string subScope;
-              while (std::getline(scopeStream, subScope, ',')) {
-                subScope.erase(0, subScope.find_first_not_of(" \t"));
-                subScope.erase(subScope.find_last_not_of(" \t") + 1);
-                if (!subScope.empty()) {
-                  ThemeRule rule;
-                  rule.scope = subScope;
-                  rule.style = style;
-                  theme->rules.push_back(rule);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (tokenColor.HasMember("settings") && tokenColor["settings"].IsObject()) {
-        const auto& settings = tokenColor["settings"];
-        if (settings.HasMember("foreground")) {
-          style.foreground = settings["foreground"].GetString();
-        }
-        if (settings.HasMember("background")) {
-          style.background = settings["background"].GetString();
-        }
-        if (settings.HasMember("fontStyle")) {
-          std::string fontStyle = settings["fontStyle"].GetString();
-          style.fontStyle = fontStyle;
-          if (fontStyle.find("bold") != std::string::npos) {
-            style.bold = true;
-          }
-          if (fontStyle.find("italic") != std::string::npos) {
-            style.italic = true;
-          }
-        }
-      }
-
-      if (!style.scope.empty()) {
-        theme->addStyle(style);
-      }
+      processTokenColor(theme, tokenColor);
     }
   }
 

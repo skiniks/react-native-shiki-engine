@@ -22,7 +22,7 @@
 #include "highlighter/cache/StyleCache.h"
 #include "highlighter/core/Configuration.h"
 #include "highlighter/memory/TokenPool.h"
-#include "highlighter/theme/ScopeMatcher.h"
+#include "highlighter/theme/Theme.h"
 #include "highlighter/utils/ScopedResource.h"
 #include "highlighter/utils/WorkPrioritizer.h"
 
