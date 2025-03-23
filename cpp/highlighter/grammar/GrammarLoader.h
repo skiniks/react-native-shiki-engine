@@ -16,8 +16,6 @@ class GrammarLoader {
 
   std::shared_ptr<Grammar> loadFromFile(const std::string& filePath);
 
-  std::shared_ptr<Grammar> loadFromJson(const std::string& content);
-
   std::shared_ptr<Grammar> loadFromJavaScriptModule(const std::string& jsContent);
 
   void registerGrammar(const std::string& scopeName, std::shared_ptr<Grammar> grammar);

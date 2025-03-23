@@ -6,7 +6,6 @@
 #include <sstream>
 
 #include "GrammarParser.h"
-#include "GrammarValidator.h"
 #include "highlighter/core/Configuration.h"
 
 namespace shiki {
@@ -24,61 +23,7 @@ std::shared_ptr<Grammar> GrammarLoader::loadFromFile(const std::string& filePath
   std::stringstream buffer;
   buffer << file.rdbuf();
 
-  return loadFromJson(buffer.str());
-}
-
-std::shared_ptr<Grammar> GrammarLoader::loadFromJson(const std::string& content) {
-  auto& config = Configuration::getInstance();
-
-  try {
-    if (content.find("export default") != std::string::npos) {
-      if (config.isDebugMode()) {
-        config.log(
-          Configuration::LogLevel::Debug,
-          "[DEBUG] Detected JavaScript module format, using loadFromJavaScriptModule"
-        );
-      }
-      return loadFromJavaScriptModule(content);
-    }
-
-    if (config.isDebugMode()) {
-      config.log(Configuration::LogLevel::Debug, "[DEBUG] Loading grammar, content length: %zu", content.length());
-      if (content.length() > 100) {
-        config.log(Configuration::LogLevel::Debug, "[DEBUG] Content preview: %.100s...", content.c_str());
-      }
-    }
-
-    auto grammar = Grammar::fromJson(content);
-
-    auto validationResult = GrammarValidator::validate(*grammar);
-
-    for (const auto& warning : validationResult.warnings) {
-      config.log(Configuration::LogLevel::Warning, "Grammar warning: %s", warning.c_str());
-    }
-
-    if (!validationResult.errors.empty()) {
-      for (const auto& error : validationResult.errors) {
-        config.log(Configuration::LogLevel::Error, "Grammar error: %s", error.c_str());
-      }
-
-      if (config.isStrictThemeMode()) {
-        throw HighlightError(
-          HighlightErrorCode::InvalidGrammar,
-          "Grammar validation failed with " + std::to_string(validationResult.errors.size()) + " errors"
-        );
-      }
-    }
-
-    if (!grammar->scopeName.empty()) {
-      grammarCache_[grammar->scopeName] = grammar;
-    }
-
-    return grammar;
-  } catch (const HighlightError& e) {
-    throw HighlightError(HighlightErrorCode::InvalidGrammar, "Failed to load grammar: " + std::string(e.what()));
-  } catch (const std::exception& e) {
-    throw HighlightError(HighlightErrorCode::InvalidGrammar, "Failed to parse grammar: " + std::string(e.what()));
-  }
+  return loadFromJavaScriptModule(buffer.str());
 }
 
 void GrammarLoader::registerGrammar(const std::string& scopeName, std::shared_ptr<Grammar> grammar) {
@@ -97,7 +42,7 @@ std::shared_ptr<Grammar> GrammarLoader::getGrammar(const std::string& scopeName)
 std::string GrammarLoader::findGrammarFile(const std::string& scopeName) {
   std::string fileName = scopeName;
   std::replace(fileName.begin(), fileName.end(), '.', '-');
-  fileName += ".tmLanguage.json";
+  fileName += ".mjs";
 
   for (const auto& path : searchPaths_) {
     std::string fullPath = path + "/" + fileName;
@@ -111,7 +56,7 @@ std::string GrammarLoader::findGrammarFile(const std::string& scopeName) {
     std::string shortName = scopeName.substr(lastDot + 1);
 
     for (const auto& path : searchPaths_) {
-      std::string fullPath = path + "/" + shortName + ".tmLanguage.json";
+      std::string fullPath = path + "/" + shortName + ".mjs";
       if (std::filesystem::exists(fullPath)) {
         return fullPath;
       }
@@ -163,7 +108,6 @@ std::shared_ptr<Grammar> GrammarLoader::loadFromJavaScriptModule(const std::stri
 
   std::string jsonContent = jsContent.substr(startPos, endPos - startPos + 1);
 
-  // Clean up the JSON (remove JavaScript-specific syntax)
   std::string cleanJson = jsonContent;
   size_t pos = 0;
   while ((pos = cleanJson.find("'", pos)) != std::string::npos) {
@@ -171,11 +115,29 @@ std::shared_ptr<Grammar> GrammarLoader::loadFromJavaScriptModule(const std::stri
     pos += 1;
   }
 
-  // Remove trailing commas in arrays and objects
   std::regex trailingCommaRegex(R"(,\s*([}\]]))", std::regex::ECMAScript);
   cleanJson = std::regex_replace(cleanJson, trailingCommaRegex, "$1");
 
-  return loadFromJson(cleanJson);
+  try {
+    if (config.isDebugMode()) {
+      config.log(Configuration::LogLevel::Debug, "[DEBUG] Loading grammar, content length: %zu", cleanJson.length());
+      if (cleanJson.length() > 100) {
+        config.log(Configuration::LogLevel::Debug, "[DEBUG] Content preview: %.100s...", cleanJson.c_str());
+      }
+    }
+
+    auto grammar = Grammar::fromJson(cleanJson);
+
+    if (!grammar->scopeName.empty()) {
+      grammarCache_[grammar->scopeName] = grammar;
+    }
+
+    return grammar;
+  } catch (const HighlightError& e) {
+    throw HighlightError(HighlightErrorCode::InvalidGrammar, "Failed to load grammar: " + std::string(e.what()));
+  } catch (const std::exception& e) {
+    throw HighlightError(HighlightErrorCode::InvalidGrammar, "Failed to parse grammar: " + std::string(e.what()));
+  }
 }
 
 }  // namespace shiki
