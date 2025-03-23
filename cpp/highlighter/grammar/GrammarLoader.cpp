@@ -25,7 +25,7 @@ std::shared_ptr<Grammar> GrammarLoader::getGrammar(const std::string& scopeName)
   return nullptr;
 }
 
-std::shared_ptr<Grammar> GrammarLoader::loadFromJavaScriptModule(const std::string& jsContent) {
+std::string GrammarLoader::extractJsonFromModule(const std::string& jsContent) {
   size_t startPos = jsContent.find("export default");
   if (startPos == std::string::npos) {
     throw HighlightError(HighlightErrorCode::InvalidGrammar, "Could not find 'export default' in JavaScript module");
@@ -41,8 +41,10 @@ std::shared_ptr<Grammar> GrammarLoader::loadFromJavaScriptModule(const std::stri
     throw HighlightError(HighlightErrorCode::InvalidGrammar, "Could not find end of JSON object in JavaScript module");
   }
 
-  std::string jsonContent = jsContent.substr(startPos, endPos - startPos + 1);
+  return jsContent.substr(startPos, endPos - startPos + 1);
+}
 
+std::string GrammarLoader::cleanJsonString(const std::string& jsonContent) {
   std::string cleanJson = jsonContent;
   size_t pos = 0;
   while ((pos = cleanJson.find("'", pos)) != std::string::npos) {
@@ -51,9 +53,15 @@ std::shared_ptr<Grammar> GrammarLoader::loadFromJavaScriptModule(const std::stri
   }
 
   std::regex trailingCommaRegex(R"(,\s*([}\]]))", std::regex::ECMAScript);
-  cleanJson = std::regex_replace(cleanJson, trailingCommaRegex, "$1");
+  return std::regex_replace(cleanJson, trailingCommaRegex, "$1");
+}
 
+std::shared_ptr<Grammar> GrammarLoader::loadFromJavaScriptModule(const std::string& jsContent) {
   try {
+    std::string jsonContent = extractJsonFromModule(jsContent);
+
+    std::string cleanJson = cleanJsonString(jsonContent);
+
     logDebug("Loading grammar, content length: %zu", cleanJson.length());
     if (cleanJson.length() > 100) {
       logDebug("Content preview: %.100s...", cleanJson.c_str());
@@ -73,6 +81,15 @@ std::shared_ptr<Grammar> GrammarLoader::loadFromJavaScriptModule(const std::stri
   }
 }
 
+void GrammarLoader::log(Configuration::LogLevel level, const char* format, va_list args) {
+  auto& config = Configuration::getInstance();
+
+  char buffer[1024];
+  vsnprintf(buffer, sizeof(buffer), format, args);
+
+  config.log(level, "%s", buffer);
+}
+
 void GrammarLoader::logDebug(const char* format, ...) {
   auto& config = Configuration::getInstance();
   if (!config.isDebugMode()) {
@@ -81,35 +98,22 @@ void GrammarLoader::logDebug(const char* format, ...) {
 
   va_list args;
   va_start(args, format);
-  char buffer[1024];
-  vsnprintf(buffer, sizeof(buffer), format, args);
+  log(Configuration::LogLevel::Debug, (std::string("[DEBUG] ") + format).c_str(), args);
   va_end(args);
-
-  config.log(Configuration::LogLevel::Debug, "[DEBUG] %s", buffer);
 }
 
 void GrammarLoader::logWarning(const char* format, ...) {
-  auto& config = Configuration::getInstance();
-
   va_list args;
   va_start(args, format);
-  char buffer[1024];
-  vsnprintf(buffer, sizeof(buffer), format, args);
+  log(Configuration::LogLevel::Warning, format, args);
   va_end(args);
-
-  config.log(Configuration::LogLevel::Warning, "%s", buffer);
 }
 
 void GrammarLoader::logError(const char* format, ...) {
-  auto& config = Configuration::getInstance();
-
   va_list args;
   va_start(args, format);
-  char buffer[1024];
-  vsnprintf(buffer, sizeof(buffer), format, args);
+  log(Configuration::LogLevel::Error, format, args);
   va_end(args);
-
-  config.log(Configuration::LogLevel::Error, "%s", buffer);
 }
 
 }  // namespace shiki

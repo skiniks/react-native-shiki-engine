@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "Grammar.h"
+#include "highlighter/core/Configuration.h"
 
 namespace shiki {
 
@@ -27,6 +28,10 @@ class GrammarLoader {
   GrammarLoader(const GrammarLoader&) = delete;
   GrammarLoader& operator=(const GrammarLoader&) = delete;
 
+  std::string extractJsonFromModule(const std::string& jsContent);
+  std::string cleanJsonString(const std::string& jsonContent);
+
+  void log(Configuration::LogLevel level, const char* format, va_list args);
   void logDebug(const char* format, ...);
   void logWarning(const char* format, ...);
   void logError(const char* format, ...);
