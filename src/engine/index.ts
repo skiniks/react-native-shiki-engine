@@ -12,12 +12,14 @@ export function createNativeEngine(options: { maxCacheSize?: number } = {}): Reg
   }
 
   return {
-    createScanner(patterns: string[]): PatternScanner {
-      if (!Array.isArray(patterns) || patterns.some(p => typeof p !== 'string')) {
-        throw new TypeError('Patterns must be an array of strings')
+    createScanner(patterns: (string | RegExp)[]): PatternScanner {
+      if (!Array.isArray(patterns) || patterns.some(p => typeof p !== 'string' && !(p instanceof RegExp))) {
+        throw new TypeError('Patterns must be an array of strings or RegExp objects')
       }
 
-      const scannerId = ShikiEngine.createScanner(patterns, maxCacheSize)
+      const stringPatterns = patterns.map(p => typeof p === 'string' ? p : p.source)
+
+      const scannerId = ShikiEngine.createScanner(stringPatterns, maxCacheSize)
       if (typeof scannerId !== 'number') {
         throw new TypeError('Failed to create native scanner')
       }
