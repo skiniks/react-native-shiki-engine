@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
     versioning-strategy: increase
     groups:
@@ -26,7 +26,7 @@ updates:
   - package-ecosystem: npm
     directory: /example
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
     groups:
       react:
@@ -37,7 +37,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
     groups:
       actions:
@@ -49,7 +49,7 @@ updates:
   - package-ecosystem: bundler
     directory: /example/ios
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
     commit-message:
       prefix: chore(ios)
@@ -57,7 +57,7 @@ updates:
   - package-ecosystem: gradle
     directory: /example/android
     schedule:
-      interval: weekly
+      interval: monthly
       day: monday
     commit-message:
       prefix: chore(android)

@@ -39,8 +39,8 @@ npx expo prebuild
 ```tsx
 import { createHighlighterCore } from '@shikijs/core'
 import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
-import javascript from 'shiki/dist/langs/javascript.mjs'
-import nord from 'shiki/dist/themes/nord.mjs'
+import javascript from '@shikijs/langs/dist/javascript.mjs'
+import nord from '@shikijs/themes/dist/nord.mjs'
 
 if (!isNativeEngineAvailable()) {
   throw new Error('Native engine is not available')
