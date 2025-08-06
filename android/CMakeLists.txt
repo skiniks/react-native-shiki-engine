@@ -27,10 +27,29 @@ target_include_directories(
   ${THIRDPARTY_ROOT}/xxHash
 )
 
-# Collect all C++ source files
+# Add shiki-textmate library
+add_subdirectory(${THIRDPARTY_ROOT}/shiki-textmate)
+set(SHIKITORI_BUILD_TESTS OFF CACHE BOOL "Disable shikitori tests" FORCE)
+
+# Collect remaining C++ source files (after cleanup)
 file(GLOB_RECURSE CPP_SOURCES
-  "${CPP_ROOT}/highlighter/**/*.cpp"
-  "${CPP_ROOT}/highlighter/**/*.h"
+  "${CPP_ROOT}/highlighter/adapter/*.cpp"
+  "${CPP_ROOT}/highlighter/adapter/*.h"
+  "${CPP_ROOT}/highlighter/theme/*.cpp"
+  "${CPP_ROOT}/highlighter/theme/*.h"
+  "${CPP_ROOT}/highlighter/platform/*.cpp"
+  "${CPP_ROOT}/highlighter/platform/*.h"
+  "${CPP_ROOT}/highlighter/text/*.cpp"
+  "${CPP_ROOT}/highlighter/text/*.h"
+  "${CPP_ROOT}/highlighter/error/*.cpp"
+  "${CPP_ROOT}/highlighter/error/*.h"
+  "${CPP_ROOT}/highlighter/utils/*.cpp"
+  "${CPP_ROOT}/highlighter/utils/*.h"
+  "${CPP_ROOT}/highlighter/renderer/*.cpp"
+  "${CPP_ROOT}/highlighter/renderer/*.h"
+  "${CPP_ROOT}/highlighter/core/ViewConfig.h"
+  "${CPP_ROOT}/highlighter/core/Constants.h"
+  "${CPP_ROOT}/highlighter/core/Types.h"
 )
 
 # Android platform-specific sources
@@ -57,6 +76,8 @@ target_include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main/cpp/include
   ${THIRDPARTY_ROOT}/rapidjson/include
   ${THIRDPARTY_ROOT}/xxHash
+  ${THIRDPARTY_ROOT}/shiki-textmate/include
+  ${THIRDPARTY_ROOT}/oniguruma/src
   ${NODE_MODULES_DIR}/react-native/ReactCommon
   ${NODE_MODULES_DIR}/react-native/ReactCommon/jsi
   ${REACT_ANDROID_DIR}/src/main/jni/react/turbomodule
@@ -73,6 +94,7 @@ target_link_libraries(
 target_link_libraries(
   shikibridge
   xxhash
+  shikitori
   android
   log
   jsi

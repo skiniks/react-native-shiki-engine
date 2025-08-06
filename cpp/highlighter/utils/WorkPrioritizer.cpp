@@ -8,11 +8,8 @@
 namespace shiki {
 
 WorkPrioritizer::WorkPrioritizer()
-  : memoryManager_(MemoryManager::getInstance()),
-    concurrencyUtil_(std::make_unique<ConcurrencyUtil>(std::thread::hardware_concurrency())) {
-  // Register memory pressure callbacks
-  memoryManager_.setHighPressureCallback([this]() { onHighMemoryPressure(); });
-  memoryManager_.setCriticalPressureCallback([this]() { onCriticalMemoryPressure(); });
+  : concurrencyUtil_(std::make_unique<ConcurrencyUtil>(std::thread::hardware_concurrency())) {
+  // Memory management now handled by shikitori
 }
 
 WorkPrioritizer::~WorkPrioritizer() = default;
@@ -57,9 +54,8 @@ bool WorkPrioritizer::canScheduleWork(const WorkItem& item) const {
   }
 
   // Check memory pressure
-  if (memoryManager_.getCurrentUsage() + item.estimatedCost > memoryThreshold_) {
-    return false;
-  }
+  // Memory pressure checking now handled by shikitori
+  // For now, allow all work items through
 
   return true;
 }

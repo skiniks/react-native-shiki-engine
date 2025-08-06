@@ -10,10 +10,9 @@
 
 #include "ThemeColor.h"
 #include "ThemeStyle.h"
-#include "highlighter/core/Configuration.h"
+// Configuration now handled by shikitori
 #include "highlighter/core/Constants.h"
-#include "highlighter/grammar/Grammar.h"
-#include "highlighter/tokenizer/Token.h"
+// Grammar and Token dependencies removed
 
 namespace shiki {
 
@@ -29,8 +28,8 @@ class Theme {
  public:
   enum class MatchMode { Strict, Standard, Relaxed };
 
-  Theme() : configuration_(&Configuration::getInstance()) {}
-  explicit Theme(const std::string& name) : name(name), configuration_(&Configuration::getInstance()) {}
+  Theme() {}
+  explicit Theme(const std::string& name) : name(name) {}
   Theme(const Theme& other);
   Theme& operator=(const Theme& other);
   virtual ~Theme() = default;
@@ -38,11 +37,9 @@ class Theme {
   void addStyle(const ThemeStyle& style);
   const ThemeStyle* findStyle(const std::string& scope) const;
   ThemeStyle resolveStyle(const std::string& scope) const;
-  bool applyStyle(Token& token) const;
+  // applyStyle method removed - tokens handled by shikitori
 
-  void addPattern(const GrammarPattern& pattern) {
-    patterns.push_back(pattern);
-  }
+  // Pattern management now handled by shikitori
 
   const std::string& getName() const {
     return name;
@@ -50,12 +47,7 @@ class Theme {
   const std::string& getScopeName() const {
     return scopeName;
   }
-  const std::vector<GrammarPattern>& getPatterns() const {
-    return patterns;
-  }
-  std::vector<GrammarPattern>& getPatterns() {
-    return patterns;
-  }
+  // Pattern access methods removed - handled by shikitori
 
   size_t getRuleCount() const {
     return rules.size();
@@ -70,9 +62,7 @@ class Theme {
   uint32_t getFontStyle(const std::string& scope) const;
   ThemeStyle getStyle(const std::string& scope) const;
 
-  void setConfiguration(std::shared_ptr<Configuration> config) {
-    configuration_ = std::move(config);
-  }
+  // Configuration now handled by shikitori
 
   void setBackground(const ThemeColor& color) {
     background_ = color;
@@ -106,10 +96,16 @@ class Theme {
   isScopeMatch(const std::string& ruleScope, const std::string& tokenScope, MatchMode mode = MatchMode::Standard);
   static size_t calculateScopeSpecificity(const std::string& ruleScope, const std::string& tokenScope);
 
+  // Helper function to match a selector against a scope path using TextMate rules
+  static bool isPathMatch(const std::string& selector, const std::string& scopePath, MatchMode mode);
+
+  // Helper function to calculate specificity for a path match
+  static size_t calculatePathSpecificity(const std::string& selector, const std::string& scopePath);
+
   std::string name;
   std::string type{"dark"};
   std::string scopeName;
-  std::vector<GrammarPattern> patterns;
+  // Patterns now handled by shikitori
 
  private:
   friend class ThemeParser;
@@ -128,7 +124,7 @@ class Theme {
   std::unordered_map<std::string, ThemeStyle> styles_;
   mutable std::unordered_map<std::string, ThemeStyle> styleCache_;
   std::map<std::string, ThemeStyle> semanticTokens_;
-  std::shared_ptr<Configuration> configuration_;
+  // Configuration removed - handled by shikitori
 };
 
 }  // namespace shiki

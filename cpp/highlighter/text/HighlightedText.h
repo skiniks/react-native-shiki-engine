@@ -6,7 +6,7 @@
 #include "TextRange.h"
 #include "highlighter/core/Constants.h"
 #include "highlighter/error/HighlightError.h"
-#include "highlighter/memory/MemoryManager.h"
+// Memory management now handled by shikitori
 
 namespace shiki {
 namespace text {

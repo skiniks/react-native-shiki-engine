@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "Theme.h"
-#include "highlighter/memory/TextRangePool.h"
+// TextRangePool removed - memory management handled by shikitori
 
 class ThemeColor;
 

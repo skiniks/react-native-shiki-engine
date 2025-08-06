@@ -14,13 +14,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "highlighter/core/Configuration.h"
-#include "highlighter/grammar/Grammar.h"
 #include "highlighter/theme/Theme.h"
 #include "highlighter/theme/ThemeParser.h"
 #include "highlighter/theme/ThemeStyle.h"
-#include "highlighter/tokenizer/ShikiTokenizer.h"
-#include "highlighter/tokenizer/Token.h"
+#include "highlighter/adapter/ShikiTextmateAdapter.h"
 
 #define TAG       "ShikiHighlighter"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
@@ -68,6 +65,9 @@ std::string languagesPath;
 std::mutex themeMutex;
 
 static std::unordered_map<std::string, std::shared_ptr<shiki::Theme>> loadedThemes;
+
+// Test the new adapter
+static std::unique_ptr<shiki::ShikiTextmateAdapter> textmateAdapter;
 
 jni::local_ref<jni::JClass> findClassLocal(const char* name) {
   return jni::findClassLocal(name);
@@ -126,6 +126,17 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
 
   static jni::local_ref<jhybriddata> initHybrid(jni::alias_ref<jclass>) {
     LOGD("initHybrid called");
+
+    // Initialize the textmate adapter
+    try {
+      if (!textmateAdapter) {
+        textmateAdapter = std::make_unique<shiki::ShikiTextmateAdapter>();
+        LOGD("ShikiTextmateAdapter initialized successfully");
+      }
+    } catch (const std::exception& e) {
+      LOGE("Failed to initialize ShikiTextmateAdapter: %s", e.what());
+    }
+
     return makeCxxInstance();
   }
 
@@ -157,33 +168,22 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
 
       LOGD("loadGrammarNative: Loading grammar: %s with scope: %s", nameStr.c_str(), scopeNameStr.c_str());
 
-      try {
-        // Parse the grammar JSON properly using the fromJson method
-        if (!shiki::Grammar::validateJson(jsonStr)) {
-          LOGE("Invalid grammar JSON format for %s", nameStr.c_str());
+            try {
+        // Use the textmate adapter
+        if (textmateAdapter) {
+          LOGD("Using ShikiTextmateAdapter for grammar loading");
+          if (textmateAdapter->loadGrammar(scopeNameStr, jsonStr)) {
+            if (textmateAdapter->setGrammar(scopeNameStr)) {
+              LOGD("Grammar loaded successfully with ShikiTextmateAdapter: %s", nameStr.c_str());
+              return 1; // Return success indicator
+            }
+          }
+          LOGE("ShikiTextmateAdapter failed to load grammar");
+          return 0;
+        } else {
+          LOGE("ShikiTextmateAdapter not initialized");
           return 0;
         }
-
-        auto grammar = shiki::Grammar::fromJson(jsonStr);
-        if (!grammar) {
-          LOGE("Failed to parse grammar JSON for %s", nameStr.c_str());
-          return 0;
-        }
-
-        // Set the name and scope name
-        grammar->name = nameStr;
-        grammar->scopeName = scopeNameStr;
-
-        // Set the grammar in the tokenizer
-        auto& tokenizer = shiki::ShikiTokenizer::getInstance();
-        tokenizer.setGrammar(grammar);
-
-        // Store the grammar in the class member
-        currentGrammar = grammar;
-        LOGD("Grammar loaded successfully: %s with %zu patterns", nameStr.c_str(), grammar->getPatterns().size());
-
-        // Return the pointer to the grammar object as a long value
-        return reinterpret_cast<jlong>(grammar.get());
       } catch (const std::exception& e) {
         LOGE("Error creating grammar object: %s", e.what());
         // Don't rethrow, just log the error and return
@@ -444,25 +444,14 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
       std::string grammarName = grammar->toString();
       LOGD("setGrammarNative: Setting grammar: %s", grammarName.c_str());
 
-      // Check if we already have this grammar loaded
-      if (currentGrammar && currentGrammar->name == grammarName) {
-        LOGD("Grammar %s is already set, skipping", grammarName.c_str());
-        return;
-      }
-
-      try {
-        auto grammarObj = std::make_shared<shiki::Grammar>(grammarName);
-
-        // Store the grammar in the class member
-        currentGrammar = grammarObj;
-
-        auto& tokenizer = shiki::ShikiTokenizer::getInstance();
-        tokenizer.setGrammar(currentGrammar);
-
-        LOGD("Grammar set successfully: %s", grammarName.c_str());
-      } catch (const std::exception& e) {
-        LOGE("Error creating grammar object: %s", e.what());
-        // Don't rethrow, just log the error and return
+      if (textmateAdapter) {
+        if (textmateAdapter->setGrammar(grammarName)) {
+          LOGD("Grammar set successfully: %s", grammarName.c_str());
+        } else {
+          LOGE("Failed to set grammar: %s", grammarName.c_str());
+        }
+      } else {
+        LOGE("ShikiTextmateAdapter not initialized");
       }
     } catch (const std::exception& e) {
       LOGE("Error in setGrammarNative: %s", e.what());
@@ -627,9 +616,7 @@ struct ShikiHighlighterImpl : public jni::HybridClass<ShikiHighlighterImpl> {
   }
 
   void resetNative() {
-    LOGD("resetNative called");
-    currentGrammar.reset();
-    currentTheme.reset();
+    LOGD("resetNative called - using adapter, no action needed");
   }
 
   static jni::local_ref<jobject> createThemeStyle(const shiki::ThemeStyle& style) {

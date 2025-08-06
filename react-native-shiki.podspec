@@ -17,7 +17,8 @@ Pod::Spec.new do |s|
   s.source_files = [
     "apple/**/*.{h,mm}",
     "cpp/**/*.{cpp,h,mm,hpp}",
-    "thirdparty/xxHash/xxhash.{c,h}"
+    "thirdparty/xxHash/xxhash.{c,h}",
+    "thirdparty/shiki-textmate/src/**/*.{cpp,cc,h,hpp}"
   ]
 
   s.pod_target_xcconfig = {
@@ -25,16 +26,21 @@ Pod::Spec.new do |s|
       '$(PODS_TARGET_SRCROOT)/cpp',
       '$(PODS_TARGET_SRCROOT)/thirdparty/rapidjson/include',
       '$(PODS_TARGET_SRCROOT)/thirdparty/xxHash',
+      '$(PODS_TARGET_SRCROOT)/thirdparty/shiki-textmate/include',
+      '$(PODS_TARGET_SRCROOT)/apple/Oniguruma.xcframework/ios-arm64/Headers',
       '$(PODS_ROOT)/Headers/Public/react-native-shiki',
       '$(PODS_ROOT)/Headers/Public/ReactCodegen',
     ].join(' '),
     'FRAMEWORK_SEARCH_PATHS' => [
-      '$(PODS_TARGET_SRCROOT)/ios'
-    ].join(' ')
+      '$(PODS_TARGET_SRCROOT)/apple'
+    ].join(' '),
+    'OTHER_LDFLAGS' => '-framework Oniguruma'
   }
 
   s.exclude_files = [
-    "cpp/highlighter/platform/android/**/*"
+    "cpp/highlighter/platform/android/**/*",
+    "thirdparty/shiki-textmate/tests/**/*",
+    "thirdparty/shiki-textmate/third_party/**/*"
   ]
 
   install_modules_dependencies(s)

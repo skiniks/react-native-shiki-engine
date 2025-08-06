@@ -15,18 +15,16 @@ using namespace facebook::react;
 @interface RCTShikiHighlighterModule () <NativeShikiHighlighterSpec>
 @end
 
-#import "highlighter/cache/CacheManager.h"
-#import "highlighter/core/Configuration.h"
-#import "highlighter/grammar/Grammar.h"
-#import "highlighter/grammar/GrammarLoader.h"
 #import "highlighter/theme/Theme.h"
 #import "highlighter/theme/ThemeParser.h"
-#import "highlighter/tokenizer/ShikiTokenizer.h"
-#import "highlighter/tokenizer/Token.h"
+#import "highlighter/adapter/ShikiTextmateAdapter.h"
 
 #include <memory>
 #include <string>
 #include <vector>
+
+// Add adapter for shiki-textmate integration
+static std::unique_ptr<shiki::ShikiTextmateAdapter> textmateAdapter;
 
 @interface ShikiGrammarWrapper : NSObject
 @property(nonatomic, assign) std::shared_ptr<shiki::Grammar> grammar;
@@ -64,7 +62,6 @@ static NSString *NSStringFromStdString(const std::string &str) {
 
 @implementation RCTShikiHighlighterModule {
   __weak RCTBridge *_bridge;
-  shiki::ShikiTokenizer *tokenizer_;
 
   NSMutableDictionary<NSString *, ShikiGrammarWrapper *> *grammars_;
   NSMutableDictionary<NSString *, ShikiThemeWrapper *> *themes_;
@@ -90,7 +87,24 @@ RCT_EXPORT_MODULE(ShikiHighlighter)
 
 - (instancetype)init {
   if (self = [super init]) {
-    tokenizer_ = &shiki::ShikiTokenizer::getInstance();
+    NSLog(@"[iOS DEBUG] ShikiHighlighter init called");
+
+    // Initialize the textmate adapter
+    if (!textmateAdapter) {
+      NSLog(@"[iOS DEBUG] Creating new ShikiTextmateAdapter");
+      textmateAdapter = std::make_unique<shiki::ShikiTextmateAdapter>();
+      NSLog(@"[iOS DEBUG] ShikiTextmateAdapter created successfully");
+    } else {
+      NSLog(@"[iOS DEBUG] textmateAdapter already exists");
+    }
+
+    // Test if the adapter is actually working
+    if (textmateAdapter) {
+      NSLog(@"[iOS DEBUG] Testing adapter...");
+      bool testResult = textmateAdapter->testMethod();
+      NSLog(@"[iOS DEBUG] Adapter test result: %d", testResult);
+    }
+
     highlightQueue_ =
         dispatch_queue_create("com.shiki.highlight", DISPATCH_QUEUE_SERIAL);
 
@@ -175,7 +189,10 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
                           theme resolve : (RCTPromiseResolveBlock)
                               resolve reject : (RCTPromiseRejectBlock)reject)
 {
+  NSLog(@"[CRITICAL DEBUG] codeToTokens METHOD CALLED! code length: %lu", (unsigned long)(code ? code.length : 0));
+
   if (!code) {
+    NSLog(@"[CRITICAL DEBUG] Code is nil, returning empty array");
     resolve(@[]);
     return;
   }
@@ -186,20 +203,26 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
     if (!strongSelf)
       return;
 
+    NSLog(@"[iOS DEBUG] codeToTokens called with lang=%@ theme=%@ code length=%lu", language, theme, (unsigned long)code.length);
     @try {
       // Use specified language/theme or defaults
       NSString *lang = language ?: strongSelf->defaultLanguage_;
       NSString *thm = theme ?: strongSelf->defaultTheme_;
+      NSLog(@"[iOS DEBUG] Using resolved lang=%@ theme=%@", lang, thm);
 
       // Check if language and theme are loaded
+      NSLog(@"[iOS DEBUG] Checking grammar for lang='%@', available grammars: %@", lang, [strongSelf->grammars_ allKeys]);
       if (!lang || !strongSelf->grammars_[lang]) {
+        NSLog(@"[iOS DEBUG] EARLY RETURN: Grammar check failed for lang='%@'", lang);
         dispatch_async(dispatch_get_main_queue(), ^{
           reject(@"invalid_language", @"Language not loaded", nil);
         });
         return;
       }
 
+      NSLog(@"[iOS DEBUG] Checking theme for thm='%@', available themes: %@", thm, [strongSelf->themes_ allKeys]);
       if (!thm || !strongSelf->themes_[thm]) {
+        NSLog(@"[iOS DEBUG] EARLY RETURN: Theme check failed for thm='%@'", thm);
         dispatch_async(dispatch_get_main_queue(), ^{
           reject(@"invalid_theme", @"Theme not loaded", nil);
         });
@@ -208,19 +231,46 @@ RCT_EXPORT_METHOD(codeToTokens : (NSString *)code language : (NSString *)
 
       // Tokenize with the specified language and theme
       std::string codeStr = std::string([code UTF8String]);
-      std::vector<shiki::Token> tokens = strongSelf->tokenizer_->tokenize(
-          codeStr, [lang UTF8String], [thm UTF8String]);
+      NSLog(@"[iOS DEBUG] About to tokenize code: %@ (length: %lu)", code, (unsigned long)code.length);
+      NSLog(@"[iOS DEBUG] Using language: %@ theme: %@", lang, thm);
+      NSLog(@"[DEBUG] Calling textmateAdapter->tokenizeWithStyles for code length: %lu", codeStr.length());
+      NSLog(@"[CRITICAL DEBUG] textmateAdapter pointer: %p", textmateAdapter.get());
+
+      std::vector<shiki::PlatformStyledToken> tokens;
+      @try {
+        NSLog(@"[CRITICAL DEBUG] About to call tokenizeWithStyles");
+        tokens = textmateAdapter->tokenizeWithStyles(codeStr);
+        NSLog(@"[CRITICAL DEBUG] tokenizeWithStyles returned %zu tokens", tokens.size());
+      } @catch (NSException *e) {
+        NSLog(@"[CRITICAL DEBUG] Exception in tokenizeWithStyles: %@", e.reason);
+        throw;
+      }
+    NSLog(@"[DEBUG] Got %zu styled tokens from adapter", tokens.size());
+
+    // Debug first few tokens to see their colors
+    for (size_t i = 0; i < std::min(tokens.size(), (size_t)5); i++) {
+        NSLog(@"[DEBUG] Token %zu: scope='%s', foreground='%s'",
+              i, tokens[i].scope.c_str(), tokens[i].style.foreground.c_str());
+    }
+      NSLog(@"[iOS DEBUG] Generated %lu tokens", (unsigned long)tokens.size());
 
       // Convert to JS array
       NSMutableArray *result = [NSMutableArray array];
+      int debugCount = 0;
       for (const auto &token : tokens) {
         NSMutableDictionary *tokenDict = [NSMutableDictionary dictionary];
         tokenDict[@"start"] = @(token.start);
         tokenDict[@"length"] = @(token.length);
 
+        // Debug first few tokens
+        if (debugCount < 5) {
+          NSLog(@"[iOS DEBUG] Token %d: scope='%s', color='%s'", debugCount, token.scope.c_str(), token.style.foreground.c_str());
+          debugCount++;
+        }
+
         NSMutableArray *scopes = [NSMutableArray array];
-        for (const auto &scope : token.scopes) {
-          [scopes addObject:@(scope.c_str())];
+        if (!token.scope.empty()) {
+          [scopes addObject:NSStringFromStdString(token.scope)];
         }
         tokenDict[@"scopes"] = scopes;
 
@@ -268,25 +318,19 @@ RCT_EXPORT_METHOD(loadLanguage : (NSString *)language grammarData : (NSString *)
 
     @try {
       std::string grammarStr = std::string([grammarData UTF8String]);
-      if (!shiki::Grammar::validateJson(grammarStr)) {
+
+      // Load grammar using textmate adapter
+      if (!textmateAdapter->loadGrammar([language UTF8String], grammarStr)) {
         dispatch_async(dispatch_get_main_queue(), ^{
-          reject(@"invalid_grammar_json", @"Invalid grammar JSON format", nil);
+          reject(@"grammar_load_error", @"Failed to load grammar with textmate adapter", nil);
         });
         return;
       }
 
-      // Create the grammar
-      auto grammar = shiki::Grammar::fromJson(grammarStr);
-      if (!grammar) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-          reject(@"grammar_parse_error", @"Failed to parse grammar", nil);
-        });
-        return;
-      }
-
-      // Store in the map
-      ShikiGrammarWrapper *grammarWrapper =
-          [[ShikiGrammarWrapper alloc] initWithGrammar:grammar];
+      // Create a placeholder grammar wrapper for compatibility
+      // Actual grammar is now managed by textmateAdapter
+      // Note: Grammar now stored in textmateAdapter, creating minimal wrapper
+      ShikiGrammarWrapper *grammarWrapper = [[ShikiGrammarWrapper alloc] init];
       strongSelf->grammars_[language] = grammarWrapper;
 
       // Set as default if it's the first one
@@ -294,12 +338,10 @@ RCT_EXPORT_METHOD(loadLanguage : (NSString *)language grammarData : (NSString *)
         strongSelf->defaultLanguage_ = language;
       }
 
-      strongSelf->currentGrammar_ = grammar;
-      strongSelf->tokenizer_->setGrammar(grammar);
+      // Grammar reference removed - handled by textmateAdapter
+      textmateAdapter->setGrammar([language UTF8String]);
 
-      // Add to Configuration
-      auto &config = shiki::Configuration::getInstance();
-      config.addLanguage([language UTF8String], grammar);
+      // Grammar now handled by textmate adapter
 
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(YES));
@@ -346,11 +388,11 @@ RCT_EXPORT_METHOD(loadTheme : (NSString *)theme themeData : (NSString *)
       }
 
       strongSelf->currentTheme_ = themeObj;
-      strongSelf->tokenizer_->setTheme(themeObj);
 
-      // Add to Configuration
-      auto &config = shiki::Configuration::getInstance();
-      config.addTheme([theme UTF8String], themeObj);
+      // Load theme into textmate adapter with both name and content
+      textmateAdapter->loadTheme([theme UTF8String], themeStr);
+
+      // Theme now handled by textmate adapter
 
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(true));
@@ -389,12 +431,10 @@ RCT_EXPORT_METHOD(setDefaultLanguage : (NSString *)language resolve : (
       // Set as default
       strongSelf->defaultLanguage_ = language;
 
-      strongSelf->currentGrammar_ = strongSelf->grammars_[language].grammar;
-      strongSelf->tokenizer_->setGrammar(strongSelf->currentGrammar_);
+      // Grammar reference removed - handled by textmateAdapter
+      textmateAdapter->setGrammar([language UTF8String]);
 
-      // Update Configuration
-      auto &config = shiki::Configuration::getInstance();
-      config.setDefaultLanguage([language UTF8String]);
+      // Default language now handled by textmate adapter
 
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(YES));
@@ -433,12 +473,10 @@ RCT_EXPORT_METHOD(setDefaultTheme : (NSString *)theme resolve : (
       // Set as default
       strongSelf->defaultTheme_ = theme;
 
-      strongSelf->currentTheme_ = strongSelf->themes_[theme].theme;
-      strongSelf->tokenizer_->setTheme(strongSelf->currentTheme_);
+      // Theme reference removed - handled by textmateAdapter
+      textmateAdapter->setTheme([theme UTF8String]);
 
-      // Update Configuration
-      auto &config = shiki::Configuration::getInstance();
-      config.setDefaultTheme([theme UTF8String]);
+      // Default theme now handled by textmate adapter
 
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(YES));
@@ -501,36 +539,33 @@ RCT_EXPORT_METHOD(getLoadedThemes : (RCTPromiseResolveBlock)
   if (!_hasListeners)
     return;
 
-  auto &cacheManager = shiki::CacheManager::getInstance();
-  auto mainMetrics = cacheManager.getCache().getMetrics();
-  auto patternMetrics = cacheManager.getPatternCache().getMetrics();
-  auto styleMetrics = cacheManager.getStyleCache().getMetrics();
-  auto syntaxMetrics = cacheManager.getSyntaxTreeCache().getMetrics();
+  // Cache metrics now handled by shikitori internally
+  // Return placeholder metrics for compatibility
 
   NSDictionary *telemetryData = @{
     @"mainCache" : @{
-      @"hitRate" : @(mainMetrics.hitRate()),
-      @"size" : @(mainMetrics.size),
-      @"memoryUsage" : @(mainMetrics.memoryUsage),
-      @"evictions" : @(mainMetrics.evictions)
+      @"hitRate" : @(0.0),
+      @"size" : @(0),
+      @"memoryUsage" : @(0),
+      @"evictions" : @(0)
     },
     @"patternCache" : @{
-      @"hitRate" : @(patternMetrics.hitRate()),
-      @"size" : @(patternMetrics.size),
-      @"memoryUsage" : @(patternMetrics.memoryUsage),
-      @"evictions" : @(patternMetrics.evictions)
+      @"hitRate" : @(0.0),
+      @"size" : @(0),
+      @"memoryUsage" : @(0),
+      @"evictions" : @(0)
     },
     @"styleCache" : @{
-      @"hitRate" : @(styleMetrics.hitRate()),
-      @"size" : @(styleMetrics.size),
-      @"memoryUsage" : @(styleMetrics.memoryUsage),
-      @"evictions" : @(styleMetrics.evictions)
+      @"hitRate" : @(0.0),
+      @"size" : @(0),
+      @"memoryUsage" : @(0),
+      @"evictions" : @(0)
     },
     @"syntaxTreeCache" : @{
-      @"hitRate" : @(syntaxMetrics.hitRate()),
-      @"size" : @(syntaxMetrics.size),
-      @"memoryUsage" : @(syntaxMetrics.memoryUsage),
-      @"evictions" : @(syntaxMetrics.evictions)
+      @"hitRate" : @(0.0),
+      @"size" : @(0),
+      @"memoryUsage" : @(0),
+      @"evictions" : @(0)
     }
   };
 
@@ -555,11 +590,8 @@ RCT_EXPORT_METHOD(enableCache : (BOOL)enabled resolve : (RCTPromiseResolveBlock)
 {
   dispatch_async(self->highlightQueue_, ^{
     @try {
-      shiki::Configuration::getInstance().performance.enableCache = enabled;
-      if (!enabled) {
-        // Clear existing caches when disabling
-        shiki::CacheManager::getInstance().clear();
-      }
+      // Cache configuration now handled by shikitori internally
+      // Note: Cache is always enabled in shikitori for optimal performance
       dispatch_async(dispatch_get_main_queue(), ^{
         resolve(@(YES));
       });

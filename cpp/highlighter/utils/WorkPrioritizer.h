@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "highlighter/core/Constants.h"
-#include "highlighter/memory/MemoryManager.h"
 
 namespace shiki {
 
@@ -106,8 +105,7 @@ class WorkPrioritizer {
   mutable std::mutex mutex_;
   std::condition_variable condition_;
 
-  // Memory management integration
-  MemoryManager& memoryManager_;
+  // Memory management now handled by shikitori
 
   // Thread pool
   std::unique_ptr<ConcurrencyUtil> concurrencyUtil_;

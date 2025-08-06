@@ -204,10 +204,13 @@ using namespace facebook::react;
                             range:NSMakeRange(0, _text.length)];
 
   // Apply token styles
+  NSLog(@"[VIEW DEBUG] Applying styles for %lu tokens to text of length %lu", (unsigned long)_tokens.count, (unsigned long)_text.length);
   for (NSDictionary *token in _tokens) {
     NSInteger start = [token[@"start"] integerValue];
     NSInteger length = [token[@"length"] integerValue];
     NSDictionary *style = token[@"style"];
+
+    NSLog(@"[VIEW DEBUG] Token: start=%ld, length=%ld, style=%@", start, length, style);
 
     if (start + length <= _text.length) {
       NSRange range = NSMakeRange(start, length);
@@ -218,6 +221,7 @@ using namespace facebook::react;
         UIColor *color = [self colorFromHexString:style[@"color"]];
         if (color) {
           attributes[NSForegroundColorAttributeName] = color;
+          NSLog(@"[VIEW DEBUG] Applied color %@ to range {%ld, %ld}", style[@"color"], range.location, range.length);
         }
       }
 
