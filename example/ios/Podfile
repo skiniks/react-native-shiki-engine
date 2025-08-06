@@ -10,13 +10,15 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+project 'ShikiEngineExample.xcodeproj'
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
 end
 
-target 'ShikiExample' do
+target 'ShikiEngineExample' do
   config = use_native_modules!
 
   use_react_native!(
@@ -25,7 +27,7 @@ target 'ShikiExample' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  target 'ShikiExampleTests' do
+  target 'ShikiEngineExampleTests' do
     inherit! :complete
     # Pods for testing
   end
