@@ -14,20 +14,22 @@
     "build:ios": "react-native build-ios --scheme ShikiExample --mode Debug --extra-params \"-sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO\""
   },
   "dependencies": {
-    "@shikijs/langs": "^3.2.1",
-    "@shikijs/themes": "^3.2.1",
-    "react": "19.0.0",
-    "react-native": "^0.78.0",
-    "react-native-shiki": "workspace:^"
+    "@shikijs/langs": "^3.9.2",
+    "@shikijs/themes": "^3.9.2",
+    "react": "19.1.1",
+    "react-native": "0.80.2",
+    "react-native-shiki": "workspace:^",
+    "shiki": "^3.9.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.10",
-    "@babel/preset-env": "^7.26.9",
-    "@babel/runtime": "^7.26.10",
-    "@react-native-community/cli": "^15.0.1",
-    "@react-native-community/cli-platform-android": "^15.0.1",
-    "@react-native-community/cli-platform-ios": "^15.0.1",
-    "@react-native/babel-preset": "^0.78.0",
-    "@react-native/metro-config": "^0.78.0"
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/runtime": "^7.28.2",
+    "@react-native-community/cli": "19.1.1",
+    "@react-native-community/cli-platform-android": "18.0.0",
+    "@react-native-community/cli-platform-ios": "18.0.0",
+    "@react-native/babel-preset": "0.80.2",
+    "@react-native/metro-config": "0.80.2",
+    "babel-plugin-module-resolver": "^5.0.2"
   }
 }
