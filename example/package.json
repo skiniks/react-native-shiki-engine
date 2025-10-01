@@ -22,7 +22,7 @@
     "shiki": "^3.9.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.0",
+    "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.0",
     "@babel/runtime": "^7.28.2",
     "@react-native-community/cli": "19.1.1",
