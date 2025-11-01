@@ -16,8 +16,8 @@
   "dependencies": {
     "@shikijs/langs": "^3.9.2",
     "@shikijs/themes": "^3.9.2",
-    "react": "19.1.1",
-    "react-native": "0.80.2",
+    "react": "19.2.0",
+    "react-native": "0.82.1",
     "react-native-shiki-engine": "workspace:^",
     "shiki": "^3.9.2"
   },
