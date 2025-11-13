@@ -1,6 +1,6 @@
 {
   "name": "react-native-shiki-engine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "packageManager": "yarn@4.5.3",
   "description": "Shiki syntax highlighting for React Native. Zero bridge overhead with native Oniguruma regex engine.",
   "author": "Ryan Skinner <hello@ryanskinner.com> (https://github.com/skiniks)",
@@ -51,9 +51,8 @@
     "prepare": "git submodule update --init --recursive && bob build",
     "prepack": "bob build",
     "clean": "del-cli android/app android/build example/android/build example/android/app/build example/ios/build lib build",
-    "pods": "cd example && yarn pods",
     "update:submodule": "git submodule update --remote --merge",
-    "codegen": "npx react-native codegen",
+    "codegen": "react-native codegen --source library --outputPath example/ios --platform ios",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint . && eslint .",
     "lint:fix": "oxlint . --fix && eslint . --fix",
@@ -66,26 +65,26 @@
     "react-native": "*"
   },
   "dependencies": {
-    "@shikijs/types": "^3.9.2",
+    "@shikijs/types": "^3.15.0",
     "@shikijs/vscode-textmate": "^10.0.2"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^5.1.0",
-    "@eslint-react/eslint-plugin": "^1.52.3",
-    "@react-native-community/cli": "^19.1.1",
+    "@antfu/eslint-config": "^6.2.0",
+    "@eslint-react/eslint-plugin": "^2.3.5",
+    "@react-native-community/cli": "^20.0.2",
     "@release-it/conventional-changelog": "^10.0.1",
-    "@types/react": "^19.1.9",
-    "del-cli": "^6.0.0",
-    "eslint": "^9.32.0",
-    "eslint-plugin-oxlint": "^1.10.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "oxlint": "^1.10.0",
-    "react": "^19.1.1",
-    "react-native": "^0.80.2",
-    "react-native-builder-bob": "^0.40.13",
-    "release-it": "^19.0.4",
-    "typescript": "^5.9.2"
+    "@types/react": "^19.2.4",
+    "del-cli": "^7.0.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-oxlint": "^1.28.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "oxlint": "^1.28.0",
+    "react": "^19.2.0",
+    "react-native": "^0.82.1",
+    "react-native-builder-bob": "^0.40.15",
+    "release-it": "^19.0.6",
+    "typescript": "^5.9.3"
   },
   "release-it": {
     "git": {

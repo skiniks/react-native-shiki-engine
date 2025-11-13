@@ -6,30 +6,27 @@
     "node": ">=18"
   },
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "pods": "cd ios && bundle install && RCT_NEW_ARCH_ENABLED=1 bundle exec pod install",
-    "start": "react-native start",
-    "build:android": "react-native build-android --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
-    "build:ios": "react-native build-ios --scheme ShikiEngineExample --mode Debug --extra-params \"-sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO\""
+    "android": "npx react-native run-android",
+    "ios": "npx react-native run-ios",
+    "start": "react-native start"
   },
   "dependencies": {
-    "@shikijs/langs": "^3.9.2",
-    "@shikijs/themes": "^3.9.2",
-    "react": "19.1.1",
-    "react-native": "0.80.2",
+    "@shikijs/langs": "^3.15.0",
+    "@shikijs/themes": "^3.15.0",
+    "react": "19.2.0",
+    "react-native": "0.82.1",
     "react-native-shiki-engine": "workspace:^",
-    "shiki": "^3.9.2"
+    "shiki": "^3.15.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.0",
-    "@babel/preset-env": "^7.28.0",
-    "@babel/runtime": "^7.28.2",
-    "@react-native-community/cli": "19.1.1",
-    "@react-native-community/cli-platform-android": "18.0.0",
-    "@react-native-community/cli-platform-ios": "18.0.0",
-    "@react-native/babel-preset": "0.80.2",
-    "@react-native/metro-config": "0.80.2",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/runtime": "^7.28.4",
+    "@react-native-community/cli": "20.0.2",
+    "@react-native-community/cli-platform-android": "20.0.2",
+    "@react-native-community/cli-platform-ios": "20.0.2",
+    "@react-native/babel-preset": "0.82.1",
+    "@react-native/metro-config": "0.82.1",
     "babel-plugin-module-resolver": "^5.0.2"
   }
 }

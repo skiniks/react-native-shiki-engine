@@ -9,7 +9,7 @@ export interface Spec extends TurboModule {
   readonly findNextMatchSync: (
     scannerId: number,
     text: string,
-    startPosition: number
+    startPosition: number,
   ) => {
     readonly index: number
     readonly captureIndices: ReadonlyArray<{

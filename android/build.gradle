@@ -120,4 +120,23 @@ if (isNewArchitectureEnabled()) {
     libraryName = "ShikiEngine"
     codegenJavaPackageName = "com.shikiengine"
   }
+
+  // Patch the auto-generated CMakeLists.txt to exclude Fabric component files
+  tasks.configureEach { task ->
+    if (task.name.contains("generateCodegenArtifactsFromSchema")) {
+      task.doLast {
+        def cmakeFile = file("${project.buildDir}/generated/source/codegen/jni/CMakeLists.txt")
+        if (cmakeFile.exists()) {
+          def content = cmakeFile.text
+          // Replace the GLOB pattern to only include TurboModule files, not Fabric components
+          content = content.replace(
+            'file(GLOB react_codegen_SRCS CONFIGURE_DEPENDS *.cpp react/renderer/components/NativeShikiEngineSpec/*.cpp)',
+            'file(GLOB react_codegen_SRCS CONFIGURE_DEPENDS *.cpp)\n# Exclude Fabric component files to avoid std::format bug'
+          )
+          cmakeFile.text = content
+          println("Patched CMakeLists.txt to exclude Fabric component files")
+        }
+      }
+    }
+  }
 }
