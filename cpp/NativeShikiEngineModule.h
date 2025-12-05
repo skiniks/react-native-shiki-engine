@@ -1,11 +1,15 @@
 #pragma once
 
-#if __has_include(<React-Codegen/NativeShikiEngineSpecJSI.h>)
+#if __has_include(<react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>)
+#include <react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>
+#elif __has_include(<React-Codegen/NativeShikiEngineSpecJSI.h>)
 #include <React-Codegen/NativeShikiEngineSpecJSI.h>
+#elif __has_include(<ReactCodegen/NativeShikiEngineSpecJSI.h>)
+#include <ReactCodegen/NativeShikiEngineSpecJSI.h>
 #elif __has_include(<NativeShikiEngineSpecJSI.h>)
 #include <NativeShikiEngineSpecJSI.h>
 #else
-#error "Could not find NativeShikiEngineSpecJSI.h"
+#error "Could not find NativeShikiEngineSpecJSI.h - ensure codegen has run and New Architecture is enabled"
 #endif
 
 #if __has_include("onig_regex.h")
