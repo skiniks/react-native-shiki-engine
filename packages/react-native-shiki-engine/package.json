@@ -44,6 +44,7 @@
     "src"
   ],
   "scripts": {
+    "postinstall": "git submodule update --init --recursive third_party/oniguruma",
     "prepack": "bob build",
     "build": "bob build",
     "clean": "del-cli android/app android/build lib build",
