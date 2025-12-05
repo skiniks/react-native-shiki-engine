@@ -5,6 +5,9 @@
   "description": "Shiki syntax highlighting for React Native - Monorepo",
   "author": "Ryan Skinner <hello@ryanskinner.com> (https://github.com/skiniks)",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "postinstall": "git submodule update --init --recursive packages/react-native-shiki-engine/third_party/oniguruma",
     "clean": "turbo clean && del-cli node_modules",
