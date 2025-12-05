@@ -13,9 +13,7 @@
     "builtin": true,
     "es2026": true,
     "browser": true,
-    "commonjs": true,
-    "node": true,
-    "shared-node-browser": true
+    "node": true
   },
   "ignorePatterns": [
     "**/.DS_Store",
@@ -49,29 +47,24 @@
     "**/.settings",
     "**/local.properties",
     "**/android.iml",
-    "example/ios/Pods",
-    "example/vendor/",
     "**/node_modules/",
     "**/npm-debug.log",
     "**/yarn-debug.log",
     "**/yarn-error.log",
     "**/buck-out/",
     "**/\\.buckd/",
-    "android/app",
+    "packages/react-native-shiki-engine/android/app",
     "android/keystores/debug.keystore",
-    ".yarn/*",
-    "!.yarn/patches",
-    "!.yarn/plugins",
-    "!.yarn/releases",
-    "!.yarn/sdks",
-    "!.yarn/versions",
-    "**/lib/",
+    "packages/react-native-shiki-engine/lib/",
+    "examples/react-native/ios/Pods",
+    "examples/react-native/vendor/",
+    "**/.pnpm-store/",
+    "**/pnpm-lock.yaml",
     "oniguruma/**",
     "**/node_modules",
     "**/dist",
     "**/package-lock.json",
     "**/yarn.lock",
-    "**/pnpm-lock.yaml",
     "**/bun.lockb",
     "**/output",
     "**/coverage",
@@ -98,14 +91,13 @@
     "**/auto-import?(s).d.ts",
     "**/components.d.ts",
     "build",
-    "lib",
-    "android",
-    "ios",
-    "cpp",
-    "example/android",
-    "example/ios",
+    "packages/react-native-shiki-engine/lib",
+    "packages/react-native-shiki-engine/android",
+    "packages/react-native-shiki-engine/ios",
+    "packages/react-native-shiki-engine/cpp",
+    "examples/react-native/android",
+    "examples/react-native/ios",
     "oniguruma",
-    "thirdparty",
     "README.md"
   ],
   "rules": {
@@ -392,7 +384,13 @@
           }
         ],
         "@typescript-eslint/no-import-type-side-effects": "error"
-      },
+      }
+    },
+    {
+      "files": [
+        "**/*.?([cm])ts",
+        "**/*.?([cm])tsx"
+      ],
       "plugins": [
         "typescript"
       ]

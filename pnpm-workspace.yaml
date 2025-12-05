@@ -1,0 +1,39 @@
+catalogMode: prefer
+cleanupUnusedCatalogs: true
+
+shellEmulator: true
+trustPolicy: no-downgrade
+
+packages:
+  - 'packages/*'
+  - 'examples/*'
+catalog:
+  '@antfu/eslint-config': ^0.0.0
+  '@babel/core': ^0.0.0
+  '@babel/preset-env': ^0.0.0
+  '@babel/runtime': ^0.0.0
+  '@eslint-react/eslint-plugin': ^0.0.0
+  '@react-native-community/cli': ^0.0.0
+  '@react-native-community/cli-platform-android': ^0.0.0
+  '@react-native-community/cli-platform-ios': ^0.0.0
+  '@react-native/babel-preset': ^0.0.0
+  '@react-native/metro-config': ^0.0.0
+  '@release-it/conventional-changelog': ^0.0.0
+  '@shikijs/langs': ^0.0.0
+  '@shikijs/themes': ^0.0.0
+  '@shikijs/types': ^0.0.0
+  '@shikijs/vscode-textmate': ^0.0.0
+  '@types/react': ^0.0.0
+  babel-plugin-module-resolver: ^0.0.0
+  del-cli: ^0.0.0
+  eslint: ^0.0.0
+  eslint-plugin-oxlint: ^0.0.0
+  eslint-plugin-react-hooks: ^0.0.0
+  eslint-plugin-react-refresh: ^0.0.0
+  oxlint: ^0.0.0
+  react: ^0.0.0
+  react-native: ^0.0.0
+  react-native-builder-bob: ^0.0.0
+  release-it: ^0.0.0
+  shiki: ^0.0.0
+  typescript: ^0.0.0

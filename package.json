@@ -1,149 +1,33 @@
 {
-  "name": "react-native-shiki-engine",
-  "version": "0.3.1",
-  "packageManager": "yarn@4.5.3",
-  "description": "Shiki syntax highlighting for React Native. Zero bridge overhead with native Oniguruma regex engine.",
+  "name": "react-native-shiki-engine-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "description": "Shiki syntax highlighting for React Native - Monorepo",
   "author": "Ryan Skinner <hello@ryanskinner.com> (https://github.com/skiniks)",
   "license": "MIT",
-  "homepage": "https://github.com/skiniks/react-native-shiki-engine#readme",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/skiniks/react-native-shiki-engine.git"
-  },
-  "bugs": {
-    "url": "https://github.com/skiniks/react-native-shiki-engine/issues"
-  },
-  "keywords": [
-    "react-native",
-    "ios",
-    "android",
-    "shiki",
-    "oniguruma",
-    "regex",
-    "syntax-highlighting",
-    "textmate",
-    "turbo"
-  ],
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
-  "main": "lib/commonjs/index.js",
-  "module": "lib/module/index.js",
-  "types": "lib/typescript/index.d.ts",
-  "workspaces": [
-    "example"
-  ],
-  "files": [
-    "*.podspec",
-    "android/CMakeLists.txt",
-    "android/build.gradle",
-    "android/gradle.properties",
-    "android/src/main",
-    "cpp",
-    "ios",
-    "lib/commonjs",
-    "lib/module",
-    "lib/typescript",
-    "react-native.config.js",
-    "src"
-  ],
   "scripts": {
-    "prepare": "git submodule update --init --recursive && bob build",
-    "prepack": "bob build",
-    "clean": "del-cli android/app android/build example/android/build example/android/app/build example/ios/build lib build",
+    "postinstall": "git submodule update --init --recursive",
+    "clean": "pnpm -r clean && del-cli node_modules",
     "update:submodule": "git submodule update --remote --merge",
-    "codegen": "react-native codegen --source library --outputPath example/ios --platform ios",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "pnpm -r typecheck",
     "lint": "oxlint . && eslint .",
     "lint:fix": "oxlint . --fix && eslint . --fix",
     "lint:cpp": "scripts/clang-format.sh",
-    "lint:all": "yarn lint:fix && yarn lint:cpp",
-    "release": "release-it"
-  },
-  "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
-  },
-  "dependencies": {
-    "@shikijs/types": "^3.15.0",
-    "@shikijs/vscode-textmate": "^10.0.2"
+    "lint:all": "pnpm lint:fix && pnpm lint:cpp",
+    "build": "pnpm --filter react-native-shiki-engine build",
+    "release": "pnpm --filter react-native-shiki-engine release"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^6.2.0",
-    "@eslint-react/eslint-plugin": "^2.3.5",
-    "@react-native-community/cli": "^20.0.2",
-    "@release-it/conventional-changelog": "^10.0.1",
-    "@types/react": "^19.2.4",
-    "del-cli": "^7.0.0",
-    "eslint": "^9.39.1",
-    "eslint-plugin-oxlint": "^1.28.0",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.24",
-    "oxlint": "^1.28.0",
-    "react": "^19.2.0",
-    "react-native": "^0.82.1",
-    "react-native-builder-bob": "^0.40.15",
-    "release-it": "^19.0.6",
-    "typescript": "^5.9.3"
-  },
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
-    },
-    "github": {
-      "release": true
-    },
-    "npm": {
-      "publish": true
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": {
-          "name": "conventionalcommits",
-          "types": [
-            {
-              "type": "chore(deps)",
-              "section": "⬆️ Dependency Upgrades"
-            },
-            {
-              "type": "docs",
-              "section": "📚 Documentation"
-            },
-            {
-              "type": "feat",
-              "section": "✨ Features"
-            },
-            {
-              "type": "fix",
-              "section": "🐛 Bug Fixes"
-            },
-            {
-              "type": "perf",
-              "section": "🐎 Performance Improvements"
-            }
-          ]
-        }
-      }
-    }
-  },
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "lib",
-    "targets": [
-      "commonjs",
-      "module",
-      [
-        "typescript",
-        {
-          "project": "tsconfig.json"
-        }
-      ]
-    ]
-  },
-  "codegenConfig": {
-    "name": "NativeShikiEngineSpec",
-    "type": "modules",
-    "jsSrcsDir": "src"
+    "@antfu/eslint-config": "catalog:",
+    "@eslint-react/eslint-plugin": "catalog:",
+    "@react-native-community/cli": "catalog:",
+    "@release-it/conventional-changelog": "catalog:",
+    "del-cli": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-oxlint": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "eslint-plugin-react-refresh": "catalog:",
+    "oxlint": "catalog:",
+    "release-it": "catalog:"
   }
 }

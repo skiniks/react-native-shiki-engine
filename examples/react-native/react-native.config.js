@@ -1,5 +1,5 @@
 const path = require('node:path')
-const pkg = require('../package.json')
+const pkg = require('../../packages/react-native-shiki-engine/package.json')
 
 module.exports = {
   project: {
@@ -9,7 +9,7 @@ module.exports = {
   },
   dependencies: {
     [pkg.name]: {
-      root: path.join(__dirname, '..'),
+      root: path.join(__dirname, '../../packages/react-native-shiki-engine'),
     },
   },
 }

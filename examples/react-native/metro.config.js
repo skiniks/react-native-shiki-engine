@@ -1,10 +1,10 @@
 const path = require('node:path')
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
 const escape = require('escape-string-regexp')
-const pak = require('../package.json')
+const pak = require('../../packages/react-native-shiki-engine/package.json')
 
 const projectRoot = __dirname
-const workspaceRoot = path.resolve(projectRoot, '..')
+const workspaceRoot = path.resolve(projectRoot, '../..')
 const modules = Object.keys({ ...pak.peerDependencies })
 
 /**
@@ -36,7 +36,7 @@ const config = {
         acc[name] = path.join(projectRoot, 'node_modules', name)
         return acc
       }, {}),
-      'react-native-shiki-engine': workspaceRoot,
+      'react-native-shiki-engine': path.join(workspaceRoot, 'packages/react-native-shiki-engine'),
     },
   },
 

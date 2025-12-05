@@ -11,9 +11,9 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		1682204E52AB127048CEA362 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 430E64911391C6E6236E9E71 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */; };
-		21F490923FE8A474D2F73AED /* libPods-ShikiEngineExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DB47B37DDAF1091E60FDE6AC /* libPods-ShikiEngineExample.a */; };
+		4DEF68ED661F14D544098E64 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F12C31D53204EAEF54D28B3A /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8C48A33DB595170592491C7E /* libPods-ShikiEngineExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AE1858ACEA2080B872D79744 /* libPods-ShikiEngineExample.a */; };
 		B690EF860B6FD4B96E9308DC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -31,7 +31,6 @@
 		00E356EE1AD99517003FC87E /* ShikiEngineExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShikiEngineExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* ShikiEngineExampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShikiEngineExampleTests.m; sourceTree = "<group>"; };
-		130C76488880BE46C0C48318 /* Pods-ShikiEngineExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample.debug.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample.debug.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* ShikiEngineExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShikiEngineExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = ShikiEngineExample/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = ShikiEngineExample/AppDelegate.mm; sourceTree = "<group>"; };
@@ -39,13 +38,14 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ShikiEngineExample/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ShikiEngineExample/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = ShikiEngineExample/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		23477E9D0EAABA96CFABAF7B /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
-		254DDAA6D085F5D0178ED5C8 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig"; sourceTree = "<group>"; };
-		430E64911391C6E6236E9E71 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiEngineExample-ShikiEngineExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4B3E2655624EE831AA2E770A /* Pods-ShikiEngineExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample.release.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample.release.xcconfig"; sourceTree = "<group>"; };
+		2DBFA014035394734CED7B94 /* Pods-ShikiEngineExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample.release.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample.release.xcconfig"; sourceTree = "<group>"; };
+		4845FC1E45CA56D62C1768A1 /* Pods-ShikiEngineExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample.debug.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ShikiEngineExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		DB47B37DDAF1091E60FDE6AC /* libPods-ShikiEngineExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiEngineExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE1858ACEA2080B872D79744 /* libPods-ShikiEngineExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiEngineExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1A9F6B7829C9B069F063E86 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F12C31D53204EAEF54D28B3A /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShikiEngineExample-ShikiEngineExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F24E64211667886A1A661F67 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig"; path = "Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1682204E52AB127048CEA362 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a in Frameworks */,
+				4DEF68ED661F14D544098E64 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,7 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21F490923FE8A474D2F73AED /* libPods-ShikiEngineExample.a in Frameworks */,
+				8C48A33DB595170592491C7E /* libPods-ShikiEngineExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,8 +103,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				DB47B37DDAF1091E60FDE6AC /* libPods-ShikiEngineExample.a */,
-				430E64911391C6E6236E9E71 /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */,
+				AE1858ACEA2080B872D79744 /* libPods-ShikiEngineExample.a */,
+				F12C31D53204EAEF54D28B3A /* libPods-ShikiEngineExample-ShikiEngineExampleTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -143,10 +143,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				130C76488880BE46C0C48318 /* Pods-ShikiEngineExample.debug.xcconfig */,
-				4B3E2655624EE831AA2E770A /* Pods-ShikiEngineExample.release.xcconfig */,
-				23477E9D0EAABA96CFABAF7B /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */,
-				254DDAA6D085F5D0178ED5C8 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */,
+				4845FC1E45CA56D62C1768A1 /* Pods-ShikiEngineExample.debug.xcconfig */,
+				2DBFA014035394734CED7B94 /* Pods-ShikiEngineExample.release.xcconfig */,
+				E1A9F6B7829C9B069F063E86 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */,
+				F24E64211667886A1A661F67 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -158,12 +158,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "ShikiEngineExampleTests" */;
 			buildPhases = (
-				1EC274A55BC506ED4B855226 /* [CP] Check Pods Manifest.lock */,
+				1145395E9EB0A4D9BD947625 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				42A60F818D9EB4AB7628B044 /* [CP] Embed Pods Frameworks */,
-				B1E1F7941BB3DF5C6D16471A /* [CP] Copy Pods Resources */,
+				6F39BF7CA9E17E91AB4A8946 /* [CP] Embed Pods Frameworks */,
+				9992D3C1083AD72265DB7EF8 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -179,13 +179,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "ShikiEngineExample" */;
 			buildPhases = (
-				4EEC4BA84C9D7BDE4FB7ED80 /* [CP] Check Pods Manifest.lock */,
+				1AAA3294F404B7F8A7849CA9 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				E14968E4D29FE8158DC6EDC9 /* [CP] Embed Pods Frameworks */,
-				45C5CA581DA93D4494B64B34 /* [CP] Copy Pods Resources */,
+				892EB66786D1CC86F6DD917E /* [CP] Embed Pods Frameworks */,
+				3FFD57E74DC4890AD0FEEE93 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -269,7 +269,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		1EC274A55BC506ED4B855226 /* [CP] Check Pods Manifest.lock */ = {
+		1145395E9EB0A4D9BD947625 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -291,41 +291,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		42A60F818D9EB4AB7628B044 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		45C5CA581DA93D4494B64B34 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		4EEC4BA84C9D7BDE4FB7ED80 /* [CP] Check Pods Manifest.lock */ = {
+		1AAA3294F404B7F8A7849CA9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -347,24 +313,41 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		B1E1F7941BB3DF5C6D16471A /* [CP] Copy Pods Resources */ = {
+		3FFD57E74DC4890AD0FEEE93 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E14968E4D29FE8158DC6EDC9 /* [CP] Embed Pods Frameworks */ = {
+		6F39BF7CA9E17E91AB4A8946 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		892EB66786D1CC86F6DD917E /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -379,6 +362,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample/Pods-ShikiEngineExample-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9992D3C1083AD72265DB7EF8 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShikiEngineExample-ShikiEngineExampleTests/Pods-ShikiEngineExample-ShikiEngineExampleTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -414,7 +414,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 23477E9D0EAABA96CFABAF7B /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */;
+			baseConfigurationReference = E1A9F6B7829C9B069F063E86 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -441,7 +441,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 254DDAA6D085F5D0178ED5C8 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */;
+			baseConfigurationReference = F24E64211667886A1A661F67 /* Pods-ShikiEngineExample-ShikiEngineExampleTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -465,7 +465,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 130C76488880BE46C0C48318 /* Pods-ShikiEngineExample.debug.xcconfig */;
+			baseConfigurationReference = 4845FC1E45CA56D62C1768A1 /* Pods-ShikiEngineExample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -494,7 +494,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4B3E2655624EE831AA2E770A /* Pods-ShikiEngineExample.release.xcconfig */;
+			baseConfigurationReference = 2DBFA014035394734CED7B94 /* Pods-ShikiEngineExample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
