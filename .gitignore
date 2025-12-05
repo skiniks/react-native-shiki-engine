@@ -43,3 +43,4 @@ examples/react-native/ios/Pods
 examples/react-native/vendor/
 .pnpm-store/
 pnpm-lock.yaml
+.turbo

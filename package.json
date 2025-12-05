@@ -7,14 +7,15 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "git submodule update --init --recursive packages/react-native-shiki-engine/third_party/oniguruma",
-    "clean": "pnpm -r clean && del-cli node_modules",
+    "clean": "turbo clean && del-cli node_modules",
     "update:submodule": "git submodule update --remote --merge",
-    "typecheck": "pnpm -r typecheck",
-    "lint": "oxlint . && eslint .",
-    "lint:fix": "oxlint . --fix && eslint . --fix",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
     "lint:cpp": "scripts/clang-format.sh",
     "lint:all": "pnpm lint:fix && pnpm lint:cpp",
-    "build": "pnpm --filter react-native-shiki-engine build",
+    "build": "turbo build",
+    "dev": "turbo dev",
     "release": "pnpm --filter react-native-shiki-engine release"
   },
   "devDependencies": {
@@ -28,6 +29,7 @@
     "eslint-plugin-react-hooks": "catalog:",
     "eslint-plugin-react-refresh": "catalog:",
     "oxlint": "catalog:",
-    "release-it": "catalog:"
+    "release-it": "catalog:",
+    "turbo": "catalog:"
   }
 }

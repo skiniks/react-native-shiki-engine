@@ -57,6 +57,9 @@ jobs:
 
       - name: Type Check
         run: pnpm typecheck
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
   lint:
     name: ESLint
@@ -92,3 +95,6 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
