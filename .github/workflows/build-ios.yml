@@ -69,7 +69,7 @@ jobs:
             ${{ runner.os }}-pods-
 
       - name: Install Pods
-        run: yarn pods
+        run: bundle exec pod install
 
       - name: Build App
         run: |
