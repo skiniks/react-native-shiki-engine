@@ -22,9 +22,6 @@ jobs:
   build_example:
     name: Build iOS Example App
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: example/ios
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,7 +42,6 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd ../..
           yarn install --frozen-lockfile
           cd example
           yarn install --frozen-lockfile
@@ -55,7 +51,7 @@ jobs:
         with:
           ruby-version: '2.7'
           bundler-cache: true
-          working-directory: example/ios
+          working-directory: example
 
       - name: Cache Pods
         uses: actions/cache@v4
@@ -70,6 +66,7 @@ jobs:
 
       - name: Install Pods
         run: bundle exec pod install
+        working-directory: example/ios
 
       - name: Build App
         run: |
@@ -80,3 +77,4 @@ jobs:
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             build
+        working-directory: example/ios
