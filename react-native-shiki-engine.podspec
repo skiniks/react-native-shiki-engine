@@ -19,5 +19,11 @@ Pod::Spec.new do |s|
     "ios/**/*.{h,mm}",
   ]
 
+  if ENV['RCT_NEW_ARCH_ENABLED'] == '1'
+    s.pod_target_xcconfig = {
+      "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/Headers/Private/React-Codegen/react/renderer/components/NativeShikiEngineSpec\" \"$(PODS_ROOT)/Headers/Public/React-Codegen/react/renderer/components/NativeShikiEngineSpec\""
+    }
+  end
+
   install_modules_dependencies(s)
 end
