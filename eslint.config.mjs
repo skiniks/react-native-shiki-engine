@@ -4,5 +4,8 @@ import oxlint from 'eslint-plugin-oxlint'
 
 export default antfu({
   ...oxlint.buildFromOxlintConfigFile(join(import.meta.dirname, '.oxlintrc.json')),
-  ignores: ['build', 'lib', 'android', 'ios', 'cpp', 'example/android', 'example/ios', 'oniguruma', 'thirdparty', 'README.md'],
+  ignores: ['build', 'packages/react-native-shiki-engine/lib', 'packages/react-native-shiki-engine/android', 'packages/react-native-shiki-engine/ios', 'packages/react-native-shiki-engine/cpp', 'examples/react-native/android', 'examples/react-native/ios', 'oniguruma', 'README.md'],
+  rules: {
+    'pnpm/yaml-enforce-settings': 'off',
+  },
 })

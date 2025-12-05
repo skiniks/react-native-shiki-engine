@@ -1,0 +1,48 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "dangerouslyDisablePackageManagerCheck": true,
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["lib/**", "build/**", "node_modules/.cache/metro/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "cache": false,
+      "outputs": []
+    },
+    "test": {
+      "inputs": ["**/*.{ts,tsx,js,jsx}"],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "interactive": true,
+      "persistent": true
+    },
+    "ios": {
+      "cache": false,
+      "interactive": true,
+      "persistent": true
+    },
+    "android": {
+      "cache": false,
+      "interactive": true,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "interactive": true,
+      "persistent": true
+    }
+  }
+}

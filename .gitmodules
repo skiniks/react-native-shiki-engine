@@ -1,3 +1,3 @@
-[submodule "oniguruma"]
-	path = oniguruma
+[submodule "packages/react-native-shiki-engine/third_party/oniguruma"]
+	path = packages/react-native-shiki-engine/third_party/oniguruma
 	url = https://github.com/kkos/oniguruma.git

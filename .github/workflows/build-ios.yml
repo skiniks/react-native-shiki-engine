@@ -6,17 +6,17 @@ on:
       - main
     paths:
       - .github/workflows/build-ios.yml
-      - 'cpp/**'
-      - 'ios/**'
-      - '*.podspec'
-      - 'example/ios/**'
+      - 'packages/react-native-shiki-engine/cpp/**'
+      - 'packages/react-native-shiki-engine/ios/**'
+      - 'packages/react-native-shiki-engine/*.podspec'
+      - 'examples/react-native/ios/**'
   pull_request:
     paths:
       - .github/workflows/build-ios.yml
-      - 'cpp/**'
-      - 'ios/**'
-      - '*.podspec'
-      - 'example/ios/**'
+      - 'packages/react-native-shiki-engine/cpp/**'
+      - 'packages/react-native-shiki-engine/ios/**'
+      - 'packages/react-native-shiki-engine/*.podspec'
+      - 'examples/react-native/ios/**'
 
 jobs:
   build_example:
@@ -31,7 +31,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: yarn
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Create Node.js symlink
         run: |
@@ -41,23 +58,20 @@ jobs:
           echo "Symlink target: $(readlink /usr/local/bin/node)"
 
       - name: Install Dependencies
-        run: |
-          yarn install --frozen-lockfile
-          cd example
-          yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          working-directory: example
+          working-directory: examples/react-native
 
       - name: Cache Pods
         uses: actions/cache@v4
         with:
           path: |
-            example/ios/Pods
+            examples/react-native/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -66,7 +80,7 @@ jobs:
 
       - name: Install Pods
         run: bundle exec pod install
-        working-directory: example/ios
+        working-directory: examples/react-native/ios
 
       - name: Build App
         run: |
@@ -77,4 +91,4 @@ jobs:
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             build
-        working-directory: example/ios
+        working-directory: examples/react-native/ios
