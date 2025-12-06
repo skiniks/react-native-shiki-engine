@@ -12,11 +12,11 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :git => "https://github.com/skiniks/react-native-shiki-engine.git", :tag => "#{s.version}" }
 
-  s.vendored_frameworks = "ios/Oniguruma.xcframework"
+  s.vendored_frameworks = "apple/Oniguruma.xcframework"
 
   s.source_files = [
     "cpp/**/*.{cpp,h}",
-    "ios/**/*.{h,mm}",
+    "apple/**/*.{h,mm}",
   ]
 
   if ENV['RCT_NEW_ARCH_ENABLED'] == '1'
