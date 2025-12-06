@@ -1,7 +1,7 @@
 import type { ThemedToken } from '@shikijs/core'
 import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { isNativeEngineAvailable } from 'react-native-shiki-engine'
 import { TokenDisplay } from './components/TokenDisplay'
 import { HighlighterProvider } from './contexts/highlighter'
@@ -144,7 +144,7 @@ function ShikiDemo() {
   }, [highlighter])
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={styles.title}>React Native Shiki Engine</Text>
         <View style={styles.statusContainer}>
@@ -171,9 +171,11 @@ function ShikiDemo() {
 
 function App() {
   return (
-    <HighlighterProvider>
-      <ShikiDemo />
-    </HighlighterProvider>
+    <SafeAreaProvider>
+      <HighlighterProvider>
+        <ShikiDemo />
+      </HighlighterProvider>
+    </SafeAreaProvider>
   )
 }
 
