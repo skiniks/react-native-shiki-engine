@@ -1,8 +1,8 @@
 import type { HighlighterCore } from '@shikijs/core'
 import type { HighlighterContextType } from './context'
 import { createHighlighterCore } from '@shikijs/core'
-import rust from '@shikijs/langs/dist/rust.mjs'
-import dracula from '@shikijs/themes/dist/dracula.mjs'
+import rust from '@shikijs/langs/rust'
+import dracula from '@shikijs/themes/dracula'
 import React from 'react'
 import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
 

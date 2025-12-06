@@ -1,4 +1,5 @@
 #include "NativeShikiEngineModule.h"
+
 #include <unordered_map>
 
 namespace facebook::react {
@@ -8,7 +9,7 @@ static std::unordered_map<double, OnigContext*> g_scanners;
 static double g_nextScannerId = 1;
 
 NativeShikiEngineModule::NativeShikiEngineModule(std::shared_ptr<CallInvoker> jsInvoker)
-    : NativeShikiEngineCxxSpec<NativeShikiEngineModule>(std::move(jsInvoker)) {}
+  : NativeShikiEngineCxxSpec<NativeShikiEngineModule>(std::move(jsInvoker)) {}
 
 NativeShikiEngineModule::~NativeShikiEngineModule() {
   // Clean up any remaining scanners
@@ -23,8 +24,7 @@ jsi::Object NativeShikiEngineModule::getConstants(jsi::Runtime& rt) {
   return jsi::Object(rt);
 }
 
-double NativeShikiEngineModule::createScanner(jsi::Runtime& rt, jsi::Array patterns,
-                                              double maxCacheSize) {
+double NativeShikiEngineModule::createScanner(jsi::Runtime& rt, jsi::Array patterns, double maxCacheSize) {
   // Convert JSI array to C string array
   size_t patternCount = patterns.length(rt);
   std::vector<std::string> patternStrings;
@@ -40,8 +40,8 @@ double NativeShikiEngineModule::createScanner(jsi::Runtime& rt, jsi::Array patte
   }
 
   // Create scanner with the provided patterns
-  OnigContext* context = create_scanner(patternPtrs.data(), static_cast<int>(patternCount),
-                                        static_cast<size_t>(maxCacheSize));
+  OnigContext* context =
+    create_scanner(patternPtrs.data(), static_cast<int>(patternCount), static_cast<size_t>(maxCacheSize));
 
   if (!context) {
     throw jsi::JSError(rt, "Failed to create scanner");
@@ -53,18 +53,15 @@ double NativeShikiEngineModule::createScanner(jsi::Runtime& rt, jsi::Array patte
   return scannerId;
 }
 
-std::optional<jsi::Object> NativeShikiEngineModule::findNextMatchSync(jsi::Runtime& rt,
-                                                                      double scannerId,
-                                                                      jsi::String text,
-                                                                      double startPosition) {
+std::optional<jsi::Object>
+NativeShikiEngineModule::findNextMatchSync(jsi::Runtime& rt, double scannerId, jsi::String text, double startPosition) {
   auto it = g_scanners.find(scannerId);
   if (it == g_scanners.end()) {
     throw jsi::JSError(rt, "Invalid scanner ID");
   }
 
   std::string textStr = text.utf8(rt);
-  OnigResult* result =
-      find_next_match(it->second, textStr.c_str(), static_cast<int>(startPosition));
+  OnigResult* result = find_next_match(it->second, textStr.c_str(), static_cast<int>(startPosition));
 
   if (!result) {
     return std::nullopt;
@@ -100,4 +97,4 @@ void NativeShikiEngineModule::destroyScanner(jsi::Runtime& rt, double scannerId)
   }
 }
 
-} // namespace facebook::react
+}  // namespace facebook::react

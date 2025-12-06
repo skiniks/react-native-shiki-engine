@@ -8,15 +8,12 @@ const monospaceFontFamily = Platform.select({
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 20,
     backgroundColor: '#2e3440',
   },
   header: {
-    marginTop: 40,
+    marginTop: 20,
     marginBottom: 30,
-    marginHorizontal: 16,
+    marginHorizontal: 24,
   },
   title: {
     fontSize: 32,
@@ -45,15 +42,14 @@ export const styles = StyleSheet.create({
   },
   demoSection: {
     flex: 1,
+    paddingBottom: 20,
   },
   codeContainer: {
     padding: 16,
     marginVertical: 16,
-    marginHorizontal: 10,
+    marginHorizontal: 24,
     borderRadius: 12,
     backgroundColor: '#3B4252',
-    alignSelf: 'stretch',
-    marginBottom: 0,
     flexShrink: 1,
   },
   codeScrollContainer: {

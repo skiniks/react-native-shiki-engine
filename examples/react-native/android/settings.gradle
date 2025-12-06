@@ -1,6 +1,22 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+pluginManagement {
+    def workingDir = rootDir.parentFile
+    def proc = ["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json')"].execute(null, workingDir)
+    proc.waitFor()
+    def output = proc.text.trim()
+    if (output.isEmpty()) {
+        throw new GradleException("Failed to resolve @react-native/gradle-plugin. Make sure node_modules are installed.")
+    }
+    def reactNativeGradlePlugin = new File(output).getParentFile().getAbsolutePath()
+    includeBuild(reactNativeGradlePlugin)
+}
 plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'shikiengine.example'
 include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
+def workingDir = rootDir.parentFile
+def proc = ["node", "--print", "require.resolve('@react-native/gradle-plugin/package.json')"].execute(null, workingDir)
+proc.waitFor()
+def output = proc.text.trim()
+if (!output.isEmpty()) {
+    includeBuild(new File(output).getParentFile().getAbsolutePath())
+}

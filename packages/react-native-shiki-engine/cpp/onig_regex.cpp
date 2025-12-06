@@ -1,9 +1,11 @@
 #include "onig_regex.h"
-#include "onig_context.hpp"
+
 #include <algorithm>
 #include <cstring>
 #include <new>
 #include <vector>
+
+#include "onig_context.hpp"
 
 /** Rough estimate of regex pattern memory usage. Base + pattern size. */
 static size_t estimate_pattern_memory(const char* pattern, regex_t* regex) {
@@ -18,8 +20,7 @@ static void check_memory_pressure(OnigContext* context) {
       patterns.push_back({entry.first, entry.second.last_used});
     }
 
-    std::sort(patterns.begin(), patterns.end(),
-              [](const auto& a, const auto& b) { return a.second < b.second; });
+    std::sort(patterns.begin(), patterns.end(), [](const auto& a, const auto& b) { return a.second < b.second; });
 
     for (const auto& pattern : patterns) {
       if (context->current_memory_usage <= CACHE_MEMORY_LIMIT) {
@@ -119,9 +120,15 @@ OnigContext* create_scanner(const char** patterns, int pattern_count, size_t max
 
       if (!regex) {
         OnigErrorInfo einfo;
-        int result = onig_new(&regex, (const OnigUChar*)patterns[i],
-                              (const OnigUChar*)(patterns[i] + strlen(patterns[i])),
-                              ONIG_OPTION_DEFAULT, ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
+        int result = onig_new(
+          &regex,
+          (const OnigUChar*)patterns[i],
+          (const OnigUChar*)(patterns[i] + strlen(patterns[i])),
+          ONIG_OPTION_DEFAULT,
+          ONIG_ENCODING_UTF8,
+          ONIG_SYNTAX_DEFAULT,
+          &einfo
+        );
 
         if (result != ONIG_NORMAL) {
           onig_region_free(context->region, 1);
@@ -165,16 +172,19 @@ OnigResult* find_next_match(OnigContext* context, const char* text, int start_po
     for (int i = 0; i < context->pattern_count; i++) {
       onig_region_clear(context->region);
 
-      int match_pos =
-          onig_search(context->regexes[i], (OnigUChar*)text, (OnigUChar*)(text + text_length),
-                      (OnigUChar*)(text + start_pos), (OnigUChar*)(text + text_length),
-                      context->region, ONIG_OPTION_NONE);
+      int match_pos = onig_search(
+        context->regexes[i],
+        (OnigUChar*)text,
+        (OnigUChar*)(text + text_length),
+        (OnigUChar*)(text + start_pos),
+        (OnigUChar*)(text + text_length),
+        context->region,
+        ONIG_OPTION_NONE
+      );
 
       if (match_pos >= 0) {
         if (best_match_pos < 0 || match_pos < best_match_pos ||
-            (match_pos == best_match_pos &&
-             context->region->end[0] - context->region->beg[0] > best_match_len)) {
-
+            (match_pos == best_match_pos && context->region->end[0] - context->region->beg[0] > best_match_len)) {
           best_match_pos = match_pos;
           best_match_len = context->region->end[0] - context->region->beg[0];
           result->pattern_index = i;

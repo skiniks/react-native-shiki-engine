@@ -1,5 +1,6 @@
 {
   "name": "react-native-shiki-engine-monorepo",
+  "type": "module",
   "private": true,
   "packageManager": "pnpm@10.24.0",
   "description": "Shiki syntax highlighting for React Native - Monorepo",
@@ -10,12 +11,13 @@
   },
   "scripts": {
     "postinstall": "git submodule update --init --recursive packages/react-native-shiki-engine/third_party/oniguruma",
-    "clean": "turbo clean && del-cli node_modules",
+    "clean": "rm -rf node_modules && find packages examples -type d \\( -name node_modules -o -name lib -o -name build -o -name Pods -o -name .gradle -o -name vendor -o -name .cxx \\) -prune -exec rm -rf {} +",
     "update:submodule": "git submodule update --remote --merge",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
     "lint:cpp": "scripts/clang-format.sh",
+    "lint:kt": "scripts/ktlint.sh",
     "lint:all": "pnpm lint:fix && pnpm lint:cpp",
     "build": "turbo build",
     "dev": "turbo dev",
@@ -33,6 +35,7 @@
     "eslint-plugin-react-refresh": "catalog:",
     "oxlint": "catalog:",
     "release-it": "catalog:",
-    "turbo": "catalog:"
+    "turbo": "catalog:",
+    "typescript": "catalog:"
   }
 }

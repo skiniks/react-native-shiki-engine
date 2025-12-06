@@ -2,21 +2,19 @@
   "name": "react-native-shiki-engine-example",
   "version": "0.0.1",
   "private": true,
-  "engines": {
-    "node": ">=18"
-  },
   "scripts": {
     "android": "npx react-native run-android",
     "ios": "npx react-native run-ios",
     "start": "react-native start"
   },
   "dependencies": {
+    "@shikijs/core": "catalog:",
     "@shikijs/langs": "catalog:",
     "@shikijs/themes": "catalog:",
     "react": "catalog:",
     "react-native": "catalog:",
-    "react-native-shiki-engine": "workspace:*",
-    "shiki": "catalog:"
+    "react-native-safe-area-context": "catalog:",
+    "react-native-shiki-engine": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
@@ -26,7 +24,9 @@
     "@react-native-community/cli-platform-android": "catalog:",
     "@react-native-community/cli-platform-ios": "catalog:",
     "@react-native/babel-preset": "catalog:",
+    "@react-native/codegen": "catalog:",
     "@react-native/metro-config": "catalog:",
+    "@types/react": "catalog:",
     "babel-plugin-module-resolver": "catalog:"
   }
 }

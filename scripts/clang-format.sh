@@ -8,10 +8,10 @@ if ! which clang-format >/dev/null; then
   exit 1
 fi
 
-find android cpp ios \
+find packages/react-native-shiki-engine/android packages/react-native-shiki-engine/cpp packages/react-native-shiki-engine/apple \
   \! -path '*/Oniguruma.xcframework/*' \
-  \! -path 'android/.cxx/*' \
-  \! -path 'android/src/main/cpp/include/*' \
+  \! -path '*/android/.cxx/*' \
+  \! -path '*/android/src/main/cpp/include/*' \
   \! -path '*/generated/*' \
   \! -path '*/build/*' \
   -type f \( -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.m" -o -name "*.mm" \) \
@@ -21,10 +21,10 @@ find android cpp ios \
 done
 
 echo "Verifying formatting..."
-find android cpp ios \
+find packages/react-native-shiki-engine/android packages/react-native-shiki-engine/cpp packages/react-native-shiki-engine/apple \
   \! -path '*/Oniguruma.xcframework/*' \
-  \! -path 'android/.cxx/*' \
-  \! -path 'android/src/main/cpp/include/*' \
+  \! -path '*/android/.cxx/*' \
+  \! -path '*/android/src/main/cpp/include/*' \
   \! -path '*/generated/*' \
   \! -path '*/build/*' \
   -type f \( -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.m" -o -name "*.mm" \) \
