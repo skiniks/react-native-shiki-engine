@@ -2,9 +2,6 @@
   "name": "react-native-shiki-engine-example",
   "version": "0.0.1",
   "private": true,
-  "engines": {
-    "node": ">=18"
-  },
   "scripts": {
     "android": "npx react-native run-android",
     "ios": "npx react-native run-ios",
