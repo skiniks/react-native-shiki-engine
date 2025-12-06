@@ -7,14 +7,14 @@ on:
     paths:
       - .github/workflows/build-ios.yml
       - 'packages/react-native-shiki-engine/cpp/**'
-      - 'packages/react-native-shiki-engine/ios/**'
+      - 'packages/react-native-shiki-engine/apple/**'
       - 'packages/react-native-shiki-engine/*.podspec'
       - 'examples/react-native/ios/**'
   pull_request:
     paths:
       - .github/workflows/build-ios.yml
       - 'packages/react-native-shiki-engine/cpp/**'
-      - 'packages/react-native-shiki-engine/ios/**'
+      - 'packages/react-native-shiki-engine/apple/**'
       - 'packages/react-native-shiki-engine/*.podspec'
       - 'examples/react-native/ios/**'
 

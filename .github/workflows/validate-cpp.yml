@@ -8,13 +8,13 @@ on:
       - .github/workflows/validate-cpp.yml
       - 'packages/react-native-shiki-engine/android/**'
       - 'packages/react-native-shiki-engine/cpp/**'
-      - 'packages/react-native-shiki-engine/ios/**'
+      - 'packages/react-native-shiki-engine/apple/**'
   pull_request:
     paths:
       - .github/workflows/validate-cpp.yml
       - 'packages/react-native-shiki-engine/android/**'
       - 'packages/react-native-shiki-engine/cpp/**'
-      - 'packages/react-native-shiki-engine/ios/**'
+      - 'packages/react-native-shiki-engine/apple/**'
 
 jobs:
   lint:
@@ -34,9 +34,9 @@ jobs:
         run: |
           find packages/react-native-shiki-engine/cpp -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) -exec clang-format-16 -n -Werror {} \;
 
-      - name: Check iOS formatting
+      - name: Check Apple formatting
         run: |
-          find packages/react-native-shiki-engine/ios -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.mm" \) \
+          find packages/react-native-shiki-engine/apple -type f \( -name "*.h" -o -name "*.cpp" -o -name "*.mm" \) \
           -not -path "*/Oniguruma.xcframework/*" \
           -exec clang-format-16 -n -Werror {} \;
 

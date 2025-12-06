@@ -4,7 +4,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
 ONIGURUMA_DIR="$PROJECT_DIR/packages/react-native-shiki-engine/third_party/oniguruma"
 BUILD_DIR="$PROJECT_DIR/build-onig"
-IOS_DIR="$PROJECT_DIR/packages/react-native-shiki-engine/ios"
+IOS_DIR="$PROJECT_DIR/packages/react-native-shiki-engine/apple"
 
 # Get Oniguruma version
 if [ -f "$ONIGURUMA_DIR/src/oniguruma.h" ]; then
