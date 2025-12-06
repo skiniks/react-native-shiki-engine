@@ -1,5 +1,6 @@
 {
   "name": "react-native-shiki-engine-monorepo",
+  "type": "module",
   "private": true,
   "packageManager": "pnpm@10.24.0",
   "description": "Shiki syntax highlighting for React Native - Monorepo",
