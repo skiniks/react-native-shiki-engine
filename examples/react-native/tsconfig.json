@@ -5,6 +5,5 @@
       "react-native-shiki-engine": ["../../packages/react-native-shiki-engine/src/index"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src"]
 }
