@@ -1,11 +1,12 @@
 const path = require('node:path')
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
-const escape = require('escape-string-regexp')
 const pak = require('../../packages/react-native-shiki-engine/package.json')
 
 const projectRoot = __dirname
 const workspaceRoot = path.resolve(projectRoot, '../..')
 const modules = Object.keys({ ...pak.peerDependencies })
+
+const escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * Metro configuration
@@ -28,7 +29,7 @@ const config = {
     ],
 
     blockList: modules.map(
-      m => new RegExp(`^${escape(path.join(workspaceRoot, 'node_modules', m))}\\/.*$`),
+      m => new RegExp(`^${escapeRegExp(path.join(workspaceRoot, 'node_modules', m))}\\/.*$`),
     ),
 
     extraNodeModules: {
