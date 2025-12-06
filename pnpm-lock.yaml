@@ -137,6 +137,9 @@ importers:
       turbo:
         specifier: 'catalog:'
         version: 2.6.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   examples/react-native:
     dependencies:
@@ -183,6 +186,9 @@ importers:
       '@react-native/metro-config':
         specifier: 'catalog:'
         version: 0.82.1(@babel/core@7.28.5)
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.7
       babel-plugin-module-resolver:
         specifier: 'catalog:'
         version: 5.0.2
