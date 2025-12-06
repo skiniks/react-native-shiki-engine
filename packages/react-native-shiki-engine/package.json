@@ -26,7 +26,14 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "main": "lib/commonjs/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/typescript/index.d.ts",
+      "import": "./lib/module/index.js",
+      "default": "./lib/module/index.js"
+    }
+  },
+  "main": "lib/module/index.js",
   "module": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
   "files": [
@@ -37,17 +44,15 @@
     "android/src/main",
     "cpp",
     "ios",
-    "lib/commonjs",
     "lib/module",
     "lib/typescript",
-    "react-native.config.js",
+    "react-native.config.ts",
     "src"
   ],
   "scripts": {
     "prepack": "bob build",
     "build": "bob build",
     "clean": "del-cli android/app android/build lib build",
-    "codegen": "react-native codegen --source library --outputPath ../../examples/react-native/ios --platform ios",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint . && eslint .",
     "lint:fix": "oxlint . --fix && eslint . --fix",
@@ -62,6 +67,7 @@
     "@shikijs/vscode-textmate": "catalog:"
   },
   "devDependencies": {
+    "@babel/core": "catalog:",
     "@types/react": "catalog:",
     "del-cli": "catalog:",
     "react": "catalog:",
@@ -73,8 +79,12 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      "commonjs",
-      "module",
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
       [
         "typescript",
         {
