@@ -11,7 +11,8 @@
   facebook::react::registerCxxModuleToGlobalModuleMap(
       std::string(facebook::react::NativeShikiEngineModule::kModuleName),
       [](std::shared_ptr<facebook::react::CallInvoker> jsInvoker) {
-        return std::make_shared<facebook::react::NativeShikiEngineModule>(jsInvoker);
+        return std::make_shared<facebook::react::NativeShikiEngineModule>(
+            jsInvoker);
       });
 }
 
