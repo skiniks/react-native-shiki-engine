@@ -1,6 +1,7 @@
 import type { ThemedToken } from '@shikijs/core'
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { isNativeEngineAvailable } from 'react-native-shiki-engine'
 import { TokenDisplay } from './components/TokenDisplay'
 import { HighlighterProvider } from './contexts/highlighter'

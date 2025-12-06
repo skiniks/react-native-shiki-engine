@@ -16,6 +16,7 @@
     "@shikijs/themes": "catalog:",
     "react": "catalog:",
     "react-native": "catalog:",
+    "react-native-safe-area-context": "catalog:",
     "react-native-shiki-engine": "workspace:*"
   },
   "devDependencies": {
