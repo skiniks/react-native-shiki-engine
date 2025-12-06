@@ -2626,7 +2626,7 @@ SPEC CHECKSUMS:
   React-logger: 500f2fa5697d224e63c33d913c8a4765319e19bf
   React-Mapbuffer: 06d59c448da7e34eb05b3fb2189e12f6a30fec57
   React-microtasksnativemodule: d1ee999dc9052e23f6488b730fa2d383a4ea40e5
-  react-native-shiki-engine: f83157648cfdd5708d7334a7ab4a4aec5f7ea35d
+  react-native-shiki-engine: 2d3773a2a323238f68ccaea8f4bc8b080eced6c8
   React-NativeModulesApple: 46690a0fe94ec28fc6fc686ec797b911d251ded0
   React-oscompat: 95875e81f5d4b3c7b2c888d5bd2c9d83450d8bdb
   React-perflogger: 2e229bf33e42c094fd64516d89ec1187a2b79b5b
@@ -2657,11 +2657,11 @@ SPEC CHECKSUMS:
   React-utils: abf37b162f560cd0e3e5d037af30bb796512246d
   React-webperformancenativemodule: 50a57c713a90d27ae3ab947a6c9c8859bcb49709
   ReactAppDependencyProvider: a45ef34bb22dc1c9b2ac1f74167d9a28af961176
-  ReactCodegen: edeafb391e717bca65e5c2969cdc708d690949a6
+  ReactCodegen: c66d30f95dc40cbb110577e04e020df6cd47e21b
   ReactCommon: 804dc80944fa90b86800b43c871742ec005ca424
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 689c8e04277f3ad631e60fe2a08e41d411daf8eb
 
 PODFILE CHECKSUM: 5b6fc78538b300666ee9e6ba76bbf538da266681
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
