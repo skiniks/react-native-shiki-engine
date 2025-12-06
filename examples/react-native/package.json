@@ -24,6 +24,7 @@
     "@react-native-community/cli-platform-android": "catalog:",
     "@react-native-community/cli-platform-ios": "catalog:",
     "@react-native/babel-preset": "catalog:",
+    "@react-native/codegen": "catalog:",
     "@react-native/metro-config": "catalog:",
     "@types/react": "catalog:",
     "babel-plugin-module-resolver": "catalog:"

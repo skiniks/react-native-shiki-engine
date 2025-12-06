@@ -17,6 +17,7 @@
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
     "lint:cpp": "scripts/clang-format.sh",
+    "lint:kt": "scripts/ktlint.sh",
     "lint:all": "pnpm lint:fix && pnpm lint:cpp",
     "build": "turbo build",
     "dev": "turbo dev",
