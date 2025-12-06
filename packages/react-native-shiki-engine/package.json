@@ -38,15 +38,10 @@
   "types": "lib/typescript/index.d.ts",
   "files": [
     "*.podspec",
-    "android/CMakeLists.txt",
-    "android/build.gradle",
-    "android/gradle.properties",
-    "android/src/main",
+    "android",
     "apple",
     "cpp",
-    "lib/module",
-    "lib/typescript",
-    "react-native.config.ts",
+    "lib",
     "src"
   ],
   "scripts": {
