@@ -9,9 +9,9 @@
 extern "C" {
 #endif
 
-#define MAX_CACHE_SIZE 1000
+#define MAX_CACHE_SIZE       1000
 #define CACHE_EXPIRY_SECONDS 3600
-#define CACHE_MEMORY_LIMIT (50 * 1024 * 1024)
+#define CACHE_MEMORY_LIMIT   (50 * 1024 * 1024)
 
 struct OnigContextImpl;
 
@@ -41,4 +41,4 @@ void free_scanner(OnigContext* context);
 }
 #endif
 
-#endif // ONIG_REGEX_H
+#endif  // ONIG_REGEX_H

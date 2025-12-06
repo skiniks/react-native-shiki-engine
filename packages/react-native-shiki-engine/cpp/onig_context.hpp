@@ -1,12 +1,13 @@
 #ifndef ONIG_CONTEXT_HPP
 #define ONIG_CONTEXT_HPP
 
-#include "onig_regex.h"
-#include "oniguruma.h"
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "onig_regex.h"
+#include "oniguruma.h"
 
 struct CachedPattern {
   regex_t* regex;
@@ -23,4 +24,4 @@ inline size_t estimate_pattern_memory(const char* pattern, const regex_t* regex)
   return strlen(pattern) + 1024;
 }
 
-#endif // ONIG_CONTEXT_HPP
+#endif  // ONIG_CONTEXT_HPP
