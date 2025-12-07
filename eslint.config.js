@@ -9,5 +9,11 @@ export default antfu(
       'pnpm/yaml-enforce-settings': 'off',
     },
   },
+  {
+    files: ['examples/expo-app/package.json'],
+    rules: {
+      'pnpm/json-enforce-catalog': 'off',
+    },
+  },
   ...oxlint.buildFromOxlintConfigFile(join(import.meta.dirname, '.oxlintrc.json')),
 )
