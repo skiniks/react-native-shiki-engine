@@ -73,3 +73,5 @@ lib/
 
 # Expo
 .expo/
+examples/expo-app/ios
+examples/expo-app/android
