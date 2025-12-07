@@ -21,15 +21,27 @@ Oniguruma regex engine implementation for React Native, providing high-performan
 ### React Native
 
 ```sh
-yarn add react-native-shiki-engine
+yarn add react-native-shiki-engine @shikijs/core
 cd ios && pod install
+```
+
+You'll also need to install the languages and themes you want to use:
+
+```sh
+yarn add @shikijs/langs @shikijs/themes
 ```
 
 ### Expo
 
 ```sh
-npx expo install react-native-shiki-engine
+npx expo install react-native-shiki-engine @shikijs/core @shikijs/langs @shikijs/themes
 npx expo prebuild
+```
+
+For web support in Expo, also install:
+
+```sh
+npx expo install @shikijs/engine-oniguruma
 ```
 
 ## Usage
@@ -38,18 +50,23 @@ npx expo prebuild
 
 ```tsx
 import { createHighlighterCore } from '@shikijs/core'
-import javascript from '@shikijs/langs/dist/javascript.mjs'
-import nord from '@shikijs/themes/dist/nord.mjs'
+import javascript from '@shikijs/langs/javascript'
+import nord from '@shikijs/themes/nord'
 import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
 
 if (!isNativeEngineAvailable()) {
   throw new Error('Native engine is not available')
 }
 
-const highlighter = createHighlighterCore({
-  themes: ['nord'],
-  langs: ['javascript'],
+const highlighter = await createHighlighterCore({
+  themes: [nord],
+  langs: [javascript],
   engine: createNativeEngine(),
+})
+
+const tokens = highlighter.codeToTokensBase(code, {
+  lang: 'javascript',
+  theme: 'nord',
 })
 ```
 
@@ -68,7 +85,7 @@ const highlighter = createHighlighterCore({
 > - Initializing highlighters inside useEffect or event handlers
 > - Multiple instances for the same language/theme combination
 >
-> See the [example directory](https://github.com/skiniks/react-native-shiki-engine/tree/main/example) for a reference implementation using React Context to maintain a single highlighter instance.
+> See the [examples directory](https://github.com/skiniks/react-native-shiki-engine/tree/main/examples) for reference implementations using React Context to maintain a single highlighter instance.
 
 ### Advanced Configuration
 
@@ -81,40 +98,50 @@ createNativeEngine({
 })
 ```
 
-## Web Platform Support
+## Web Platform Support (Expo)
 
-For web applications, this native engine is not compatible as it relies on React Native's TurboModules and JSI. To support web platforms, you can use Shiki's default WASM or JavaScript engine instead.
+For Expo apps targeting web, this native engine is not compatible as it relies on React Native's TurboModules and JSI. To support web platforms, use platform-specific files with Metro's `.web.tsx` extension.
 
-1. Use Shiki's default WASM/JavaScript engine for web platforms
-2. Implement platform-specific engine selection in your code
+### Setup for Expo Web
 
-### Example Implementation
+1. Install the WASM engine:
+```sh
+npx expo install @shikijs/engine-oniguruma
+```
 
-```typescript
+2. Create platform-specific context files:
+
+**Native platforms** (`contexts/highlighter/index.tsx`):
+```tsx
 import { createHighlighterCore } from '@shikijs/core'
-import { createOnigurumaEngine } from '@shikijs/engine-oniguruma'
-import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
+import javascript from '@shikijs/langs/javascript'
+import nord from '@shikijs/themes/nord'
+import { createNativeEngine } from 'react-native-shiki-engine'
 
-function createAdaptiveEngine() {
-  // Use native engine for native platforms
-  if (isNativeEngineAvailable()) {
-    return createNativeEngine()
-  }
-  // Fallback to Shiki's WASM engine for web platforms
-  return createOnigurumaEngine(import('shiki/wasm'))
-}
-
-const highlighter = createHighlighterCore({
-  themes: ['nord'],
-  langs: ['javascript'],
-  engine: createAdaptiveEngine(),
+const highlighter = await createHighlighterCore({
+  themes: [nord],
+  langs: [javascript],
+  engine: createNativeEngine(),
 })
 ```
 
-This approach ensures:
-- Optimal performance on React Native using the native engine
-- Seamless fallback to Shiki's WASM engine on web platforms
-- Cross-platform compatibility with a single codebase
+**Web platform** (`contexts/highlighter/index.web.tsx`):
+```tsx
+import { createHighlighterCore } from '@shikijs/core'
+import { createOnigurumaEngine } from '@shikijs/engine-oniguruma'
+import javascript from '@shikijs/langs/javascript'
+import nord from '@shikijs/themes/nord'
+
+const highlighter = await createHighlighterCore({
+  themes: [nord],
+  langs: [javascript],
+  engine: createOnigurumaEngine(import('@shikijs/engine-oniguruma/wasm-inlined')),
+})
+```
+
+Metro will automatically use the `.web.tsx` file when bundling for web, and the regular `.tsx` file for native platforms.
+
+See the [expo-app example](https://github.com/skiniks/react-native-shiki-engine/tree/main/examples/expo-app) for a complete implementation.
 
 ## Technical Architecture
 
