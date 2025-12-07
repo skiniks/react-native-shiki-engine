@@ -1,0 +1,38 @@
+{
+  "name": "expo-app",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "start:dev-client": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "prebuild": "expo prebuild",
+    "prebuild:clean": "expo prebuild --clean",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint . && eslint .",
+    "lint:fix": "oxlint . --fix && eslint . --fix"
+  },
+  "dependencies": {
+    "@react-native/babel-preset": "^0.81.5",
+    "@react-native/codegen": "^0.81.5",
+    "@react-native/metro-config": "^0.81.5",
+    "@shikijs/core": "catalog:",
+    "@shikijs/engine-oniguruma": "catalog:",
+    "@shikijs/langs": "catalog:",
+    "@shikijs/themes": "catalog:",
+    "expo": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-native": "0.81.5",
+    "react-native-safe-area-context": "catalog:",
+    "react-native-shiki-engine": "workspace:*",
+    "react-native-web": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  }
+}

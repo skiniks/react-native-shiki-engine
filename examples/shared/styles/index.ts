@@ -3,6 +3,7 @@ import { Platform, StyleSheet } from 'react-native'
 const monospaceFontFamily = Platform.select({
   ios: 'Menlo',
   android: 'monospace',
+  web: 'monospace',
 })
 
 export const styles = StyleSheet.create({
@@ -37,6 +38,18 @@ export const styles = StyleSheet.create({
   },
   statusValue: {
     fontSize: 16,
+    color: '#ECEFF4',
+    fontWeight: '600',
+  },
+  platformBadge: {
+    backgroundColor: '#5E81AC',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginLeft: 12,
+  },
+  platformText: {
+    fontSize: 14,
     color: '#ECEFF4',
     fontWeight: '600',
   },

@@ -2,15 +2,13 @@ import type { ThemedToken } from '@shikijs/core'
 import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import { isNativeEngineAvailable } from 'react-native-shiki-engine'
-import { TokenDisplay } from '../../shared/components/TokenDisplay'
-import { useHighlighter } from '../../shared/hooks/useHighlighter'
-import { rustExample } from '../../shared/snippets/rust-example'
-import { styles } from '../../shared/styles'
-import { HighlighterProvider } from './contexts/highlighter'
+import { TokenDisplay } from '../shared/components/TokenDisplay'
+import { useHighlighter } from '../shared/hooks/useHighlighter'
+import { rustExample } from '../shared/snippets/rust-example'
+import { styles } from '../shared/styles'
+import { HighlighterProvider } from './src/contexts/highlighter'
 
 function ShikiDemo() {
-  const [engineStatus, setEngineStatus] = useState('Initializing...')
   const [tokens, setTokens] = useState<ThemedToken[][]>([])
   const [error, setError] = useState('')
   const highlighter = useHighlighter()
@@ -18,12 +16,6 @@ function ShikiDemo() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        const available = isNativeEngineAvailable()
-        setEngineStatus(available ? 'Available' : 'Not Available')
-
-        if (!available)
-          throw new Error('Native engine not available.')
-
         await highlighter.initialize()
 
         const tokenized = highlighter.tokenize(rustExample, {
@@ -57,8 +49,11 @@ function ShikiDemo() {
       <View style={styles.header}>
         <Text style={styles.title}>React Native Shiki Engine</Text>
         <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Engine Status:</Text>
-          <Text style={styles.statusValue}>{engineStatus}</Text>
+          <Text style={styles.statusLabel}>Engine:</Text>
+          <Text style={styles.statusValue}>WASM Engine</Text>
+          <View style={styles.platformBadge}>
+            <Text style={styles.platformText}>Web</Text>
+          </View>
         </View>
       </View>
 
@@ -78,7 +73,7 @@ function ShikiDemo() {
   )
 }
 
-function App() {
+export default function App() {
   return (
     <SafeAreaProvider>
       <HighlighterProvider>
@@ -87,5 +82,3 @@ function App() {
     </SafeAreaProvider>
   )
 }
-
-export default App

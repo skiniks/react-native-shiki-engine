@@ -1,10 +1,10 @@
 import type { HighlighterCore } from '@shikijs/core'
 import type { HighlighterContextType } from '../../../../shared/contexts/highlighter/context'
 import { createHighlighterCore } from '@shikijs/core'
+import { createOnigurumaEngine } from '@shikijs/engine-oniguruma'
 import rust from '@shikijs/langs/rust'
 import dracula from '@shikijs/themes/dracula'
 import React from 'react'
-import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
 import { HighlighterContext } from '../../../../shared/contexts/highlighter/context'
 
 let highlighterInstance: HighlighterCore | null = null
@@ -16,14 +16,10 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
       initialize: async () => {
         if (!initializationPromise) {
           initializationPromise = (async () => {
-            const available = isNativeEngineAvailable()
-            if (!available)
-              throw new Error('Native engine not available.')
-
             highlighterInstance = await createHighlighterCore({
               langs: [rust],
               themes: [dracula],
-              engine: createNativeEngine(),
+              engine: createOnigurumaEngine(import('@shikijs/engine-oniguruma/wasm-inlined')),
             })
           })()
         }

@@ -11,7 +11,7 @@
   },
   "scripts": {
     "postinstall": "git submodule update --init --recursive packages/react-native-shiki-engine/third_party/oniguruma",
-    "clean": "rm -rf node_modules && find packages examples -type d \\( -name node_modules -o -name lib -o -name build -o -name Pods -o -name .gradle -o -name vendor -o -name .cxx \\) -prune -exec rm -rf {} +",
+    "clean": "rm -rf node_modules .idea .pnpm-store .turbo && find packages examples -type d \\( -name node_modules -o -name lib -o -name build -o -name Pods -o -name .gradle -o -name vendor -o -name .cxx -o -name .turbo -o -name .expo \\) -prune -exec rm -rf {} + && rm -rf examples/expo-app/android examples/expo-app/ios",
     "update:submodule": "git submodule update --remote --merge",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",

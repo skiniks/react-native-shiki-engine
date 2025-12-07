@@ -1,0 +1,7 @@
+{
+  "extends": "../../packages/react-native-shiki-engine/tsconfig.json",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}

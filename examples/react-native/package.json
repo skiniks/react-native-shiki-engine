@@ -5,7 +5,10 @@
   "scripts": {
     "android": "npx react-native run-android",
     "ios": "npx react-native run-ios",
-    "start": "react-native start"
+    "start": "react-native start",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint . && eslint .",
+    "lint:fix": "oxlint . --fix && eslint . --fix"
   },
   "dependencies": {
     "@shikijs/core": "catalog:",
