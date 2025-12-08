@@ -1,8 +1,10 @@
 {
   "extends": "../../packages/react-native-shiki-engine/tsconfig",
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "@shared/*": ["../shared/*"]
     }
-  }
+  },
+  "include": ["src"]
 }
