@@ -23,7 +23,7 @@ jobs:
     name: Build iOS Example App
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -58,15 +58,15 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build Package
+        run: pnpm --filter react-native-shiki-engine build
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
           working-directory: examples/react-native
-
-      - name: Install CocoaPods
-        run: gem install cocoapods -v 1.16.2
 
       - name: Cache Pods
         uses: actions/cache@v4

@@ -59,6 +59,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build Package
+        run: pnpm --filter react-native-shiki-engine build
+
       - name: Build Android App
         run: ./gradlew assembleDebug --no-daemon --stacktrace
         working-directory: examples/react-native/android
