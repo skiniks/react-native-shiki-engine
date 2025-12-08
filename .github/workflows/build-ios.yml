@@ -23,7 +23,7 @@ jobs:
     name: Build iOS Example App
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
