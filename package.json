@@ -26,9 +26,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
     "@eslint-react/eslint-plugin": "catalog:",
-    "@react-native-community/cli": "catalog:",
     "@release-it/conventional-changelog": "catalog:",
-    "del-cli": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-oxlint": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
