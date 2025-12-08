@@ -121,6 +121,14 @@ if (isNewArchitectureEnabled()) {
     codegenJavaPackageName = "com.shikiengine"
   }
 
+  // Disable buildCodegenCLI task for RN 0.72.7 compatibility
+  // RN 0.72.7 looks for a build.sh script that doesn't exist in the codegen package
+  tasks.configureEach { task ->
+    if (task.name == "buildCodegenCLI") {
+      task.enabled = false
+    }
+  }
+
   // Patch the auto-generated CMakeLists.txt to exclude Fabric component files
   tasks.configureEach { task ->
     if (task.name.contains("generateCodegenArtifactsFromSchema")) {

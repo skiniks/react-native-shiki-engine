@@ -41,10 +41,18 @@ target_compile_definitions(react-native-shiki-engine
 
 # Add codegen files
 set(CODEGEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/generated/source/codegen/jni")
-target_sources(react-native-shiki-engine PRIVATE
-    ${CODEGEN_DIR}/NativeShikiEngineSpec-generated.cpp
-    ${CODEGEN_DIR}/react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI-generated.cpp
-)
+
+if(EXISTS "${CODEGEN_DIR}/NativeShikiEngineSpec-generated.cpp")
+    target_sources(react-native-shiki-engine PRIVATE
+        ${CODEGEN_DIR}/NativeShikiEngineSpec-generated.cpp
+    )
+endif()
+
+if(EXISTS "${CODEGEN_DIR}/react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI-generated.cpp")
+    target_sources(react-native-shiki-engine PRIVATE
+        ${CODEGEN_DIR}/react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI-generated.cpp
+    )
+endif()
 
 target_include_directories(react-native-shiki-engine PRIVATE
     ${CODEGEN_DIR}
