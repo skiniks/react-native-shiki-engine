@@ -18,8 +18,8 @@ function generateTokenKey(lineIndex: number, tokenIndex: number, token: ThemedTo
 
 export function TokenDisplay({ tokens }: TokenDisplayProps) {
   return (
-    <ScrollView style={styles.codeContainer}>
-      <ScrollView horizontal showsHorizontalScrollIndicator>
+    <View style={styles.codeContainer}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.codeScrollContainer}>
           {tokens.map((line, lineIndex) => (
             <View key={generateLineKey(lineIndex, line)} style={styles.codeLine}>
@@ -32,6 +32,6 @@ export function TokenDisplay({ tokens }: TokenDisplayProps) {
           ))}
         </View>
       </ScrollView>
-    </ScrollView>
+    </View>
   )
 }
