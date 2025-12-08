@@ -1,6 +1,6 @@
 import React from 'react'
-import { ShikiExampleScreen } from '@/components/ShikiExampleScreen'
-import { HighlighterProvider } from '@/contexts/highlighter'
+import { ShikiExampleScreen } from '@/components'
+import { HighlighterProvider } from '@/contexts'
 
 export default function App() {
   return (

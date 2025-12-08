@@ -1,7 +1,7 @@
 import React from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { ShikiExampleScreen } from './components/ShikiExampleScreen'
-import { HighlighterProvider } from './contexts/highlighter'
+import { ShikiExampleScreen } from './components'
+import { HighlighterProvider } from './contexts'
 
 function App() {
   return (
