@@ -161,15 +161,6 @@ importers:
 
   examples/expo-app:
     dependencies:
-      '@react-native/babel-preset':
-        specifier: ^0.81.5
-        version: 0.81.5(@babel/core@7.28.5)
-      '@react-native/codegen':
-        specifier: ^0.81.5
-        version: 0.81.5(@babel/core@7.28.5)
-      '@react-native/metro-config':
-        specifier: ^0.81.5
-        version: 0.81.5(@babel/core@7.28.5)
       '@shikijs/core':
         specifier: 'catalog:'
         version: 3.19.0
@@ -204,6 +195,15 @@ importers:
         specifier: 'catalog:'
         version: 0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     devDependencies:
+      '@react-native/babel-preset':
+        specifier: ^0.81.5
+        version: 0.81.5(@babel/core@7.28.5)
+      '@react-native/codegen':
+        specifier: ^0.81.5
+        version: 0.81.5(@babel/core@7.28.5)
+      '@react-native/metro-config':
+        specifier: ^0.81.5
+        version: 0.81.5(@babel/core@7.28.5)
       '@types/react':
         specifier: 'catalog:'
         version: 19.1.17

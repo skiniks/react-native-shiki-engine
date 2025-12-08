@@ -16,9 +16,6 @@
     "lint:fix": "oxlint . --fix && eslint . --fix"
   },
   "dependencies": {
-    "@react-native/babel-preset": "^0.81.5",
-    "@react-native/codegen": "^0.81.5",
-    "@react-native/metro-config": "^0.81.5",
     "@shikijs/core": "catalog:",
     "@shikijs/engine-oniguruma": "catalog:",
     "@shikijs/langs": "catalog:",
@@ -32,6 +29,9 @@
     "react-native-web": "catalog:"
   },
   "devDependencies": {
+    "@react-native/babel-preset": "^0.81.5",
+    "@react-native/codegen": "^0.81.5",
+    "@react-native/metro-config": "^0.81.5",
     "@types/react": "catalog:",
     "typescript": "catalog:"
   }
