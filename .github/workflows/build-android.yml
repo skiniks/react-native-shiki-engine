@@ -62,30 +62,6 @@ jobs:
       - name: Build Package
         run: pnpm --filter react-native-shiki-engine build
 
-      - name: Debug node_modules structure
-        run: |
-          echo "=== Checking for @react-native/gradle-plugin ==="
-          if [ -d "node_modules/@react-native/gradle-plugin" ]; then
-            echo "✓ Found in examples/react-native/node_modules"
-            ls -la node_modules/@react-native/gradle-plugin/
-          else
-            echo "✗ Not found in examples/react-native/node_modules"
-          fi
-
-          echo ""
-          echo "=== Checking root node_modules ==="
-          if [ -d "../../node_modules/@react-native/gradle-plugin" ]; then
-            echo "✓ Found in root node_modules"
-            ls -la ../../node_modules/@react-native/gradle-plugin/
-          else
-            echo "✗ Not found in root node_modules"
-          fi
-
-          echo ""
-          echo "=== Testing Node resolution ==="
-          node --print "require.resolve('@react-native/gradle-plugin/package.json')" || echo "Failed to resolve"
-        working-directory: examples/react-native
-
       - name: Build Android App
         run: ./gradlew assembleDebug --no-daemon --stacktrace
         working-directory: examples/react-native/android
