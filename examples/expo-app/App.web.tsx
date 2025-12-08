@@ -1,12 +1,12 @@
 import type { ThemedToken } from '@shikijs/core'
+import { TokenDisplay } from '@shared/components/TokenDisplay'
+import { useHighlighter } from '@shared/hooks/useHighlighter'
+import { rustExample } from '@shared/snippets/rust-example'
+import { styles } from '@shared/styles'
 import React, { useEffect, useState } from 'react'
-import { Text, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import { TokenDisplay } from '../shared/components/TokenDisplay'
-import { useHighlighter } from '../shared/hooks/useHighlighter'
-import { rustExample } from '../shared/snippets/rust-example'
-import { styles } from '../shared/styles'
-import { HighlighterProvider } from './src/contexts/highlighter'
+import { HighlighterProvider } from '@/contexts/highlighter'
 
 function ShikiDemo() {
   const [tokens, setTokens] = useState<ThemedToken[][]>([])
@@ -57,7 +57,7 @@ function ShikiDemo() {
         </View>
       </View>
 
-      <View style={styles.demoSection}>
+      <ScrollView style={styles.demoSection} showsVerticalScrollIndicator={false}>
         <Text style={styles.languageTag}>rust</Text>
         {error
           ? (
@@ -68,7 +68,7 @@ function ShikiDemo() {
           : (
               <TokenDisplay tokens={tokens} />
             )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }

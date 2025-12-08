@@ -1,11 +1,11 @@
+import type { HighlighterContextType } from '@shared/contexts/highlighter/context'
 import type { HighlighterCore } from '@shikijs/core'
-import type { HighlighterContextType } from '../../../../shared/contexts/highlighter/context'
+import { HighlighterContext } from '@shared/contexts/highlighter/context'
 import { createHighlighterCore } from '@shikijs/core'
 import rust from '@shikijs/langs/rust'
 import dracula from '@shikijs/themes/dracula'
 import React from 'react'
 import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
-import { HighlighterContext } from '../../../../shared/contexts/highlighter/context'
 
 let highlighterInstance: HighlighterCore | null = null
 let initializationPromise: Promise<void> | null = null

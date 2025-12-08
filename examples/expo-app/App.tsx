@@ -1,13 +1,12 @@
 import type { ThemedToken } from '@shikijs/core'
+import { TokenDisplay } from '@shared/components/TokenDisplay'
+import { useHighlighter } from '@shared/hooks/useHighlighter'
+import { rustExample } from '@shared/snippets/rust-example'
+import { styles } from '@shared/styles'
 import React, { useEffect, useState } from 'react'
-import { Platform, Text, View } from 'react-native'
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { Platform, ScrollView, StatusBar, Text, View } from 'react-native'
 import { isNativeEngineAvailable } from 'react-native-shiki-engine'
-import { TokenDisplay } from '../shared/components/TokenDisplay'
-import { useHighlighter } from '../shared/hooks/useHighlighter'
-import { rustExample } from '../shared/snippets/rust-example'
-import { styles } from '../shared/styles'
-import { HighlighterProvider } from './src/contexts/highlighter'
+import { HighlighterProvider } from '@/contexts/highlighter'
 
 function ShikiDemo() {
   const [engineStatus, setEngineStatus] = useState('Initializing...')
@@ -16,6 +15,7 @@ function ShikiDemo() {
   const highlighter = useHighlighter()
 
   const platformName = Platform.OS === 'web' ? 'Web' : Platform.OS === 'ios' ? 'iOS' : 'Android'
+  const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -53,7 +53,7 @@ function ShikiDemo() {
   }, [highlighter])
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <View style={[styles.container, { paddingTop: statusBarHeight }]}>
       <View style={styles.header}>
         <Text style={styles.title}>React Native Shiki Engine</Text>
         <View style={styles.statusContainer}>
@@ -65,7 +65,7 @@ function ShikiDemo() {
         </View>
       </View>
 
-      <View style={styles.demoSection}>
+      <ScrollView style={styles.demoSection} showsVerticalScrollIndicator={false}>
         <Text style={styles.languageTag}>rust</Text>
         {error
           ? (
@@ -76,17 +76,15 @@ function ShikiDemo() {
           : (
               <TokenDisplay tokens={tokens} />
             )}
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   )
 }
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <HighlighterProvider>
-        <ShikiDemo />
-      </HighlighterProvider>
-    </SafeAreaProvider>
+    <HighlighterProvider>
+      <ShikiDemo />
+    </HighlighterProvider>
   )
 }

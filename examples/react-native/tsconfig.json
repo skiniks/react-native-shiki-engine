@@ -2,7 +2,8 @@
   "extends": "../../packages/react-native-shiki-engine/tsconfig",
   "compilerOptions": {
     "paths": {
-      "react-native-shiki-engine": ["../../packages/react-native-shiki-engine/src/index"]
+      "react-native-shiki-engine": ["../../packages/react-native-shiki-engine/src/index"],
+      "@shared/*": ["../shared/*"]
     }
   },
   "include": ["src"]
