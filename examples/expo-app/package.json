@@ -29,7 +29,7 @@
     "react-native-web": "catalog:"
   },
   "devDependencies": {
-    "@react-native/babel-preset": "^0.81.5",
+    "@react-native/babel-preset": "^0.82.1",
     "@react-native/codegen": "^0.81.5",
     "@react-native/metro-config": "^0.81.5",
     "@types/react": "catalog:",
