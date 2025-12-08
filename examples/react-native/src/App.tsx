@@ -3,7 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { ShikiExampleScreen } from './components'
 import { HighlighterProvider } from './contexts'
 
-function App() {
+export default function App() {
   return (
     <SafeAreaProvider>
       <HighlighterProvider>
@@ -12,5 +12,3 @@ function App() {
     </SafeAreaProvider>
   )
 }
-
-export default App
