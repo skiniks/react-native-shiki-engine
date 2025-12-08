@@ -16,6 +16,12 @@ updates:
           - '*eslint*'
           - '@types/*'
           - typescript
+      shiki:
+        patterns:
+          - '@shikijs/*'
+      turbo:
+        patterns:
+          - turbo
     ignore:
       - dependency-name: react-native
         update-types: ['version-update:semver-major']
@@ -24,7 +30,27 @@ updates:
       prefix-development: chore(dev-deps)
 
   - package-ecosystem: npm
-    directory: /example
+    directory: /packages/react-native-shiki-engine
+    schedule:
+      interval: monthly
+      day: monday
+    versioning-strategy: increase
+    groups:
+      react:
+        patterns:
+          - 'react*'
+          - '@types/react*'
+      shiki:
+        patterns:
+          - '@shikijs/*'
+    ignore:
+      - dependency-name: react-native
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: chore(deps)
+
+  - package-ecosystem: npm
+    directory: /examples/expo-app
     schedule:
       interval: monthly
       day: monday
@@ -33,6 +59,40 @@ updates:
         patterns:
           - 'react*'
           - '@types/react*'
+      expo:
+        patterns:
+          - 'expo*'
+          - '@expo/*'
+    commit-message:
+      prefix: chore(example-expo)
+
+  - package-ecosystem: npm
+    directory: /examples/react-native
+    schedule:
+      interval: monthly
+      day: monday
+    groups:
+      react:
+        patterns:
+          - 'react*'
+          - '@types/react*'
+    ignore:
+      - dependency-name: react-native
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: chore(example-rn)
+
+  - package-ecosystem: npm
+    directory: /examples/shared
+    schedule:
+      interval: monthly
+      day: monday
+    groups:
+      shiki:
+        patterns:
+          - '@shikijs/*'
+    commit-message:
+      prefix: chore(example-shared)
 
   - package-ecosystem: github-actions
     directory: /
@@ -47,17 +107,33 @@ updates:
       prefix: ci
 
   - package-ecosystem: bundler
-    directory: /example/ios
+    directory: /examples/expo-app/ios
     schedule:
       interval: monthly
       day: monday
     commit-message:
-      prefix: chore(ios)
+      prefix: chore(ios-expo)
 
   - package-ecosystem: gradle
-    directory: /example/android
+    directory: /examples/expo-app/android
     schedule:
       interval: monthly
       day: monday
     commit-message:
-      prefix: chore(android)
+      prefix: chore(android-expo)
+
+  - package-ecosystem: bundler
+    directory: /examples/react-native/ios
+    schedule:
+      interval: monthly
+      day: monday
+    commit-message:
+      prefix: chore(ios-rn)
+
+  - package-ecosystem: gradle
+    directory: /examples/react-native/android
+    schedule:
+      interval: monthly
+      day: monday
+    commit-message:
+      prefix: chore(android-rn)
