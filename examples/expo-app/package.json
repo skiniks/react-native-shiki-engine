@@ -23,7 +23,7 @@
     "expo": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-native": "0.81.5",
+    "react-native": "0.82.1",
     "react-native-safe-area-context": "catalog:",
     "react-native-shiki-engine": "workspace:*",
     "react-native-web": "catalog:"
