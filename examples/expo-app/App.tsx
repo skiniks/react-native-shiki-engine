@@ -1,12 +1,12 @@
 import type { ThemedToken } from '@shikijs/core'
+import { TokenDisplay } from '@shared/components/TokenDisplay'
+import { useHighlighter } from '@shared/hooks/useHighlighter'
+import { rustExample } from '@shared/snippets/rust-example'
+import { styles } from '@shared/styles'
 import React, { useEffect, useState } from 'react'
 import { Platform, ScrollView, StatusBar, Text, View } from 'react-native'
 import { isNativeEngineAvailable } from 'react-native-shiki-engine'
-import { TokenDisplay } from '../shared/components/TokenDisplay'
-import { useHighlighter } from '../shared/hooks/useHighlighter'
-import { rustExample } from '../shared/snippets/rust-example'
-import { styles } from '../shared/styles'
-import { HighlighterProvider } from './src/contexts/highlighter'
+import { HighlighterProvider } from '@/contexts/highlighter'
 
 function ShikiDemo() {
   const [engineStatus, setEngineStatus] = useState('Initializing...')

@@ -38,6 +38,7 @@ const config = {
         return acc
       }, {}),
       'react-native-shiki-engine': path.join(workspaceRoot, 'packages/react-native-shiki-engine'),
+      '@shared': path.join(workspaceRoot, 'examples/shared'),
     },
   },
 

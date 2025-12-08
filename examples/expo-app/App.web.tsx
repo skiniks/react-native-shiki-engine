@@ -1,12 +1,12 @@
 import type { ThemedToken } from '@shikijs/core'
+import { TokenDisplay } from '@shared/components/TokenDisplay'
+import { useHighlighter } from '@shared/hooks/useHighlighter'
+import { rustExample } from '@shared/snippets/rust-example'
+import { styles } from '@shared/styles'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import { TokenDisplay } from '../shared/components/TokenDisplay'
-import { useHighlighter } from '../shared/hooks/useHighlighter'
-import { rustExample } from '../shared/snippets/rust-example'
-import { styles } from '../shared/styles'
-import { HighlighterProvider } from './src/contexts/highlighter'
+import { HighlighterProvider } from '@/contexts/highlighter'
 
 function ShikiDemo() {
   const [tokens, setTokens] = useState<ThemedToken[][]>([])
