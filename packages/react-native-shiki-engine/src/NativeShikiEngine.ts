@@ -2,7 +2,6 @@ import type { TurboModule } from 'react-native'
 import { TurboModuleRegistry } from 'react-native'
 
 export interface Spec extends TurboModule {
-  // eslint-disable-next-line ts/no-empty-object-type
   readonly getConstants: () => {}
   readonly createScanner: (patterns: readonly string[], maxCacheSize: number) => number
   readonly findNextMatchSync: (
