@@ -6,7 +6,7 @@ packages:
   - packages/*
   - examples/*
 catalog:
-  '@antfu/eslint-config': ^6.4.2
+  '@antfu/eslint-config': ^6.5.1
   '@babel/core': ^7.28.5
   '@babel/preset-env': ^7.28.5
   '@babel/runtime': ^7.28.4
@@ -28,11 +28,11 @@ catalog:
   babel-plugin-module-resolver: ^5.0.2
   del-cli: ^7.0.0
   eslint: ^9.39.1
-  eslint-plugin-oxlint: ^1.31.0
+  eslint-plugin-oxlint: ^1.32.0
   eslint-plugin-react-hooks: ^7.0.1
   eslint-plugin-react-refresh: ^0.4.24
   expo: ^54.0.27
-  oxlint: ^1.31.0
+  oxlint: ^1.32.0
   react: 19.1.0
   react-dom: 19.1.0
   react-native: 0.82.1
