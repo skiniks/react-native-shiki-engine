@@ -125,15 +125,9 @@ importers:
       '@eslint-react/eslint-plugin':
         specifier: 'catalog:'
         version: 2.3.12(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
-      '@react-native-community/cli':
-        specifier: 'catalog:'
-        version: 20.0.2(typescript@5.9.3)
       '@release-it/conventional-changelog':
         specifier: 'catalog:'
         version: 10.0.2(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.2.1)(release-it@19.0.6(@types/node@24.10.1))
-      del-cli:
-        specifier: 'catalog:'
-        version: 7.0.0
       eslint:
         specifier: 'catalog:'
         version: 9.39.1(jiti@2.6.1)
