@@ -1,5 +1,12 @@
 #pragma once
 
+#include <ReactCommon/CallInvoker.h>
+
+#include <jsi/jsi.h>
+
+#include <memory>
+#include <optional>
+
 #if __has_include(<react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>)
 #  include <react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>
 #elif __has_include(<React-Codegen/NativeShikiEngineSpecJSI.h>)
