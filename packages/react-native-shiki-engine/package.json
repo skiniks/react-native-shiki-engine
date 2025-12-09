@@ -46,7 +46,8 @@
     "src"
   ],
   "scripts": {
-    "prepack": "npm run build",
+    "prepack": "node scripts/resolve-catalog.js && npm run build",
+    "postpack": "mv package.json.backup package.json",
     "build": "npm run build:config && bob build",
     "build:config": "tsc react-native.config.ts --module commonjs --target es2015 --skipLibCheck --esModuleInterop",
     "clean": "del-cli android/app android/build lib build react-native.config.js",
