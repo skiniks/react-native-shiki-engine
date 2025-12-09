@@ -42,12 +42,14 @@
     "apple",
     "cpp",
     "lib",
+    "react-native.config.js",
     "src"
   ],
   "scripts": {
-    "prepack": "bob build",
-    "build": "bob build",
-    "clean": "del-cli android/app android/build lib build",
+    "prepack": "npm run build",
+    "build": "npm run build:config && bob build",
+    "build:config": "tsc react-native.config.ts --module commonjs --target es2015 --skipLibCheck --esModuleInterop",
+    "clean": "del-cli android/app android/build lib build react-native.config.js",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint . && eslint .",
     "lint:fix": "oxlint . --fix && eslint . --fix",
