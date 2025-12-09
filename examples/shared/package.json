@@ -8,12 +8,12 @@
     "lint:fix": "oxlint . --fix && eslint . --fix"
   },
   "dependencies": {
-    "@shikijs/core": "catalog:",
-    "react": "catalog:",
-    "react-native": "catalog:"
+    "@shikijs/core": "^3.19.0",
+    "react": "19.1.0",
+    "react-native": "0.82.1"
   },
   "devDependencies": {
-    "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "@types/react": "~19.1.17",
+    "typescript": "^5.9.3"
   }
 }

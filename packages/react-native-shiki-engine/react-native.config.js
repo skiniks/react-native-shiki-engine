@@ -1,4 +1,7 @@
-const config = {
+/**
+ * @type {import('@react-native-community/cli-types').UserDependencyConfig}
+ */
+module.exports = {
   dependency: {
     platforms: {
       android: {
@@ -9,5 +12,3 @@ const config = {
     },
   },
 }
-
-export default config

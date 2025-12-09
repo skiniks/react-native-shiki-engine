@@ -4,189 +4,78 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-catalogs:
-  default:
-    '@antfu/eslint-config':
-      specifier: ^6.5.1
-      version: 6.5.1
-    '@babel/core':
-      specifier: ^7.28.5
-      version: 7.28.5
-    '@babel/preset-env':
-      specifier: ^7.28.5
-      version: 7.28.5
-    '@babel/runtime':
-      specifier: ^7.28.4
-      version: 7.28.4
-    '@eslint-react/eslint-plugin':
-      specifier: ^2.3.12
-      version: 2.3.12
-    '@react-native-community/cli':
-      specifier: ^20.0.2
-      version: 20.0.2
-    '@react-native-community/cli-platform-android':
-      specifier: ^20.0.2
-      version: 20.0.2
-    '@react-native-community/cli-platform-ios':
-      specifier: ^20.0.2
-      version: 20.0.2
-    '@react-native/babel-preset':
-      specifier: ^0.82.1
-      version: 0.82.1
-    '@react-native/codegen':
-      specifier: ^0.82.1
-      version: 0.82.1
-    '@react-native/metro-config':
-      specifier: ^0.82.1
-      version: 0.82.1
-    '@release-it/conventional-changelog':
-      specifier: ^10.0.2
-      version: 10.0.2
-    '@shikijs/core':
-      specifier: ^3.19.0
-      version: 3.19.0
-    '@shikijs/engine-oniguruma':
-      specifier: ^3.19.0
-      version: 3.19.0
-    '@shikijs/langs':
-      specifier: ^3.19.0
-      version: 3.19.0
-    '@shikijs/themes':
-      specifier: ^3.19.0
-      version: 3.19.0
-    '@shikijs/types':
-      specifier: ^3.19.0
-      version: 3.19.0
-    '@shikijs/vscode-textmate':
-      specifier: ^10.0.2
-      version: 10.0.2
-    '@types/react':
-      specifier: ~19.1.17
-      version: 19.1.17
-    babel-plugin-module-resolver:
-      specifier: ^5.0.2
-      version: 5.0.2
-    del-cli:
-      specifier: ^7.0.0
-      version: 7.0.0
-    eslint:
-      specifier: ^9.39.1
-      version: 9.39.1
-    eslint-plugin-oxlint:
-      specifier: ^1.32.0
-      version: 1.32.0
-    eslint-plugin-react-hooks:
-      specifier: ^7.0.1
-      version: 7.0.1
-    eslint-plugin-react-refresh:
-      specifier: ^0.4.24
-      version: 0.4.24
-    expo:
-      specifier: ^54.0.27
-      version: 54.0.27
-    oxlint:
-      specifier: ^1.32.0
-      version: 1.32.0
-    react:
-      specifier: 19.1.0
-      version: 19.1.0
-    react-dom:
-      specifier: 19.1.0
-      version: 19.1.0
-    react-native:
-      specifier: 0.82.1
-      version: 0.82.1
-    react-native-builder-bob:
-      specifier: ^0.40.16
-      version: 0.40.16
-    react-native-safe-area-context:
-      specifier: ^5.6.2
-      version: 5.6.2
-    react-native-web:
-      specifier: ^0.21.2
-      version: 0.21.2
-    release-it:
-      specifier: ^19.0.6
-      version: 19.0.6
-    turbo:
-      specifier: ^2.6.3
-      version: 2.6.3
-    typescript:
-      specifier: ^5.9.3
-      version: 5.9.3
-
 importers:
 
   .:
     devDependencies:
       '@antfu/eslint-config':
-        specifier: 'catalog:'
+        specifier: ^6.5.1
         version: 6.5.1(@eslint-react/eslint-plugin@2.3.12(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(@vue/compiler-sfc@3.5.25)(eslint-plugin-react-hooks@7.0.1(eslint@9.39.1(jiti@2.6.1)))(eslint-plugin-react-refresh@0.4.24(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       '@eslint-react/eslint-plugin':
-        specifier: 'catalog:'
+        specifier: ^2.3.12
         version: 2.3.12(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       '@release-it/conventional-changelog':
-        specifier: 'catalog:'
+        specifier: ^10.0.2
         version: 10.0.2(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.2.1)(release-it@19.0.6(@types/node@24.10.1))
       eslint:
-        specifier: 'catalog:'
+        specifier: ^9.39.1
         version: 9.39.1(jiti@2.6.1)
       eslint-plugin-oxlint:
-        specifier: 'catalog:'
+        specifier: ^1.32.0
         version: 1.32.0
       eslint-plugin-react-hooks:
-        specifier: 'catalog:'
+        specifier: ^7.0.1
         version: 7.0.1(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react-refresh:
-        specifier: 'catalog:'
+        specifier: ^0.4.24
         version: 0.4.24(eslint@9.39.1(jiti@2.6.1))
       oxlint:
-        specifier: 'catalog:'
+        specifier: ^1.32.0
         version: 1.32.0
       release-it:
-        specifier: 'catalog:'
+        specifier: ^19.0.6
         version: 19.0.6(@types/node@24.10.1)
       turbo:
-        specifier: 'catalog:'
+        specifier: ^2.6.3
         version: 2.6.3
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.9.3
         version: 5.9.3
 
   examples/expo-app:
     dependencies:
       '@shikijs/core':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       '@shikijs/engine-oniguruma':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       '@shikijs/langs':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       '@shikijs/themes':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       expo:
-        specifier: 'catalog:'
+        specifier: ^54.0.27
         version: 54.0.27(@babel/core@7.28.5)(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.81.5(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react:
-        specifier: 'catalog:'
+        specifier: 19.1.0
         version: 19.1.0
       react-dom:
-        specifier: 'catalog:'
+        specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
       react-native:
         specifier: 0.81.5
         version: 0.81.5(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.81.5(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0)
       react-native-safe-area-context:
-        specifier: 'catalog:'
+        specifier: ^5.6.2
         version: 5.6.2(react-native@0.81.5(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.81.5(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-shiki-engine:
         specifier: workspace:*
         version: link:../../packages/react-native-shiki-engine
       react-native-web:
-        specifier: 'catalog:'
+        specifier: ^0.21.2
         version: 0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     devDependencies:
       '@react-native/babel-preset':
@@ -199,118 +88,118 @@ importers:
         specifier: ^0.81.5
         version: 0.81.5(@babel/core@7.28.5)
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ~19.1.17
         version: 19.1.17
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.9.3
         version: 5.9.3
 
   examples/react-native:
     dependencies:
       '@shikijs/core':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       '@shikijs/langs':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       '@shikijs/themes':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       react:
-        specifier: 'catalog:'
+        specifier: 19.1.0
         version: 19.1.0
       react-native:
-        specifier: 'catalog:'
+        specifier: 0.82.1
         version: 0.82.1(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0)
       react-native-safe-area-context:
-        specifier: 'catalog:'
+        specifier: ^5.6.2
         version: 5.6.2(react-native@0.82.1(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-shiki-engine:
         specifier: workspace:*
         version: link:../../packages/react-native-shiki-engine
     devDependencies:
       '@babel/core':
-        specifier: 'catalog:'
+        specifier: ^7.28.5
         version: 7.28.5
       '@babel/preset-env':
-        specifier: 'catalog:'
+        specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.5)
       '@babel/runtime':
-        specifier: 'catalog:'
+        specifier: ^7.28.4
         version: 7.28.4
       '@react-native-community/cli':
-        specifier: 'catalog:'
+        specifier: ^20.0.2
         version: 20.0.2(typescript@5.9.3)
       '@react-native-community/cli-platform-android':
-        specifier: 'catalog:'
+        specifier: ^20.0.2
         version: 20.0.2
       '@react-native-community/cli-platform-ios':
-        specifier: 'catalog:'
+        specifier: ^20.0.2
         version: 20.0.2
       '@react-native/babel-preset':
-        specifier: 'catalog:'
+        specifier: ^0.82.1
         version: 0.82.1(@babel/core@7.28.5)
       '@react-native/codegen':
-        specifier: 'catalog:'
+        specifier: ^0.82.1
         version: 0.82.1(@babel/core@7.28.5)
       '@react-native/metro-config':
-        specifier: 'catalog:'
+        specifier: ^0.82.1
         version: 0.82.1(@babel/core@7.28.5)
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ~19.1.17
         version: 19.1.17
       babel-plugin-module-resolver:
-        specifier: 'catalog:'
+        specifier: ^5.0.2
         version: 5.0.2
 
   examples/shared:
     dependencies:
       '@shikijs/core':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       react:
-        specifier: 'catalog:'
+        specifier: 19.1.0
         version: 19.1.0
       react-native:
-        specifier: 'catalog:'
+        specifier: 0.82.1
         version: 0.82.1(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0)
     devDependencies:
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ~19.1.17
         version: 19.1.17
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.9.3
         version: 5.9.3
 
   packages/react-native-shiki-engine:
     dependencies:
       '@shikijs/types':
-        specifier: 'catalog:'
+        specifier: ^3.19.0
         version: 3.19.0
       '@shikijs/vscode-textmate':
-        specifier: 'catalog:'
+        specifier: ^10.0.2
         version: 10.0.2
     devDependencies:
       '@babel/core':
-        specifier: 'catalog:'
+        specifier: ^7.28.5
         version: 7.28.5
       '@types/react':
-        specifier: 'catalog:'
+        specifier: ~19.1.17
         version: 19.1.17
       del-cli:
-        specifier: 'catalog:'
+        specifier: ^7.0.0
         version: 7.0.0
       react:
-        specifier: 'catalog:'
+        specifier: 19.1.0
         version: 19.1.0
       react-native:
-        specifier: 'catalog:'
+        specifier: 0.82.1
         version: 0.82.1(@babel/core@7.28.5)(@react-native-community/cli@20.0.2(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.28.5))(@types/react@19.1.17)(react@19.1.0)
       react-native-builder-bob:
-        specifier: 'catalog:'
+        specifier: ^0.40.16
         version: 0.40.16
       typescript:
-        specifier: 'catalog:'
+        specifier: ^5.9.3
         version: 5.9.3
 
 packages:
@@ -8092,9 +7981,7 @@ snapshots:
       metro-runtime: 0.83.3
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 

@@ -70,7 +70,6 @@ yarn-error.log
 
 # Build outputs
 lib/
-packages/react-native-shiki-engine/react-native.config.js
 
 # Expo
 .expo/

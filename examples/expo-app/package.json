@@ -16,23 +16,23 @@
     "lint:fix": "oxlint . --fix && eslint . --fix"
   },
   "dependencies": {
-    "@shikijs/core": "catalog:",
-    "@shikijs/engine-oniguruma": "catalog:",
-    "@shikijs/langs": "catalog:",
-    "@shikijs/themes": "catalog:",
-    "expo": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
+    "@shikijs/core": "^3.19.0",
+    "@shikijs/engine-oniguruma": "^3.19.0",
+    "@shikijs/langs": "^3.19.0",
+    "@shikijs/themes": "^3.19.0",
+    "expo": "^54.0.27",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-safe-area-context": "catalog:",
+    "react-native-safe-area-context": "^5.6.2",
     "react-native-shiki-engine": "workspace:*",
-    "react-native-web": "catalog:"
+    "react-native-web": "^0.21.2"
   },
   "devDependencies": {
     "@react-native/babel-preset": "^0.81.5",
     "@react-native/codegen": "^0.81.5",
     "@react-native/metro-config": "^0.81.5",
-    "@types/react": "catalog:",
-    "typescript": "catalog:"
+    "@types/react": "~19.1.17",
+    "typescript": "^5.9.3"
   }
 }

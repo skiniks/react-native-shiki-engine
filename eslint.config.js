@@ -7,11 +7,6 @@ export default antfu(
   {
     rules: {
       'pnpm/yaml-enforce-settings': 'off',
-    },
-  },
-  {
-    files: ['examples/expo-app/package.json'],
-    rules: {
       'pnpm/json-enforce-catalog': 'off',
     },
   },

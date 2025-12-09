@@ -46,11 +46,9 @@
     "src"
   ],
   "scripts": {
-    "prepack": "node scripts/resolve-catalog.js && npm run build",
-    "postpack": "mv package.json.backup package.json",
-    "build": "npm run build:config && bob build",
-    "build:config": "tsc react-native.config.ts --module commonjs --target es2015 --skipLibCheck --esModuleInterop",
-    "clean": "del-cli android/app android/build lib build react-native.config.js",
+    "prepublishOnly": "npm run build",
+    "build": "bob build",
+    "clean": "del-cli android/app android/build lib build",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint . && eslint .",
     "lint:fix": "oxlint . --fix && eslint . --fix",
@@ -61,17 +59,17 @@
     "react-native": "*"
   },
   "dependencies": {
-    "@shikijs/types": "catalog:",
-    "@shikijs/vscode-textmate": "catalog:"
+    "@shikijs/types": "^3.19.0",
+    "@shikijs/vscode-textmate": "^10.0.2"
   },
   "devDependencies": {
-    "@babel/core": "catalog:",
-    "@types/react": "catalog:",
-    "del-cli": "catalog:",
-    "react": "catalog:",
-    "react-native": "catalog:",
-    "react-native-builder-bob": "catalog:",
-    "typescript": "catalog:"
+    "@babel/core": "^7.28.5",
+    "@types/react": "~19.1.17",
+    "del-cli": "^7.0.0",
+    "react": "19.1.0",
+    "react-native": "0.82.1",
+    "react-native-builder-bob": "^0.40.16",
+    "typescript": "^5.9.3"
   },
   "react-native-builder-bob": {
     "source": "src",
