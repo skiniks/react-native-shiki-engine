@@ -32,9 +32,21 @@ Pod::Spec.new do |s|
         "\"$(PODS_ROOT)/Headers/Private/React-Codegen\"",
         "\"$(PODS_ROOT)/Headers/Public/React-Codegen\"",
         "\"$(PODS_ROOT)/Headers/Private/ReactCodegen\"",
-        "\"$(PODS_ROOT)/Headers/Public/ReactCodegen\""
-      ].join(" ")
+        "\"$(PODS_ROOT)/Headers/Public/ReactCodegen\"",
+        # Build dir for manually generated specs (RN 0.71-0.73 workaround)
+        "\"$(PODS_CONFIGURATION_BUILD_DIR)/React-Codegen/React_Codegen.framework/Headers\"",
+        "\"$(PODS_CONFIGURATION_BUILD_DIR)/React-Codegen/React_Codegen.framework/Headers/react/renderer/components/NativeShikiEngineSpec\"",
+        # Manual codegen output directory (RN 0.71-0.73 workaround)
+        # When using: node node_modules/react-native/scripts/generate-codegen-artifacts.js
+        "\"$(PODS_TARGET_SRCROOT)/../../ios/build/generated/ios/build/generated/ios\"",
+        "\"$(PODS_TARGET_SRCROOT)/../../ios/build/generated/build/generated/ios\""
+      ].join(" "),
+      "OTHER_CPLUSPLUSFLAGS" => "$(inherited) -DRCT_NEW_ARCH_ENABLED=1"
     }
+
+    # Ensure React-Codegen dependency for RN 0.71-0.73
+    s.dependency "React-Codegen"
+    s.dependency "ReactCommon/turbomodule/core"
   end
 
   install_modules_dependencies(s)
