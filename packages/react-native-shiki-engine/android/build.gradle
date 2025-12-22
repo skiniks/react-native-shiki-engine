@@ -23,6 +23,37 @@ def isNewArchitectureEnabled() {
   return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
 }
 
+def getReactNativeVersion() {
+  def rnPackageJson = file("${rootProject.projectDir}/../node_modules/react-native/package.json")
+  if (!rnPackageJson.exists()) {
+    return null
+  }
+  def packageJson = new groovy.json.JsonSlurper().parseText(rnPackageJson.text)
+  return packageJson.version
+}
+
+def isReactNativeVersionLessThan(String targetVersion) {
+  def version = getReactNativeVersion()
+  if (version == null) {
+    return false
+  }
+  def versionParts = version.tokenize('.')
+  def targetParts = targetVersion.tokenize('.')
+
+  for (int i = 0; i < Math.min(versionParts.size(), targetParts.size()); i++) {
+    def versionPart = versionParts[i].replaceAll(/[^0-9]/, '').toInteger()
+    def targetPart = targetParts[i].replaceAll(/[^0-9]/, '').toInteger()
+
+    if (versionPart < targetPart) {
+      return true
+    } else if (versionPart > targetPart) {
+      return false
+    }
+  }
+
+  return false
+}
+
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
@@ -93,6 +124,13 @@ android {
             "${project.buildDir}/generated/source/codegen/java",
             "${project.buildDir}/generated/source/codegen/jni"
           ]
+      }
+
+      if (isReactNativeVersionLessThan("0.73.0")) {
+        java {
+          srcDirs += ['src/rn72/java']
+          exclude 'com/shikiengine/ShikiEngineModule.java'
+        }
       }
     }
   }
