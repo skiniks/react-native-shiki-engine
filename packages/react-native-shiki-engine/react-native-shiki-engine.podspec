@@ -42,12 +42,12 @@ Pod::Spec.new do |s|
   if is_rn_73_or_higher
     s.source_files = [
       "cpp/**/*.{cpp,h}",
-      "apple/**/*.{h,mm}",
+      "apple/*.{h,mm}",
     ]
   else
     s.source_files = [
       "cpp/**/*.{cpp,h}",
-      "apple/**/*.{h,mm}",
+      "apple/*.{h,mm}",
     ]
     s.exclude_files = "apple/onLoad.mm"
   end
