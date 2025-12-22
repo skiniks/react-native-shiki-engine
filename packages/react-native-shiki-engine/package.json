@@ -1,6 +1,6 @@
 {
   "name": "react-native-shiki-engine",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Shiki syntax highlighting for React Native. Zero bridge overhead with native Oniguruma regex engine.",
   "author": "Ryan Skinner <hello@ryanskinner.com> (https://github.com/skiniks)",
   "license": "MIT",
