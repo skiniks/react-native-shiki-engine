@@ -33,7 +33,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "oxlint": "^1.32.0",
     "release-it": "^19.0.6",
-    "turbo": "^2.6.3",
+    "turbo": "^2.7.2",
     "typescript": "^5.9.3"
   }
 }
