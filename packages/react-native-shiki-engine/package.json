@@ -64,11 +64,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
-    "@types/react": "~19.1.17",
+    "@types/react": "~19.2.7",
     "del-cli": "^7.0.0",
-    "react": "19.1.0",
-    "react-native": "0.82.1",
-    "react-native-builder-bob": "^0.40.16",
+    "react": "19.2.3",
+    "react-native": "0.83.1",
+    "react-native-builder-bob": "^0.40.17",
     "typescript": "^5.9.3"
   },
   "react-native-builder-bob": {
