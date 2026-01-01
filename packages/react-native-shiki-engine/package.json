@@ -59,7 +59,7 @@
     "react-native": "*"
   },
   "dependencies": {
-    "@shikijs/types": "^3.19.0",
+    "@shikijs/types": "^3.20.0",
     "@shikijs/vscode-textmate": "^10.0.2"
   },
   "devDependencies": {
