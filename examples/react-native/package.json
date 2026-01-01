@@ -11,7 +11,7 @@
     "lint:fix": "oxlint . --fix && eslint . --fix"
   },
   "dependencies": {
-    "@shikijs/core": "^3.19.0",
+    "@shikijs/core": "^3.20.0",
     "@shikijs/langs": "^3.19.0",
     "@shikijs/themes": "^3.19.0",
     "react": "19.1.0",
