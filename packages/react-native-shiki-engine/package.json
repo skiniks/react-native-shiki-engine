@@ -63,7 +63,7 @@
     "@shikijs/vscode-textmate": "^10.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.5",
+    "@babel/core": "^7.29.0",
     "@types/react": "~19.1.17",
     "del-cli": "^7.0.0",
     "react": "19.1.0",
