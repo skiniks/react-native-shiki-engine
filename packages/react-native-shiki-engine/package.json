@@ -59,17 +59,17 @@
     "react-native": "*"
   },
   "dependencies": {
-    "@shikijs/types": "^3.19.0",
-    "@shikijs/vscode-textmate": "^10.0.2"
+    "@shikijs/types": "catalog:shiki",
+    "@shikijs/vscode-textmate": "catalog:shiki"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.5",
-    "@types/react": "~19.1.17",
-    "del-cli": "^7.0.0",
-    "react": "19.1.0",
+    "@babel/core": "catalog:babel",
+    "@types/react": "catalog:types",
+    "del-cli": "catalog:build",
+    "react": "catalog:react",
     "react-native": "0.82.1",
-    "react-native-builder-bob": "^0.40.16",
-    "typescript": "^5.9.3"
+    "react-native-builder-bob": "catalog:build",
+    "typescript": "catalog:types"
   },
   "react-native-builder-bob": {
     "source": "src",
@@ -106,6 +106,7 @@
       "publish": true
     },
     "plugins": {
+      "release-it-pnpm": {},
       "@release-it/conventional-changelog": {
         "preset": {
           "name": "conventionalcommits",
