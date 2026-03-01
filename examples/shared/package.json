@@ -10,7 +10,7 @@
   "dependencies": {
     "@shikijs/core": "catalog:shiki",
     "react": "catalog:react",
-    "react-native": "0.82.1"
+    "react-native": "0.84.1"
   },
   "devDependencies": {
     "@types/react": "catalog:types",
