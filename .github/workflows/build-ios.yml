@@ -80,8 +80,20 @@ jobs:
             ${{ runner.os }}-pods-
 
       - name: Install Pods
-        run: bundle exec pod install
+        shell: bash
         working-directory: examples/react-native/ios
+        run: |
+          set -euo pipefail
+
+          install_pods() {
+            bundle exec pod install
+          }
+
+          if ! install_pods; then
+            echo "::warning::pod install failed; cleaning iOS artifacts and retrying once"
+            rm -rf Pods build
+            install_pods
+          fi
 
       - name: Build App
         run: |
