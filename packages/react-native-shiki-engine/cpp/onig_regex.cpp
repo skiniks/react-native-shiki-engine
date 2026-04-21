@@ -192,8 +192,9 @@ OnigResult* find_next_match(OnigContext* context, const char* text, int start_po
           result->match_end = context->region->end[0];
 
           delete[] result->capture_indices;
-          result->capture_count = context->region->num_regs * 2;
-          result->capture_indices = new int[result->capture_count];
+          // capture_count is the number of capture groups; indices store start/end pairs.
+          result->capture_count = context->region->num_regs;
+          result->capture_indices = new int[result->capture_count * 2];
 
           for (int j = 0; j < context->region->num_regs; j++) {
             result->capture_indices[j * 2] = context->region->beg[j];
