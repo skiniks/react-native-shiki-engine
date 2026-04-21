@@ -106,7 +106,9 @@
       "publish": true
     },
     "plugins": {
-      "release-it-pnpm": {},
+      "release-it-pnpm": {
+        "publishCommand": "pnpm -r publish --access public --no-git-checks --otp ${NPM_OTP} --tag $tag"
+      },
       "@release-it/conventional-changelog": {
         "preset": {
           "name": "conventionalcommits",
