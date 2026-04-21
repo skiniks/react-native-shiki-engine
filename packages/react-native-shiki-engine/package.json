@@ -104,7 +104,7 @@
     },
     "npm": {
       "publish": true,
-      "publishArgs": ["--otp", "${OTP}"]
+      "publishArgs": ["--otp", "${NPM_OTP}"]
     },
     "plugins": {
       "release-it-pnpm": {},
