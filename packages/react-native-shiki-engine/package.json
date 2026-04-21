@@ -103,11 +103,9 @@
       "release": true
     },
     "npm": {
-      "publish": true,
-      "publishArgs": ["--otp", "${NPM_OTP}"]
+      "publish": true
     },
     "plugins": {
-      "release-it-pnpm": {},
       "@release-it/conventional-changelog": {
         "preset": {
           "name": "conventionalcommits",
