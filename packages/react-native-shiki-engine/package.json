@@ -103,9 +103,10 @@
       "release": true
     },
     "npm": {
-      "publish": true
+      "publish": false
     },
     "plugins": {
+      "release-it-pnpm": {},
       "@release-it/conventional-changelog": {
         "preset": {
           "name": "conventionalcommits",
