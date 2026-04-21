@@ -103,7 +103,8 @@
       "release": true
     },
     "npm": {
-      "publish": true
+      "publish": true,
+      "publishArgs": ["--otp", "${OTP}"]
     },
     "plugins": {
       "release-it-pnpm": {},
