@@ -28,7 +28,7 @@
     "@react-native-community/cli-platform-ios": "catalog:react-native-cli",
     "@react-native/babel-preset": "^0.82.1",
     "@react-native/codegen": "^0.82.1",
-    "@react-native/metro-config": "^0.82.1",
+    "@react-native/metro-config": "^0.85.2",
     "@types/react": "catalog:types",
     "babel-plugin-module-resolver": "catalog:babel"
   }
