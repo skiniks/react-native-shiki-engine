@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@react-native/babel-preset": "^0.81.5",
-    "@react-native/codegen": "^0.81.5",
+    "@react-native/codegen": "^0.85.2",
     "@react-native/metro-config": "^0.81.5",
     "@types/react": "catalog:types",
     "typescript": "catalog:types"
