@@ -67,7 +67,7 @@
     "@types/react": "catalog:types",
     "del-cli": "catalog:build",
     "react": "catalog:react",
-    "react-native": "0.82.1",
+    "react-native": "0.85.2",
     "react-native-builder-bob": "catalog:build",
     "typescript": "catalog:types"
   },
