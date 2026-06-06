@@ -124,7 +124,11 @@ OnigContext* create_scanner(const char** patterns, int pattern_count, size_t max
           &regex,
           (const OnigUChar*)patterns[i],
           (const OnigUChar*)(patterns[i] + strlen(patterns[i])),
-          ONIG_OPTION_DEFAULT,
+          // ONIG_OPTION_CAPTURE_GROUP matches vscode-oniguruma: without it,
+          // oniguruma disables numbered captures in any pattern that also
+          // contains named groups, silently breaking TextMate `captures`
+          // scope assignment (tokens lose their colors).
+          ONIG_OPTION_CAPTURE_GROUP,
           ONIG_ENCODING_UTF8,
           ONIG_SYNTAX_DEFAULT,
           &einfo
@@ -151,7 +155,8 @@ OnigContext* create_scanner(const char** patterns, int pattern_count, size_t max
   }
 }
 
-/** Finds leftmost-longest match after start_pos across all patterns. */
+/** Finds the leftmost match after start_pos across all patterns;
+ *  position ties are won by the lowest pattern index (TextMate priority). */
 OnigResult* find_next_match(OnigContext* context, const char* text, int start_pos) {
   if (!context || !text || start_pos < 0) {
     return nullptr;
@@ -167,7 +172,6 @@ OnigResult* find_next_match(OnigContext* context, const char* text, int start_po
 
     int text_length = strlen(text);
     int best_match_pos = -1;
-    int best_match_len = -1;
 
     for (int i = 0; i < context->pattern_count; i++) {
       onig_region_clear(context->region);
@@ -183,10 +187,12 @@ OnigResult* find_next_match(OnigContext* context, const char* text, int start_po
       );
 
       if (match_pos >= 0) {
-        if (best_match_pos < 0 || match_pos < best_match_pos ||
-            (match_pos == best_match_pos && context->region->end[0] - context->region->beg[0] > best_match_len)) {
+        // vscode-oniguruma contract: pick the LEFTMOST match; ties (same
+        // position) are won by the LOWEST pattern index — TextMate rule
+        // order is rule priority. Never tie-break by match length: that
+        // lets later rules steal matches and assigns wrong scopes.
+        if (best_match_pos < 0 || match_pos < best_match_pos) {
           best_match_pos = match_pos;
-          best_match_len = context->region->end[0] - context->region->beg[0];
           result->pattern_index = i;
           result->match_start = context->region->beg[0];
           result->match_end = context->region->end[0];
@@ -199,6 +205,12 @@ OnigResult* find_next_match(OnigContext* context, const char* text, int start_po
           for (int j = 0; j < context->region->num_regs; j++) {
             result->capture_indices[j * 2] = context->region->beg[j];
             result->capture_indices[j * 2 + 1] = context->region->end[j];
+          }
+
+          // Nothing can match earlier than start_pos; later patterns could
+          // only tie and ties keep the current (earlier) pattern.
+          if (best_match_pos == start_pos) {
+            break;
           }
         }
       }
