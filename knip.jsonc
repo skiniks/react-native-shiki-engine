@@ -24,7 +24,6 @@
     // C++ formatter installed via apt in CI, not an npm package
     "clang-format-16",
     // Shell scripts for local/CI linting, invoked directly
-    "scripts/clang-format.sh",
-    "scripts/ktlint.sh"
+    "scripts/clang-format.sh"
   ]
 }
