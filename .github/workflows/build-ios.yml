@@ -84,6 +84,6 @@ jobs:
             -scheme ShikiEngineExample \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'generic/platform=iOS Simulator' \
             build
         working-directory: examples/react-native/ios

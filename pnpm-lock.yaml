@@ -9,6 +9,9 @@ catalogs:
     '@babel/core':
       specifier: ^7.29.7
       version: 7.29.7
+    '@babel/runtime':
+      specifier: ^7.29.7
+      version: 7.29.7
     babel-plugin-module-resolver:
       specifier: ^5.0.3
       version: 5.0.3
@@ -55,6 +58,9 @@ catalogs:
       specifier: ^0.85.3
       version: 0.85.3
     '@react-native/codegen':
+      specifier: ^0.85.3
+      version: 0.85.3
+    '@react-native/gradle-plugin':
       specifier: ^0.85.3
       version: 0.85.3
     '@react-native/metro-config':
@@ -198,6 +204,9 @@ importers:
 
   examples/react-native:
     dependencies:
+      '@babel/runtime':
+        specifier: catalog:babel
+        version: 7.29.7
       '@shikijs/core':
         specifier: catalog:shiki
         version: 4.2.0
@@ -238,6 +247,9 @@ importers:
       '@react-native/codegen':
         specifier: catalog:react
         version: 0.85.3(@babel/core@7.29.7)
+      '@react-native/gradle-plugin':
+        specifier: catalog:react
+        version: 0.85.3
       '@react-native/metro-config':
         specifier: catalog:react
         version: 0.85.3(@babel/core@7.29.7)
@@ -1851,6 +1863,10 @@ packages:
 
   '@react-native/gradle-plugin@0.85.2':
     resolution: {integrity: sha512-YXBOLeAqFrv7XwUeBPTKZeOV1FIxn4AW7UAEitScf3ibC8bu8+6NpJu4HWgbNQHg7vDbbTZVbcOl8EwGxsSq2w==}
+    engines: {node: ^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0}
+
+  '@react-native/gradle-plugin@0.85.3':
+    resolution: {integrity: sha512-39dY2j50Q1pntejzwt3XL7vwXtrj8jcIfHq6E+gyu3jzYxZJVvMkMutQ39vSg6zinIQOX36oQDhidXUbCXzgoA==}
     engines: {node: ^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0}
 
   '@react-native/js-polyfills@0.85.2':
@@ -7970,6 +7986,8 @@ snapshots:
       - utf-8-validate
 
   '@react-native/gradle-plugin@0.85.2': {}
+
+  '@react-native/gradle-plugin@0.85.3': {}
 
   '@react-native/js-polyfills@0.85.2': {}
 

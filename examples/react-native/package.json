@@ -11,6 +11,7 @@
     "lint:fix": "oxlint . --fix && eslint . --fix"
   },
   "dependencies": {
+    "@babel/runtime": "catalog:babel",
     "@shikijs/core": "catalog:shiki",
     "@shikijs/langs": "catalog:shiki",
     "@shikijs/themes": "catalog:shiki",
@@ -26,6 +27,7 @@
     "@react-native-community/cli-platform-ios": "catalog:react-native-cli",
     "@react-native/babel-preset": "catalog:react",
     "@react-native/codegen": "catalog:react",
+    "@react-native/gradle-plugin": "catalog:react",
     "@react-native/metro-config": "catalog:react",
     "@types/react": "catalog:types",
     "babel-plugin-module-resolver": "catalog:babel"
