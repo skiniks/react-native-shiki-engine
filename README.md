@@ -3,7 +3,7 @@
 Oniguruma regex engine implementation for React Native, providing high-performance syntax highlighting capabilities through [Shiki](https://github.com/shikijs/shiki). This module implements a JSI-based native bridge to Oniguruma, enabling efficient pattern matching and syntax highlighting in React Native applications.
 
 > [!IMPORTANT]
-> React Native Shiki Engine requires the New Architecture to be enabled (react-native 0.71+)
+> React Native Shiki Engine requires the New Architecture to be enabled (react-native 0.73+)
 
 ## Features
 
@@ -21,14 +21,14 @@ Oniguruma regex engine implementation for React Native, providing high-performan
 ### React Native
 
 ```sh
-yarn add react-native-shiki-engine @shikijs/core
+pnpm add react-native-shiki-engine @shikijs/core
 cd ios && pod install
 ```
 
 You'll also need to install the languages and themes you want to use:
 
 ```sh
-yarn add @shikijs/langs @shikijs/themes
+pnpm add @shikijs/langs @shikijs/themes
 ```
 
 ### Expo

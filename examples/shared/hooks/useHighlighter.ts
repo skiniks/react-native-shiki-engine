@@ -1,6 +1,6 @@
-import type { HighlighterContextType } from '../contexts'
+import type { HighlighterContextType } from '../contexts/highlighter/context'
 import { use } from 'react'
-import { HighlighterContext } from '../contexts'
+import { HighlighterContext } from '../contexts/highlighter/context'
 
 export function useHighlighter(): HighlighterContextType {
   const context = use(HighlighterContext)

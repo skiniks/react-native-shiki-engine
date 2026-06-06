@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "jsx": "react-native",
+    "rootDir": "src",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,

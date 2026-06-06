@@ -1,5 +1,8 @@
 {
   "extends": "../../packages/react-native-shiki-engine/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
   "include": [
     "**/*.ts",
     "**/*.tsx"

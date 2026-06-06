@@ -38,6 +38,7 @@
   "types": "lib/typescript/index.d.ts",
   "files": [
     "*.podspec",
+    "README.md",
     "android",
     "apple",
     "cpp",
@@ -46,7 +47,7 @@
     "src"
   ],
   "scripts": {
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "cp ../../README.md ../../LICENSE . && npm run build",
     "build": "bob build",
     "clean": "del-cli android/app android/build lib build",
     "typecheck": "tsc --noEmit",
@@ -67,7 +68,7 @@
     "@types/react": "catalog:types",
     "del-cli": "catalog:build",
     "react": "catalog:react",
-    "react-native": "0.82.1",
+    "react-native": "catalog:react",
     "react-native-builder-bob": "catalog:build",
     "typescript": "catalog:types"
   },

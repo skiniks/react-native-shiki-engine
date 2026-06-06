@@ -1,3 +1,4 @@
+/* oxlint-disable no-undef */
 import type { PatternScanner, RegexEngine } from '@shikijs/types'
 import type { IOnigMatch, OnigString } from '@shikijs/vscode-textmate'
 import { TurboModuleRegistry } from 'react-native'
