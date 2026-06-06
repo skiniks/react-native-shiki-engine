@@ -1,9 +1,6 @@
 ---
 BasedOnStyle: Google
 ColumnLimit: 120
-IndentWidth: 2
-TabWidth: 2
-UseTab: Never
 MaxEmptyLinesToKeep: 1
 BinPackArguments: false
 BinPackParameters: false
@@ -11,14 +8,9 @@ PointerAlignment: Left
 IndentPPDirectives: AfterHash
 AlignTrailingComments: false
 AllowShortFunctionsOnASingleLine: Empty
-SpaceAfterCStyleCast: false
-SpaceAfterLogicalNot: false
 SpaceBeforeRangeBasedForLoopColon: true
-
 Language: Cpp
-Standard: c++17
-
-SortIncludes: true
+Standard: c++20
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '^<React.*/'
@@ -31,38 +23,21 @@ IncludeCategories:
     Priority: 4
   - Regex: '.*'
     Priority: 5
-
 ReferenceAlignment: Left
 AlignAfterOpenBracket: BlockIndent
 AlignOperands: false
-ExperimentalAutoDetectBinPacking: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowAllArgumentsOnNextLine: false
 PenaltyBreakBeforeFirstCallParameter: 1
 AlignConsecutiveMacros: Consecutive
 ContinuationIndentWidth: 2
-AlwaysBreakTemplateDeclarations: Yes
-BreakBeforeBraces: Attach
-BraceWrapping:
-  AfterFunction: false
-  AfterClass: false
-  AfterNamespace: false
-  AfterStruct: false
-  BeforeCatch: false
-  BeforeElse: false
-  AfterExternBlock: false
 BreakConstructorInitializers: BeforeColon
 ConstructorInitializerIndentWidth: 2
 AccessModifierOffset: -1
 EmptyLineBeforeAccessModifier: LogicalBlock
-ReflowComments: true
 CommentPragmas: '^ NOLINT'
-DerivePointerAlignment: false
-SpaceAfterTemplateKeyword: true
-FixNamespaceComments: true
 NamespaceIndentation: Inner
 IndentExternBlock: AfterExternBlock
-
 StatementMacros:
   - 'RCT_EXPORT_METHOD'
   - 'RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD'
@@ -72,16 +47,13 @@ StatementMacros:
 WhitespaceSensitiveMacros:
   - 'RCT_EXPORT_MODULE'
   - 'RCT_EXTERN_MODULE'
-
 ---
 Language: ObjC
-
 ObjCBinPackProtocolList: Never
 ObjCBlockIndentWidth: 2
 ObjCBreakBeforeNestedBlockParam: true
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
-
 StatementMacros:
   - 'RCT_EXPORT_METHOD'
   - 'RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD'
