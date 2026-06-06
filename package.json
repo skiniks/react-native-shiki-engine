@@ -32,7 +32,6 @@
     "eslint-plugin-react-refresh": "catalog:eslint",
     "oxlint": "catalog:eslint",
     "release-it": "catalog:build",
-    "release-it-pnpm": "catalog:build",
     "turbo": "catalog:build",
     "typescript": "catalog:types"
   }

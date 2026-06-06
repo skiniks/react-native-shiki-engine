@@ -38,6 +38,7 @@
   "types": "lib/typescript/index.d.ts",
   "files": [
     "*.podspec",
+    "LICENSE",
     "README.md",
     "android",
     "apple",
@@ -98,18 +99,16 @@
   "release-it": {
     "git": {
       "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
+      "tagName": "v${version}",
+      "pushRepo": "origin"
     },
     "github": {
-      "release": true
+      "release": false
     },
     "npm": {
-      "publish": true
+      "publish": false
     },
     "plugins": {
-      "release-it-pnpm": {
-        "publishCommand": "pnpm pack && npm publish *.tgz --access public --tag $tag"
-      },
       "@release-it/conventional-changelog": {
         "preset": {
           "name": "conventionalcommits",

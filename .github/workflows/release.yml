@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '22'
+
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          cache: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm --filter react-native-shiki-engine build
+
+      - name: Prepare package
+        working-directory: packages/react-native-shiki-engine
+        run: |
+          cp ../../README.md .
+          cp ../../LICENSE .
+
+      - name: Publish to npm
+        working-directory: packages/react-native-shiki-engine
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          IS_PRERELEASE=$(node -e "process.stdout.write('${VERSION}'.includes('-') ? 'true' : 'false');")
+
+          # pnpm pack resolves catalog: protocols
+          TARBALL=$(pnpm pack | tail -1)
+          echo "Packed: ${TARBALL}"
+
+          if [[ "${IS_PRERELEASE}" == "true" ]]; then
+            echo "Publishing ${VERSION} with tag 'next'..."
+            npm publish "${TARBALL}" --access public --tag next
+          else
+            echo "Publishing ${VERSION} with tag 'latest'..."
+            npm publish "${TARBALL}" --access public
+          fi
+
+      - name: Create GitHub Release
+        run: gh release create "${{ github.ref_name }}" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
