@@ -110,7 +110,7 @@
     },
     "plugins": {
       "release-it-pnpm": {
-        "publishCommand": "pnpm -r publish --access public --no-git-checks --ignore-scripts --otp $NPM_OTP --tag $tag"
+        "publishCommand": "pnpm pack && npm publish *.tgz --access public --tag $tag"
       },
       "@release-it/conventional-changelog": {
         "preset": {
