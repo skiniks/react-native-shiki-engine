@@ -9,14 +9,6 @@ runs:
       with:
         cache: true
 
-    - name: Cache turbo
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-      with:
-        path: .turbo
-        key: ${{ runner.os }}-turbo-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-turbo-
-
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       shell: bash

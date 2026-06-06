@@ -16,7 +16,6 @@
   "ignorePatterns": [
     "**/.DS_Store",
     "**/.idea",
-    "**/.turbo/",
     "**/.expo/",
     "**/.gradle",
     "**/.cxx/",

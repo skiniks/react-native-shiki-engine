@@ -11,15 +11,15 @@
   },
   "scripts": {
     "postinstall": "git submodule update --init --recursive packages/react-native-shiki-engine/third_party/oniguruma",
-    "clean": "rm -rf node_modules .idea .pnpm-store .turbo && find packages examples -type d \\( -name node_modules -o -name lib -o -name build -o -name Pods -o -name .gradle -o -name vendor -o -name .cxx -o -name .turbo -o -name .expo \\) -prune -exec rm -rf {} + && rm -rf examples/expo-app/android examples/expo-app/ios",
+    "clean": "rm -rf node_modules .idea .pnpm-store && find packages examples -type d \\( -name node_modules -o -name lib -o -name build -o -name Pods -o -name .gradle -o -name vendor -o -name .cxx -o -name .expo \\) -prune -exec rm -rf {} + && rm -rf examples/expo-app/android examples/expo-app/ios",
     "update:submodule": "git submodule update --remote --merge",
-    "typecheck": "turbo typecheck",
-    "lint": "turbo lint",
-    "lint:fix": "turbo lint:fix",
+    "build": "pnpm --filter react-native-shiki-engine build",
+    "typecheck": "pnpm --filter react-native-shiki-engine build && pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix",
     "lint:cpp": "scripts/clang-format.sh",
     "lint:all": "pnpm lint:fix && pnpm lint:cpp",
-    "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "pnpm -r --parallel run dev",
     "release": "pnpm --filter react-native-shiki-engine release"
   },
   "devDependencies": {
@@ -31,7 +31,6 @@
     "eslint-plugin-react-refresh": "catalog:eslint",
     "oxlint": "catalog:eslint",
     "release-it": "catalog:build",
-    "turbo": "catalog:build",
     "typescript": "catalog:types"
   }
 }

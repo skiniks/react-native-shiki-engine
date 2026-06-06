@@ -22,7 +22,6 @@ catalogs:
     del-cli: ^7.0.0
     react-native-builder-bob: ^0.41.0
     release-it: ^20.2.0
-    turbo: ^2.9.16
   eslint:
     '@antfu/eslint-config': ^9.0.0
     '@eslint-react/eslint-plugin': ^5.8.12
