@@ -40,6 +40,7 @@ updates:
       - dependency-name: react-native-safe-area-context
       - dependency-name: react-native-web
       - dependency-name: '@types/react'
+      - dependency-name: '@babel/runtime'
     commit-message:
       prefix: chore(deps)
 
