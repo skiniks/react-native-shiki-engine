@@ -47,7 +47,6 @@
     "src"
   ],
   "scripts": {
-    "prepublishOnly": "bob build",
     "build": "bob build",
     "clean": "del-cli android/app android/build lib build",
     "typecheck": "tsc --noEmit",
@@ -97,7 +96,7 @@
   },
   "release-it": {
     "hooks": {
-      "before:release": "cp ../../README.md ../../LICENSE ."
+      "before:release": "cp ../../README.md ../../LICENSE . && bob build"
     },
     "git": {
       "commitMessage": "chore: release ${version}",
@@ -111,7 +110,7 @@
     },
     "plugins": {
       "release-it-pnpm": {
-        "publishCommand": "pnpm -r publish --access public --no-git-checks --otp $NPM_OTP --tag $tag"
+        "publishCommand": "pnpm -r publish --access public --no-git-checks --ignore-scripts --otp $NPM_OTP --tag $tag"
       },
       "@release-it/conventional-changelog": {
         "preset": {
