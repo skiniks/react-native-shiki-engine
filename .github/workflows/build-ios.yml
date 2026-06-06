@@ -84,6 +84,8 @@ jobs:
             -scheme ShikiEngineExample \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            CODE_SIGNING_ALLOWED=NO \
+            SKIP_BUNDLING=1 \
             build
         working-directory: examples/react-native/ios
