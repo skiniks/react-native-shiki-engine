@@ -1,6 +1,6 @@
-import type { HighlighterContextType } from '@shared/contexts'
+import type { HighlighterContextType } from '@shared/contexts/highlighter/context'
 import type { HighlighterCore } from '@shikijs/core'
-import { HighlighterContext } from '@shared/contexts'
+import { HighlighterContext } from '@shared/contexts/highlighter/context'
 import { createHighlighterCore } from '@shikijs/core'
 import rust from '@shikijs/langs/rust'
 import dracula from '@shikijs/themes/dracula'

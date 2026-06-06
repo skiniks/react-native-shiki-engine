@@ -1,0 +1,30 @@
+{
+  "ignore": [
+    // Platform-specific files resolved by Metro's .web.tsx extension
+    "examples/expo-app/App.web.tsx",
+    // Used by Metro/Expo at build time for Babel configuration
+    "examples/expo-app/babel.config.js"
+  ],
+  "ignoreDependencies": [
+    // Required at runtime by Metro bundler for Babel helpers (interopRequireDefault, etc.)
+    "@babel/runtime",
+    // Used by React Native CLI codegen during native builds, not imported in JS
+    "@react-native/codegen",
+    // Used by Android Gradle settings.gradle to resolve the RN build plugin
+    "@react-native/gradle-plugin",
+    // Expo plugins referenced in app.json, managed by expo prebuild
+    "expo-updates",
+    "expo-system-ui",
+    // Transitive dep of @react-native/metro-config, used for type import in metro.config.js
+    "metro-config",
+    // Used only for JSDoc type annotation in react-native.config.js
+    "@react-native-community/cli-types"
+  ],
+  "ignoreBinaries": [
+    // C++ formatter installed via apt in CI, not an npm package
+    "clang-format-16",
+    // Shell scripts for local/CI linting, invoked directly
+    "scripts/clang-format.sh",
+    "scripts/ktlint.sh"
+  ]
+}

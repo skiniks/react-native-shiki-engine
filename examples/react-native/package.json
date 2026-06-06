@@ -11,24 +11,24 @@
     "lint:fix": "oxlint . --fix && eslint . --fix"
   },
   "dependencies": {
+    "@babel/runtime": "catalog:babel",
     "@shikijs/core": "catalog:shiki",
     "@shikijs/langs": "catalog:shiki",
     "@shikijs/themes": "catalog:shiki",
     "react": "catalog:react",
-    "react-native": "0.82.1",
+    "react-native": "catalog:react",
     "react-native-safe-area-context": "catalog:react",
     "react-native-shiki-engine": "workspace:*"
   },
   "devDependencies": {
     "@babel/core": "catalog:babel",
-    "@babel/preset-env": "catalog:babel",
-    "@babel/runtime": "catalog:babel",
     "@react-native-community/cli": "catalog:react-native-cli",
     "@react-native-community/cli-platform-android": "catalog:react-native-cli",
     "@react-native-community/cli-platform-ios": "catalog:react-native-cli",
-    "@react-native/babel-preset": "^0.82.1",
-    "@react-native/codegen": "^0.82.1",
-    "@react-native/metro-config": "^0.82.1",
+    "@react-native/babel-preset": "catalog:react",
+    "@react-native/codegen": "catalog:react",
+    "@react-native/gradle-plugin": "catalog:react",
+    "@react-native/metro-config": "catalog:react",
     "@types/react": "catalog:types",
     "babel-plugin-module-resolver": "catalog:babel"
   }
