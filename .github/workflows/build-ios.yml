@@ -32,6 +32,10 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Create Node.js symlink
+        run: |
+          sudo ln -sf "$(which node)" /usr/local/bin/node
+
       - name: Setup pnpm
         uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
         with:
@@ -85,7 +89,6 @@ jobs:
             -sdk iphonesimulator \
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 16' \
-            CODE_SIGNING_ALLOWED=NO \
             SKIP_BUNDLING=1 \
             build
         working-directory: examples/react-native/ios
