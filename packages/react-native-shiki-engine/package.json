@@ -47,7 +47,7 @@
     "src"
   ],
   "scripts": {
-    "prepublishOnly": "cp ../../README.md ../../LICENSE . && npm run build",
+    "prepublishOnly": "bob build",
     "build": "bob build",
     "clean": "del-cli android/app android/build lib build",
     "typecheck": "tsc --noEmit",
@@ -96,6 +96,9 @@
     "jsSrcsDir": "src"
   },
   "release-it": {
+    "hooks": {
+      "before:release": "cp ../../README.md ../../LICENSE ."
+    },
     "git": {
       "commitMessage": "chore: release ${version}",
       "tagName": "v${version}"
