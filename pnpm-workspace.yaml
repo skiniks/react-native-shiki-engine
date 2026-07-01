@@ -14,7 +14,7 @@ packages:
   - examples/*
 catalogs:
   babel:
-    '@babel/core': ^7.29.7
+    '@babel/core': ^8.0.1
     '@babel/runtime': ^7.29.7
     babel-plugin-module-resolver: ^5.0.3
   build:
