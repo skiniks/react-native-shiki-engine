@@ -19,7 +19,7 @@ catalogs:
     babel-plugin-module-resolver: ^5.0.3
   build:
     '@release-it/conventional-changelog': ^11.0.1
-    react-native-builder-bob: ^0.41.0
+    react-native-builder-bob: ^0.43.0
     release-it: ^20.2.0
   eslint:
     '@antfu/eslint-config': ^9.0.0
