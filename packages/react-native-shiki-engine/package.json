@@ -16,6 +16,15 @@
     "react-native",
     "ios",
     "android",
+    "macos",
+<<<<<<< HEAD
+<<<<<<< HEAD
+    "windows",
+=======
+>>>>>>> b3ac321 (.)
+=======
+    "windows",
+>>>>>>> a406944 (add Windows support)
     "shiki",
     "oniguruma",
     "regex",
@@ -45,6 +54,7 @@
     "apple",
     "cpp",
     "lib",
+    "windows",
     "react-native.config.js",
     "src"
   ],
@@ -61,10 +71,25 @@
     "@shikijs/types": "^4.0.0",
     "@shikijs/vscode-textmate": "^10.0.0",
     "react": ">=19.0.0",
-    "react-native": ">=0.73.0"
+    "react-native": ">=0.73.0",
+<<<<<<< HEAD
+<<<<<<< HEAD
+    "react-native-macos": ">=0.73.0",
+=======
+>>>>>>> a406944 (add Windows support)
+=======
+    "react-native-macos": ">=0.73.0",
+>>>>>>> 8ae31ef (cleanup messes which made while testings)
+    "react-native-windows": ">=0.73.0"
   },
   "peerDependenciesMeta": {
     "@shikijs/core": {
+      "optional": true
+    },
+    "react-native-macos": {
+      "optional": true
+    },
+    "react-native-windows": {
       "optional": true
     }
   },
@@ -109,7 +134,12 @@
   "codegenConfig": {
     "name": "NativeShikiEngineSpec",
     "type": "modules",
-    "jsSrcsDir": "src"
+    "jsSrcsDir": "src",
+    "windows": {
+      "namespace": "ShikiEngineCodegen",
+      "outputDirectory": "windows/ShikiEngine/codegen",
+      "separateDataTypes": true
+    }
   },
   "release-it": {
     "git": {

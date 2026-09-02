@@ -4,7 +4,11 @@
 
 #if __has_include(<ReactCommon/CxxTurboModuleUtils.h>)
 #import <ReactCommon/CxxTurboModuleUtils.h>
+#if !TARGET_OS_OSX
 #import <UIKit/UIKit.h>
+#else
+#import <AppKit/AppKit.h>
+#endif
 
 @interface OnLoad : NSObject
 @end
@@ -18,7 +22,7 @@
         return std::make_shared<facebook::react::NativeShikiEngineModule>(
             jsInvoker);
       });
-
+	#if !TARGET_OS_OSX
   [[NSNotificationCenter defaultCenter]
       addObserverForName:UIApplicationDidReceiveMemoryWarningNotification
                   object:nil
@@ -26,6 +30,7 @@
               usingBlock:^(__unused NSNotification *note) {
                 clear_unused_pattern_cache();
               }];
+	#endif
 }
 
 @end
@@ -33,7 +38,11 @@
 #else
 #import <React/RCTBridgeModule.h>
 #import <ReactCommon/RCTTurboModule.h>
+#if !TARGET_OS_OSX
 #import <UIKit/UIKit.h>
+#else
+#import <AppKit/AppKit.h>
+#endif
 
 @interface ShikiEngine : NSObject <RCTBridgeModule, RCTTurboModule>
 @end
@@ -43,6 +52,7 @@
 RCT_EXPORT_MODULE(ShikiEngine)
 
 + (void)initialize {
+	#if !TARGET_OS_OSX
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     [[NSNotificationCenter defaultCenter]
@@ -53,6 +63,7 @@ RCT_EXPORT_MODULE(ShikiEngine)
                   clear_unused_pattern_cache();
                 }];
   });
+  #endif
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:

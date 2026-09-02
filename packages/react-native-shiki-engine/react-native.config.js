@@ -9,6 +9,13 @@ module.exports = {
         cxxModuleCMakeListsPath: 'CMakeLists.txt',
         cxxModuleHeaderName: 'NativeShikiEngineModule',
       },
+      windows: {
+        sourceDir: 'windows',
+        solutionFile: 'ShikiEngine.sln',
+        project: {
+          projectFile: 'ShikiEngine\\ShikiEngine.vcxproj'
+        }
+      }
     },
   },
 }
