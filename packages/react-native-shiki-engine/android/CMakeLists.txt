@@ -4,9 +4,12 @@ project(ReactNativeShikiEngine)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Find prebuilt oniguruma library
+# NO_DEFAULT_PATH keeps the search to the bundled jniLibs. Without it, a host
+# libonig (e.g. /usr/lib/libonig.so on Linux) is found first and the link fails.
 find_library(LOG_LIB log)
 find_library(ONIG_LIB onig
     PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}
+    NO_DEFAULT_PATH
     NO_CMAKE_FIND_ROOT_PATH
     REQUIRED
 )
