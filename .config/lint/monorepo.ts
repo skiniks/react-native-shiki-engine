@@ -56,5 +56,11 @@ export const monorepoLint: OxlintConfig = {
         'no-console': 'off',
       },
     },
+    {
+      files: ['packages/react-native-shiki-engine/src/NativeShikiEngine.ts'],
+      rules: {
+        'typescript/no-empty-object-type': 'off',
+      },
+    },
   ],
 }

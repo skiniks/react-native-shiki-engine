@@ -14,6 +14,18 @@ export NO_FLIPPER=1
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# json 3.0 removed the quirks_mode option that ActiveSupport::JSON.decode still
+# passes, which surfaces as: Invalid Podfile file: unknown keyword: quirks_mode.
+patch_gemfile_json_pin() {
+  local gemfile="$1"
+  if grep -q "gem ['\"]json['\"]" "$gemfile"; then
+    echo "Gemfile already pins json: $gemfile"
+    return 0
+  fi
+  printf "\n# Pin json < 3: ActiveSupport still passes quirks_mode to JSON.parse\ngem 'json', '< 3'\n" >> "$gemfile"
+  echo "Pinned json < 3 in $gemfile"
+}
+
 # Xcode 26+ / Apple Clang rejects fmt 11.x consteval (RN 0.81 and earlier).
 # Force those pods to C++17 + FMT_USE_CONSTEVAL=0.
 patch_podfile_fmt_xcode26() {
@@ -54,6 +66,7 @@ PY
 }
 
 cd "$RN_SHIKI_COMPAT_APP_DIR"
+patch_gemfile_json_pin "$RN_SHIKI_COMPAT_APP_DIR/Gemfile"
 bundle install
 cd "$RN_SHIKI_COMPAT_IOS_DIR"
 patch_podfile_fmt_xcode26 "$RN_SHIKI_COMPAT_IOS_DIR/Podfile"

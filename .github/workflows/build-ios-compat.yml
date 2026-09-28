@@ -13,7 +13,7 @@ on:
       - packages/react-native-shiki-engine/package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
-      - scripts/ci/**
+      - .github/scripts/**
   pull_request:
     paths:
       - .github/workflows/build-ios-compat.yml
@@ -23,7 +23,7 @@ on:
       - packages/react-native-shiki-engine/package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
-      - scripts/ci/**
+      - .github/scripts/**
 
 permissions:
   contents: read
@@ -60,7 +60,7 @@ jobs:
           sudo ln -sf "$(which node)" /usr/local/bin/node
 
       - name: Setup Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:
           ruby-version: '3.2'
           bundler-cache: false
@@ -70,4 +70,4 @@ jobs:
           CI: true
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
-        run: bash scripts/ci/ios-compat.sh "${{ matrix.rn-version }}"
+        run: bash .github/scripts/ios-compat.sh "${{ matrix.rn-version }}"
