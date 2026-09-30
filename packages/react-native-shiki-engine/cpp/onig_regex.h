@@ -1,7 +1,7 @@
 #ifndef ONIG_REGEX_H
 #define ONIG_REGEX_H
 
-#include <oniguruma.h>
+#include "oniguruma.h"
 #include <stddef.h>
 #include <stdint.h>
 
