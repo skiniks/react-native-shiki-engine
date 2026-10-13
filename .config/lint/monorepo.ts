@@ -57,7 +57,7 @@ export const monorepoLint: OxlintConfig = {
       },
     },
     {
-      files: ['packages/react-native-shiki-engine/src/NativeShikiEngine.ts'],
+      files: ['**/NativeShikiEngine.ts'],
       rules: {
         'typescript/no-empty-object-type': 'off',
       },

@@ -2,14 +2,17 @@
 
 #include "onig_regex.h"
 
-#if __has_include(<ReactCommon/CxxTurboModuleUtils.h>)
-#import <ReactCommon/CxxTurboModuleUtils.h>
+#import <React/RCTBridgeModule.h>
+#import <ReactCommon/RCTTurboModule.h>
 #import <UIKit/UIKit.h>
 
-@interface OnLoad : NSObject
+#if __has_include(<ReactCommon/CxxTurboModuleUtils.h>)
+#import <ReactCommon/CxxTurboModuleUtils.h>
+
+@interface NativeShikiEngineCxxLoader : NSObject
 @end
 
-@implementation OnLoad
+@implementation NativeShikiEngineCxxLoader
 
 + (void)load {
   facebook::react::registerCxxModuleToGlobalModuleMap(
@@ -18,23 +21,16 @@
         return std::make_shared<facebook::react::NativeShikiEngineModule>(
             jsInvoker);
       });
-
-  [[NSNotificationCenter defaultCenter]
-      addObserverForName:UIApplicationDidReceiveMemoryWarningNotification
-                  object:nil
-                   queue:[NSOperationQueue mainQueue]
-              usingBlock:^(__unused NSNotification *note) {
-                clear_unused_pattern_cache();
-              }];
 }
 
 @end
 
-#else
-#import <React/RCTBridgeModule.h>
-#import <ReactCommon/RCTTurboModule.h>
-#import <UIKit/UIKit.h>
+#endif
 
+/**
+ * Bridgeless RN (0.86+ / Expo 57) resolves modules via RCT_EXPORT_MODULE, not
+ * the C++ global map. Return the existing NativeShikiEngineModule unchanged.
+ */
 @interface ShikiEngine : NSObject <RCTBridgeModule, RCTTurboModule>
 @end
 
@@ -62,5 +58,3 @@ RCT_EXPORT_MODULE(ShikiEngine)
 }
 
 @end
-
-#endif
