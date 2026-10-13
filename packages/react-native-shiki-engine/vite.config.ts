@@ -10,6 +10,15 @@ export default defineConfig({
       ...lint.rules,
       'typescript/prefer-readonly-parameter-types': 'off',
     },
+    overrides: [
+      ...(lint.overrides ?? []),
+      {
+        files: ['src/NativeShikiEngine.ts'],
+        rules: {
+          'typescript/no-empty-object-type': 'off',
+        },
+      },
+    ],
   },
   test: {
     environment: 'node',
