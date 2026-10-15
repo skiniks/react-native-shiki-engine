@@ -1,11 +1,11 @@
 package com.shikiengine
 
-import com.facebook.react.BaseReactPackage
+import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.model.ReactModuleInfoProvider
 
-class ShikiEnginePackage : BaseReactPackage() {
+class ShikiEnginePackage : TurboReactPackage() {
   init {
     try {
       System.loadLibrary("react-native-shiki-engine")

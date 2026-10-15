@@ -53,18 +53,29 @@ describe('createNativeEngine options', () => {
     const scanner = engine.createScanner(['foo', /bar/])
     expect(mockModule.createScanner).toHaveBeenCalledWith(['foo', 'bar'], 100)
 
-    expect(() => scanner.findNextMatchSync('hello', 0, 0)).toThrow(/createString/)
+    expect(scanner.findNextMatchSync('hello', 0, 0)).toBeNull()
+    expect(mockModule.internString).toHaveBeenCalledWith('hello')
+    expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 10, 0)
+    expect(mockModule.releaseString).toHaveBeenCalledWith(10)
+
+    mockModule.internString.mockClear()
+    mockModule.findNextMatchSync.mockClear()
+    mockModule.releaseString.mockClear()
 
     const onig = engine.createString('hello')
     expect(mockModule.internString).toHaveBeenCalledWith('hello')
     expect(scanner.findNextMatchSync(onig, 0, 0)).toBeNull()
     expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 10, 0)
 
+    const foreign = { content: 'foreign' }
+    expect(scanner.findNextMatchSync(foreign, 0, 0)).toBeNull()
+    expect(mockModule.internString).toHaveBeenCalledWith('foreign')
+
     scanner.dispose?.()
     expect(mockModule.destroyScanner).toHaveBeenCalledWith(1)
 
     engine.dispose()
-    expect(mockModule.releaseString).toHaveBeenCalledWith(10)
+    expect(mockModule.releaseString).toHaveBeenCalled()
     expect(mockModule.clearPatternCache).toHaveBeenCalled()
   })
 

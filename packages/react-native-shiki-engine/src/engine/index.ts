@@ -144,13 +144,27 @@ export function createNativeEngine(options: NativeEngineOptions = {}): NativeReg
           _options: FindOption,
         ): IOnigMatch | null {
           if (startPosition < 0) throw new RangeError('Start position must be >= 0')
+
           if (typeof string === 'string') {
-            throw new TypeError('Pass an OnigString from engine.createString(...)')
+            const stringId = ShikiEngine.internString(string)
+            try {
+              return convertToOnigMatch(
+                ShikiEngine.findNextMatchSync(scannerId, stringId, startPosition),
+              )
+            } finally {
+              ShikiEngine.releaseString(stringId)
+            }
           }
 
-          const stringId = stringIdByOnig.get(string)
+          let stringId = stringIdByOnig.get(string)
           if (stringId === undefined) {
-            throw new TypeError('Pass an OnigString from engine.createString(...)')
+            if (typeof string.content !== 'string') {
+              throw new TypeError('Expected a string or OnigString with string content')
+            }
+            stringId = ShikiEngine.internString(string.content)
+            stringIds.add(stringId)
+            stringIdByOnig.set(string, stringId)
+            stringFinalizers.register(string, stringId)
           }
 
           return convertToOnigMatch(

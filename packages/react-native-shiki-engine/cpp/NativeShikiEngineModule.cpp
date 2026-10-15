@@ -225,8 +225,10 @@ double NativeShikiEngineModule::internString(jsi::Runtime& rt, jsi::String text)
 
 void NativeShikiEngineModule::releaseString(jsi::Runtime& rt, double stringId) {
   std::lock_guard<std::mutex> lock(g_strings_mutex);
+  if (owned_string_ids_.erase(stringId) == 0) {
+    return;
+  }
   g_strings.erase(stringId);
-  owned_string_ids_.erase(stringId);
 }
 
 std::optional<jsi::Array>
