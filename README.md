@@ -75,6 +75,7 @@ export const HighlighterContext = createContext<HighlighterContextType | null>(n
 import type { HighlighterCore } from '@shikijs/core'
 import { createHighlighterCore } from '@shikijs/core'
 import rust from '@shikijs/langs/rust'
+import typescript from '@shikijs/langs/typescript'
 import dracula from '@shikijs/themes/dracula'
 import React from 'react'
 import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
@@ -91,7 +92,7 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
           if (!isNativeEngineAvailable()) throw new Error('Native engine not available.')
 
           highlighterInstance = await createHighlighterCore({
-            langs: [rust],
+            langs: [rust, typescript],
             themes: [dracula],
             engine: createNativeEngine(),
           })

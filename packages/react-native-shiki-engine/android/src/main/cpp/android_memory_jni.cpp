@@ -28,14 +28,14 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_shikiengine_ShikiEngineMemory_nativeOnTrimMemory(JNIEnv*, jclass, jint level) {
   switch (level) {
     case TRIM_MEMORY_RUNNING_CRITICAL:
+    case TRIM_MEMORY_UI_HIDDEN:
+    case TRIM_MEMORY_BACKGROUND:
     case TRIM_MEMORY_MODERATE:
     case TRIM_MEMORY_COMPLETE:
       clear_unused_pattern_cache();
       break;
     case TRIM_MEMORY_RUNNING_MODERATE:
     case TRIM_MEMORY_RUNNING_LOW:
-    case TRIM_MEMORY_UI_HIDDEN:
-    case TRIM_MEMORY_BACKGROUND:
       trim_pattern_cache();
       break;
     default:

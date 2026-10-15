@@ -20,10 +20,12 @@ internal class ShikiEngineMemory private constructor() : ComponentCallbacks2 {
     private val INSTANCE = ShikiEngineMemory()
 
     @Volatile private var registered = false
+    @Volatile private var libraryLoaded = false
 
     init {
       try {
         System.loadLibrary("react-native-shiki-engine")
+        libraryLoaded = true
       } catch (e: UnsatisfiedLinkError) {
         e.printStackTrace()
       }
@@ -32,6 +34,7 @@ internal class ShikiEngineMemory private constructor() : ComponentCallbacks2 {
     @JvmStatic
     @Synchronized
     fun ensureRegistered(context: Context) {
+      if (!libraryLoaded) return
       val app = context.applicationContext
       publishAvailableMemory(app)
       if (registered) return
