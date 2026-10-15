@@ -20,6 +20,7 @@ internal class ShikiEngineMemory private constructor() : ComponentCallbacks2 {
     private val INSTANCE = ShikiEngineMemory()
 
     @Volatile private var registered = false
+
     @Volatile private var libraryLoaded = false
 
     init {
