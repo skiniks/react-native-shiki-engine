@@ -34,7 +34,7 @@ concurrency:
 
 jobs:
   build_library:
-    name: iOS RN ${{ matrix.rn-version }}
+    name: iOS RN ${{ matrix.rn-version }}${{ matrix.use-frameworks && format(' ({0})', matrix.use-frameworks) || '' }}
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -44,6 +44,9 @@ jobs:
             node-version: '20'
           - rn-version: 0.81.6
             node-version: '20'
+          - rn-version: 0.81.6
+            node-version: '20'
+            use-frameworks: static
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -70,4 +73,5 @@ jobs:
           CI: true
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
+          USE_FRAMEWORKS: ${{ matrix.use-frameworks }}
         run: bash .github/scripts/ios-compat.sh "${{ matrix.rn-version }}"

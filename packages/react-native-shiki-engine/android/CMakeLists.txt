@@ -18,6 +18,7 @@ find_library(ONIG_LIB onig
 add_library(react-native-shiki-engine SHARED
     ../cpp/NativeShikiEngineModule.cpp
     ../cpp/onig_regex.cpp
+    src/main/cpp/android_memory_jni.cpp
 )
 
 # Include directories for our code

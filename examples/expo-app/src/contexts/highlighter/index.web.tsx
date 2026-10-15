@@ -1,4 +1,4 @@
-import type { HighlighterContextType } from '@shared/contexts/highlighter/context'
+import type { HighlighterContextType, TokenizeOptions } from '@shared/contexts/highlighter/context'
 import type { HighlighterCore } from '@shikijs/core'
 import { HighlighterContext } from '@shared/contexts/highlighter/context'
 import { createHighlighterCore } from '@shikijs/core'
@@ -27,7 +27,7 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
         await initializationPromise
       },
 
-      tokenize: (code: string, options: { lang: string; theme: string }) => {
+      tokenize: (code: string, options: TokenizeOptions) => {
         if (!highlighterInstance)
           throw new Error('Highlighter not initialized. Call initialize() first.')
         return highlighterInstance.codeToTokensBase(code, options)

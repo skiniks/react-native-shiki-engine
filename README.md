@@ -53,12 +53,14 @@ Create a single highlighter at the app level with React Context. The examples us
 `src/contexts/highlighter/context.ts`:
 
 ```ts
-import type { ThemedToken } from '@shikijs/core'
+import type { CodeToTokensBaseOptions, ThemedToken } from '@shikijs/core'
 import { createContext } from 'react'
+
+export type TokenizeOptions = CodeToTokensBaseOptions
 
 export interface HighlighterContextType {
   initialize: () => Promise<void>
-  tokenize: (code: string, options: { lang: string; theme: string }) => ThemedToken[][]
+  tokenize: (code: string, options: TokenizeOptions) => ThemedToken[][]
   dispose: () => void
 }
 
@@ -200,7 +202,7 @@ engine.trimMemory() // drop unused cached patterns under pressure
 engine.clearPatternCache() // drop unused entries now
 engine.dispose() // destroy scanners created by this engine + clear unused cache
 
-// Optional: trim on iOS memoryWarning + app backgrounding
+// Optional: also trim from JS on iOS memoryWarning + app backgrounding
 import { attachMemoryPressureHandler } from 'react-native-shiki-engine'
 const detach = attachMemoryPressureHandler(engine)
 // later: detach()
@@ -211,6 +213,56 @@ Pass options when creating the engine inside `HighlighterProvider`:
 ```tsx
 engine: createNativeEngine({ maxCacheEntries: 2000 }),
 ```
+
+### Tokenization options (Shiki)
+
+These are Shiki options on `codeToTokensBase` / `codeToTokens`. They apply equally with the native engine—no native API changes.
+
+#### Cap pathological lines
+
+Long or adversarial lines can stall TextMate. Cap them the same way VS Code does:
+
+```ts
+highlighter.codeToTokensBase(code, {
+  lang: 'typescript',
+  theme: 'dracula',
+  // Skip tokenization when a line is this long or longer (0 = no limit)
+  tokenizeMaxLineLength: 2000,
+  // Per-line time budget in ms (Shiki default: 500)
+  tokenizeTimeLimit: 500,
+})
+```
+
+When a line hits `tokenizeMaxLineLength`, Shiki emits a single unstyled token for that line instead of running the grammar.
+
+#### Continue from a grammar state
+
+For incremental highlighting (type annotations, streamed chunks, editor-style continuation), capture state and resume:
+
+```ts
+const state = highlighter.getLastGrammarState('let a: ', {
+  lang: 'typescript',
+  theme: 'dracula',
+})
+
+const tokens = highlighter.codeToTokensBase('Pick<MyObject, string>[]', {
+  lang: 'typescript',
+  theme: 'dracula',
+  grammarState: state,
+})
+```
+
+For a one-off context shift without keeping a state object, pass `grammarContextCode` instead (ignored when `grammarState` is set):
+
+```ts
+highlighter.codeToTokensBase('Pick<MyObject, string>[]', {
+  lang: 'typescript',
+  theme: 'dracula',
+  grammarContextCode: 'let a: ',
+})
+```
+
+See Shiki’s [Grammar State](https://shiki.style/guide/grammar-state) guide for details.
 
 ## Web Platform Support (Expo)
 
@@ -249,20 +301,7 @@ npx expo install @shikijs/engine-oniguruma
 }
 ```
 
-3. Add the shared context type at `src/contexts/highlighter/context.ts`:
-
-```ts
-import type { ThemedToken } from '@shikijs/core'
-import { createContext } from 'react'
-
-export interface HighlighterContextType {
-  initialize: () => Promise<void>
-  tokenize: (code: string, options: { lang: string; theme: string }) => ThemedToken[][]
-  dispose: () => void
-}
-
-export const HighlighterContext = createContext<HighlighterContextType | null>(null)
-```
+3. Add the shared context type at `src/contexts/highlighter/context.ts` (same `TokenizeOptions` shape as in [Usage](#usage) above), or reuse `examples/shared/contexts/highlighter/context.ts`.
 
 4. Create platform-specific providers:
 
@@ -418,9 +457,10 @@ Compiled patterns live in a **single process-wide cache**, shared by every scann
 - Patterns are keyed by source string and held with `shared_ptr`
 - Scanners keep strong refs while alive; eviction only frees entries with no live scanners
 - Size is an **estimate** (`4096 + patternLength * 32 + captures * 128`), derived from public Oniguruma capture counts, not a measured `regex_t` heap footprint
-- Default memory budget is derived from available device memory (iOS `os_proc_available_memory` / Android `/proc/meminfo`), floored at 8MiB and capped at 50MiB
+- Default memory budget is derived from available device memory (iOS `os_proc_available_memory` / Android `ActivityManager.getMemoryInfo`), floored at 8MiB and capped at 50MiB
 - JS can override with `maxCacheEntries` / `maxMemoryBytes`, and call `trimMemory` / `clearPatternCache` / `getCacheStats`
-- iOS automatically trims on `UIApplicationDidReceiveMemoryWarning`; apps can also call `attachMemoryPressureHandler(engine)` for AppState-driven trims (iOS memoryWarning + background)
+- iOS automatically trims on `UIApplicationDidReceiveMemoryWarning`; Android trims on `ComponentCallbacks2.onTrimMemory`
+- Apps can also call `attachMemoryPressureHandler(engine)` for AppState-driven trims (iOS `memoryWarning` + background on both platforms)
 
 ## Supported Platforms
 

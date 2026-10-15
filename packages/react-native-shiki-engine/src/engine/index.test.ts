@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 const mockModule = {
   getConstants: () => ({}),
   createScanner: vi.fn(() => 1),
+  internString: vi.fn(() => 10),
+  releaseString: vi.fn(),
   findNextMatchSync: vi.fn(() => null),
   destroyScanner: vi.fn(),
   configureCache: vi.fn(),
@@ -51,13 +53,18 @@ describe('createNativeEngine options', () => {
     const scanner = engine.createScanner(['foo', /bar/])
     expect(mockModule.createScanner).toHaveBeenCalledWith(['foo', 'bar'], 100)
 
-    expect(scanner.findNextMatchSync('hello', 0, 0)).toBeNull()
-    expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 'hello', 0)
+    expect(() => scanner.findNextMatchSync('hello', 0, 0)).toThrow(/createString/)
+
+    const onig = engine.createString('hello')
+    expect(mockModule.internString).toHaveBeenCalledWith('hello')
+    expect(scanner.findNextMatchSync(onig, 0, 0)).toBeNull()
+    expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 10, 0)
 
     scanner.dispose?.()
     expect(mockModule.destroyScanner).toHaveBeenCalledWith(1)
 
     engine.dispose()
+    expect(mockModule.releaseString).toHaveBeenCalledWith(10)
     expect(mockModule.clearPatternCache).toHaveBeenCalled()
   })
 
@@ -107,6 +114,25 @@ describe('createNativeEngine options', () => {
 
     vi.mocked(TurboModuleRegistry.get).mockReturnValue(mockModule)
   })
+
+  it('works when FinalizationRegistry is missing (Hermes)', async () => {
+    const original = globalThis.FinalizationRegistry
+    // @ts-expect-error - simulate Hermes without FinalizationRegistry
+    delete globalThis.FinalizationRegistry
+
+    try {
+      vi.resetModules()
+      const { createNativeEngine } = await import('./index')
+      const engine = createNativeEngine()
+      const onig = engine.createString('hermes')
+      expect(onig.content).toBe('hermes')
+      engine.dispose()
+      expect(mockModule.releaseString).toHaveBeenCalledWith(10)
+    } finally {
+      globalThis.FinalizationRegistry = original
+      vi.resetModules()
+    }
+  })
 })
 
 describe('attachMemoryPressureHandler', () => {
@@ -139,17 +165,15 @@ describe('attachMemoryPressureHandler', () => {
 })
 
 describe('convertToOnigMatch', () => {
-  it('maps native results', async () => {
+  it('maps packed native results', async () => {
     const { convertToOnigMatch } = await import('./utils')
     expect(convertToOnigMatch(null)).toBeNull()
-    expect(
-      convertToOnigMatch({
-        index: 2,
-        captureIndices: [{ start: 1, end: 4, length: 3 }],
-      }),
-    ).toEqual({
+    expect(convertToOnigMatch([2, 1, 4, 5, 8])).toEqual({
       index: 2,
-      captureIndices: [{ start: 1, end: 4, length: 3 }],
+      captureIndices: [
+        { start: 1, end: 4, length: 3 },
+        { start: 5, end: 8, length: 3 },
+      ],
     })
   })
 })

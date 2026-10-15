@@ -7,6 +7,8 @@ import { describe, expect, it, vi } from 'vite-plus/test'
 const mockModule = {
   getConstants: () => ({}),
   createScanner: vi.fn(() => 1),
+  internString: vi.fn(() => 10),
+  releaseString: vi.fn(),
   findNextMatchSync: vi.fn(() => null),
   destroyScanner: vi.fn(),
   configureCache: vi.fn(),
