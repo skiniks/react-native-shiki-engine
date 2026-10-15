@@ -21,7 +21,8 @@
     "lint": "pnpm --filter react-native-shiki-engine build && pnpm fmt:check && pnpm -r run lint && eslint packages/ examples/ scripts/ eslint.config.ts vite.config.ts package.json pnpm-workspace.yaml",
     "lint:fix": "pnpm --filter react-native-shiki-engine build && pnpm fmt && pnpm -r run lint:fix && eslint packages/ examples/ scripts/ eslint.config.ts vite.config.ts package.json pnpm-workspace.yaml --fix",
     "lint:cpp": "scripts/clang-format.sh",
-    "lint:all": "pnpm lint:fix && pnpm lint:cpp",
+    "lint:kt": "scripts/ktlint.sh",
+    "lint:all": "pnpm lint:fix && pnpm lint:cpp && pnpm lint:kt",
     "dev": "pnpm -r --parallel run dev",
     "release": "pnpm --filter react-native-shiki-engine release"
   },
