@@ -28,6 +28,9 @@ struct CachedRegex {
 struct OnigContext {
   std::vector<std::shared_ptr<CachedRegex>> patterns;
   int pattern_count = 0;
+  OnigRegion* region = nullptr;
+  std::vector<int> last_captures;
+  OnigResult last_result{};
 };
 
 #endif  // ONIG_CONTEXT_HPP

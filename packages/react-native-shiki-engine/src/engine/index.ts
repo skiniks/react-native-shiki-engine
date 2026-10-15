@@ -35,6 +35,61 @@ function getModule(): Spec | null {
   return TurboModuleRegistry.get<Spec>('ShikiEngine') ?? null
 }
 
+function createStringFinalizer(release: (stringId: number) => void): {
+  register: (target: object, stringId: number) => void
+  clear: () => void
+} {
+  const FinalizationRegistryCtor = (
+    globalThis as typeof globalThis & {
+      FinalizationRegistry?: typeof FinalizationRegistry
+    }
+  ).FinalizationRegistry
+
+  if (typeof FinalizationRegistryCtor === 'function') {
+    const registry = new FinalizationRegistryCtor(release)
+    return {
+      register(target, stringId) {
+        registry.register(target, stringId, target)
+      },
+      clear() {
+        // dispose() releases via stringIds; held values may still fire harmlessly
+      },
+    }
+  }
+
+  const WeakRefCtor = (
+    globalThis as typeof globalThis & {
+      WeakRef?: typeof WeakRef
+    }
+  ).WeakRef
+
+  if (typeof WeakRefCtor === 'function') {
+    const entries: { ref: WeakRef<object>; stringId: number }[] = []
+    const sweep = () => {
+      for (let i = entries.length - 1; i >= 0; i--) {
+        const entry = entries[i]
+        if (!entry || entry.ref.deref() !== undefined) continue
+        entries.splice(i, 1)
+        release(entry.stringId)
+      }
+    }
+    return {
+      register(target, stringId) {
+        entries.push({ ref: new WeakRefCtor(target), stringId })
+        if (entries.length >= 32) sweep()
+      },
+      clear() {
+        entries.length = 0
+      },
+    }
+  }
+
+  return {
+    register() {},
+    clear() {},
+  }
+}
+
 export function createNativeEngine(options: NativeEngineOptions = {}): NativeRegexEngine {
   const ShikiEngine = getModule()
   if (!ShikiEngine) throw new Error('Native engine not available')
@@ -45,6 +100,28 @@ export function createNativeEngine(options: NativeEngineOptions = {}): NativeReg
   ShikiEngine.configureCache(maxCacheEntries ?? 0, maxMemoryBytes ?? 0)
 
   const scannerIds = new Set<number>()
+  const stringIds = new Set<number>()
+  const stringIdByOnig = new WeakMap<object, number>()
+  const stringFinalizers = createStringFinalizer((stringId: number) => {
+    if (!stringIds.delete(stringId)) return
+    try {
+      ShikiEngine.releaseString(stringId)
+    } catch {
+      // module may already be torn down
+    }
+  })
+
+  const releaseAllStrings = () => {
+    for (const stringId of stringIds) {
+      try {
+        ShikiEngine.releaseString(stringId)
+      } catch {
+        // ignore
+      }
+    }
+    stringIds.clear()
+    stringFinalizers.clear()
+  }
 
   const engine: NativeRegexEngine = {
     createScanner(patterns: (string | RegExp)[]): PatternScanner {
@@ -67,12 +144,18 @@ export function createNativeEngine(options: NativeEngineOptions = {}): NativeReg
           _options: FindOption,
         ): IOnigMatch | null {
           if (startPosition < 0) throw new RangeError('Start position must be >= 0')
+          if (typeof string === 'string') {
+            throw new TypeError('Pass an OnigString from engine.createString(...)')
+          }
 
-          const stringContent = typeof string === 'string' ? string : string.content
-          if (typeof stringContent !== 'string') throw new TypeError('Invalid input string')
+          const stringId = stringIdByOnig.get(string)
+          if (stringId === undefined) {
+            throw new TypeError('Pass an OnigString from engine.createString(...)')
+          }
 
-          const result = ShikiEngine.findNextMatchSync(scannerId, stringContent, startPosition)
-          return convertToOnigMatch(result)
+          return convertToOnigMatch(
+            ShikiEngine.findNextMatchSync(scannerId, stringId, startPosition),
+          )
         },
 
         dispose(): void {
@@ -87,7 +170,12 @@ export function createNativeEngine(options: NativeEngineOptions = {}): NativeReg
 
     createString(s: string): OnigString {
       if (typeof s !== 'string') throw new TypeError('Input must be a string')
-      return { content: s }
+      const onig: OnigString = { content: s }
+      const stringId = ShikiEngine.internString(s)
+      stringIds.add(stringId)
+      stringIdByOnig.set(onig, stringId)
+      stringFinalizers.register(onig, stringId)
+      return onig
     },
 
     getCacheStats(): CacheStats {
@@ -111,6 +199,7 @@ export function createNativeEngine(options: NativeEngineOptions = {}): NativeReg
         }
       }
       scannerIds.clear()
+      releaseAllStrings()
       ShikiEngine.clearPatternCache()
     },
   }
