@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
         "\"$(PODS_ROOT)/Headers/Public/ReactCodegen\"",
         "\"$(PODS_ROOT)/Headers/Private/ReactCodegen/react/renderer/components/NativeShikiEngineSpec\"",
         "\"$(PODS_ROOT)/Headers/Public/ReactCodegen/react/renderer/components/NativeShikiEngineSpec\"",
-        # RN 0.73–0.76: React-Codegen
+        # RN 0.76: React-Codegen
         "\"$(PODS_ROOT)/Headers/Private/React-Codegen\"",
         "\"$(PODS_ROOT)/Headers/Public/React-Codegen\"",
         "\"$(PODS_ROOT)/Headers/Private/React-Codegen/react/renderer/components/NativeShikiEngineSpec\"",
