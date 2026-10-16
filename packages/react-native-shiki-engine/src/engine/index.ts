@@ -190,7 +190,7 @@ export function createNativeEngine(options: NativeEngineOptions = {}): NativeReg
           }
 
           let stringId = stringIdByOnig.get(string)
-          if (stringId === undefined) {
+          if (stringId === undefined || !stringIds.has(stringId)) {
             if (typeof string.content !== 'string') {
               throw new TypeError('Expected a string or OnigString with string content')
             }
