@@ -130,13 +130,14 @@ describe('createNativeEngine options', () => {
   it('re-interns OnigString when cached id was released', async () => {
     const { createNativeEngine } = await import('./index')
     const engine = createNativeEngine()
-    const scanner = engine.createScanner(['foo'])
+    engine.createScanner(['foo'])
     const onig = engine.createString('stale')
 
     mockModule.internString.mockClear()
     mockModule.internString.mockReturnValueOnce(99)
     engine.dispose()
 
+    const scanner = engine.createScanner(['foo'])
     expect(scanner.findNextMatchSync(onig, 0, 0)).toBeNull()
     expect(mockModule.internString).toHaveBeenCalledWith('stale')
     expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 99, 0)
