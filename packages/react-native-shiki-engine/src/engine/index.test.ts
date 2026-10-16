@@ -34,6 +34,7 @@ describe('createNativeEngine options', () => {
   afterEach(() => {
     vi.clearAllMocks()
     vi.mocked(mockModule.createScanner).mockReturnValue(1)
+    vi.mocked(mockModule.internString).mockReturnValue(10)
   })
 
   it('rejects invalid cache options', async () => {
@@ -124,6 +125,21 @@ describe('createNativeEngine options', () => {
     expect(() => createNativeEngine()).toThrow(/not available/)
 
     vi.mocked(TurboModuleRegistry.get).mockReturnValue(mockModule)
+  })
+
+  it('re-interns OnigString when cached id was released', async () => {
+    const { createNativeEngine } = await import('./index')
+    const engine = createNativeEngine()
+    const scanner = engine.createScanner(['foo'])
+    const onig = engine.createString('stale')
+
+    mockModule.internString.mockClear()
+    mockModule.internString.mockReturnValueOnce(99)
+    engine.dispose()
+
+    expect(scanner.findNextMatchSync(onig, 0, 0)).toBeNull()
+    expect(mockModule.internString).toHaveBeenCalledWith('stale')
+    expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 99, 0)
   })
 
   it('works when FinalizationRegistry is missing (Hermes)', async () => {
