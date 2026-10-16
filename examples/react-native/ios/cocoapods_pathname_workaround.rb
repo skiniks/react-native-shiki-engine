@@ -25,7 +25,6 @@ module CocoaPodsPathnameWorkaround
         path += name
         group = group.children.find { |child| child.display_name == name } || group.new_group(name, path)
       end
-      return group
     end
 
     if relative_dir.basename.to_s.downcase.include? '.lproj'

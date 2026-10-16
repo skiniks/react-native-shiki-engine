@@ -64,22 +64,55 @@ function createStringFinalizer(release: (stringId: number) => void): {
   ).WeakRef
 
   if (typeof WeakRefCtor === 'function') {
+    const SWEEP_BATCH = 32
+    const SWEEP_INTERVAL_MS = 1000
     const entries: { ref: WeakRef<object>; stringId: number }[] = []
+    let cursor = 0
+    let timer: ReturnType<typeof setInterval> | undefined
+
     const sweep = () => {
-      for (let i = entries.length - 1; i >= 0; i--) {
-        const entry = entries[i]
-        if (!entry || entry.ref.deref() !== undefined) continue
-        entries.splice(i, 1)
+      const limit = Math.min(SWEEP_BATCH, entries.length)
+      for (let n = 0; n < limit; n++) {
+        if (entries.length === 0) {
+          cursor = 0
+          return
+        }
+        if (cursor >= entries.length) cursor = 0
+        const entry = entries[cursor]
+        if (!entry || entry.ref.deref() !== undefined) {
+          cursor++
+          continue
+        }
+        entries.splice(cursor, 1)
         release(entry.stringId)
       }
     }
+
+    const ensureTimer = () => {
+      if (timer !== undefined) return
+      const handle = setInterval(sweep, SWEEP_INTERVAL_MS) as ReturnType<typeof setInterval> & {
+        unref?: () => void
+      }
+      handle.unref?.()
+      timer = handle
+    }
+
+    const stopTimer = () => {
+      if (timer === undefined) return
+      clearInterval(timer)
+      timer = undefined
+    }
+
     return {
       register(target, stringId) {
         entries.push({ ref: new WeakRefCtor(target), stringId })
-        if (entries.length >= 32) sweep()
+        ensureTimer()
+        if (entries.length >= SWEEP_BATCH) sweep()
       },
       clear() {
+        stopTimer()
         entries.length = 0
+        cursor = 0
       },
     }
   }
