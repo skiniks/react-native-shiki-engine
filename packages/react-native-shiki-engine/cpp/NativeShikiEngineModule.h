@@ -10,8 +10,6 @@
 
 #if __has_include(<react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>)
 #  include <react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>
-#elif __has_include(<React-Codegen/NativeShikiEngineSpecJSI.h>)
-#  include <React-Codegen/NativeShikiEngineSpecJSI.h>
 #elif __has_include(<ReactCodegen/NativeShikiEngineSpecJSI.h>)
 #  include <ReactCodegen/NativeShikiEngineSpecJSI.h>
 #elif __has_include(<NativeShikiEngineSpecJSI.h>)

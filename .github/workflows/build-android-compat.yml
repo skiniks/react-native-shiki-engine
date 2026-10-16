@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - rn-version: 0.76.9
+          - rn-version: 0.77.3
             node-version: '20'
           - rn-version: 0.81.6
             node-version: '20'
