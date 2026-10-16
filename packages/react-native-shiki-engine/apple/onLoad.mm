@@ -29,8 +29,12 @@
 
 @end
 
-#else
+#endif
 
+/**
+ * Bridgeless RN (0.86+ / Expo 57) resolves modules via RCT_EXPORT_MODULE, not
+ * the C++ global map. Return the existing NativeShikiEngineModule unchanged.
+ */
 @interface ShikiEngine : NSObject <RCTBridgeModule, RCTTurboModule>
 @end
 
@@ -60,5 +64,3 @@ RCT_EXPORT_MODULE(ShikiEngine)
 }
 
 @end
-
-#endif
