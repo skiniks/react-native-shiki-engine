@@ -4,7 +4,11 @@
 
 #import <React/RCTBridgeModule.h>
 #import <ReactCommon/RCTTurboModule.h>
+#if !TARGET_OS_OSX
 #import <UIKit/UIKit.h>
+#else
+#import <AppKit/AppKit.h>
+#endif
 
 #if __has_include(<ReactCommon/CxxTurboModuleUtils.h>)
 #import <ReactCommon/CxxTurboModuleUtils.h>
@@ -39,6 +43,7 @@
 RCT_EXPORT_MODULE(ShikiEngine)
 
 + (void)initialize {
+#if !TARGET_OS_OSX
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     [[NSNotificationCenter defaultCenter]
@@ -49,6 +54,7 @@ RCT_EXPORT_MODULE(ShikiEngine)
                   clear_unused_pattern_cache();
                 }];
   });
+#endif
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
