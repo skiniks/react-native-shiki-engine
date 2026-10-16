@@ -26,19 +26,6 @@ def isNewArchitectureEnabled() {
     (project.hasProperty("newArchEnabled") && project.getProperty("newArchEnabled") == "true")
 }
 
-def getReactNativeMinorVersion() {
-  def rnPackageJson = file("${rootProject.projectDir}/../node_modules/react-native/package.json")
-  if (!rnPackageJson.exists()) {
-    return null
-  }
-
-  def packageJson = new groovy.json.JsonSlurper().parseText(rnPackageJson.text)
-  def version = packageJson.version as String
-  def minor = version.tokenize(".")[1]
-
-  return minor?.replaceAll(/[^0-9]/, "")?.toInteger()
-}
-
 def getExtOrDefault(name, defaultValue) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["ShikiEngine_" + name] ?: defaultValue)
 }
@@ -126,16 +113,9 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion", "1.9.25")
-def reactNativeMinorVersion = getReactNativeMinorVersion()
 
 dependencies {
-  if (reactNativeMinorVersion != null && reactNativeMinorVersion <= 70) {
-    //noinspection GradleDynamicVersion
-    implementation "com.facebook.react:react-native:+"
-  } else {
-    implementation "com.facebook.react:react-android"
-  }
-
+  implementation "com.facebook.react:react-android"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
