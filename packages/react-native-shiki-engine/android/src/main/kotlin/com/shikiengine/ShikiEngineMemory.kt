@@ -7,6 +7,7 @@ import android.content.res.Configuration
 
 internal class ShikiEngineMemory private constructor() : ComponentCallbacks2 {
   override fun onTrimMemory(level: Int) {
+    appContext?.let { publishAvailableMemory(it) }
     nativeOnTrimMemory(level)
   }
 
@@ -23,6 +24,8 @@ internal class ShikiEngineMemory private constructor() : ComponentCallbacks2 {
 
     @Volatile private var libraryLoaded = false
 
+    @Volatile private var appContext: Context? = null
+
     init {
       try {
         System.loadLibrary("react-native-shiki-engine")
@@ -37,6 +40,7 @@ internal class ShikiEngineMemory private constructor() : ComponentCallbacks2 {
     fun ensureRegistered(context: Context) {
       if (!libraryLoaded) return
       val app = context.applicationContext
+      appContext = app
       publishAvailableMemory(app)
       if (registered) return
       app.registerComponentCallbacks(INSTANCE)
