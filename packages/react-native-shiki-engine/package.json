@@ -13,12 +13,12 @@
     "url": "https://github.com/skiniks/react-native-shiki-engine/issues"
   },
   "keywords": [
-    "react-native",
-    "ios",
     "android",
-    "shiki",
+    "ios",
     "oniguruma",
+    "react-native",
     "regex",
+    "shiki",
     "syntax-highlighting",
     "textmate",
     "turbo"
@@ -61,7 +61,7 @@
     "@shikijs/types": "^4.0.0",
     "@shikijs/vscode-textmate": "^10.0.0",
     "react": ">=19.0.0",
-    "react-native": ">=0.73.0"
+    "react-native": ">=0.77.0"
   },
   "peerDependenciesMeta": {
     "@shikijs/core": {

@@ -1,14 +1,16 @@
 catalogMode: prefer
-minimumReleaseAgeExclude:
-  - '@rari/lint@0.1.2'
+minimumReleaseAgeExcludePrune: true
 shellEmulator: true
+
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - semver@6.3.1
   - ua-parser-js@1.0.41
+
 packages:
   - packages/*
   - examples/*
+
 catalogs:
   babel:
     '@babel/core': 7.29.7
@@ -21,7 +23,7 @@ catalogs:
     release-it: ^21.0.2
     vite-plus: ^0.3.0
   eslint:
-    '@rari/lint': ^0.1.2
+    '@rari/lint': ^0.1.5
     eslint: ^10.9.1
   react:
     '@react-native/babel-preset': 0.87.0
@@ -51,5 +53,6 @@ catalogs:
     # https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0
     typescript: npm:@typescript/typescript6@^6.0.2
     typescript-7: npm:typescript@^7.0.2
+
 allowBuilds:
   msgpackr-extract: true

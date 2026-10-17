@@ -1316,7 +1316,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-shiki-engine (0.3.12):
+  - react-native-shiki-engine (0.4.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2023,7 +2023,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 512d9f7c6b66574d90832a6b10b6102d4a8fdf30
   React-mutationobservernativemodule: 2c5abeb9a4ae316ba6d9420ef8d9baa81faa9d56
   react-native-safe-area-context: f17f4ec987ecdd130820a4a850498b874fb70388
-  react-native-shiki-engine: 87d04d9b42868049dd748fc1c95f3f09b2983233
+  react-native-shiki-engine: 5802ecffb723d56c90d5939d93bfd31b445552e8
   React-NativeModulesApple: 22b2f3e1538ceb1aab1ab182ccb0666ea2ec36ad
   React-networking: b58b3098d4a626f88bbaeaf6bf5e67b18ff39089
   React-oscompat: 72573ceb65b6c6c6bc34e51e0df8f44c91081a6d
@@ -2065,4 +2065,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 5b6fc78538b300666ee9e6ba76bbf538da266681
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

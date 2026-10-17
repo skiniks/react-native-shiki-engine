@@ -85,6 +85,8 @@ jobs:
           set -euo pipefail
           # Don't restore a cached Pods/ tree, RN prebuilds leave React-Core-prebuilt
           # Headers/module.modulemap missing across version bumps and Debug/Release swaps.
+          # Podfile loads cocoapods_pathname_workaround.rb for pnpm symlink null-byte crashes
+          # (CocoaPods#12798 / #12866).
           rm -rf Pods build
           bundle exec pod install
 
