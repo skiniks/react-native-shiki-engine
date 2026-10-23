@@ -161,7 +161,8 @@ OnigCacheStats get_pattern_cache_stats(void) {
 }
 
 OnigContext* create_scanner(const char** patterns, int pattern_count, size_t /*max_cache_size*/) {
-  if (!patterns || pattern_count < 0) {
+  // TextMate rules can compile to an empty pattern list; patterns may then be null (std::vector::data()).
+  if (pattern_count < 0 || (pattern_count > 0 && !patterns)) {
     return nullptr;
   }
 
