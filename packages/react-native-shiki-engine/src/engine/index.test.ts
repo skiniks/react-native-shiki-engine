@@ -62,15 +62,18 @@ describe('createNativeEngine options', () => {
     mockModule.internString.mockClear()
     mockModule.findNextMatchSync.mockClear()
     mockModule.releaseString.mockClear()
+    mockModule.internString.mockReturnValueOnce(10).mockReturnValueOnce(11)
 
     const onig = engine.createString('hello')
     expect(mockModule.internString).toHaveBeenCalledWith('hello')
     expect(scanner.findNextMatchSync(onig, 0, 0)).toBeNull()
     expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 10, 0)
 
+    mockModule.findNextMatchSync.mockClear()
     const foreign = { content: 'foreign' }
     expect(scanner.findNextMatchSync(foreign, 0, 0)).toBeNull()
     expect(mockModule.internString).toHaveBeenCalledWith('foreign')
+    expect(mockModule.findNextMatchSync).toHaveBeenCalledWith(1, 11, 0)
 
     scanner.dispose?.()
     expect(mockModule.destroyScanner).toHaveBeenCalledWith(1)
@@ -81,7 +84,6 @@ describe('createNativeEngine options', () => {
   })
 
   it('accepts an empty pattern list', async () => {
-    // TextMate can create scanners with no patterns; native create_scanner must allow that.
     const { createNativeEngine } = await import('./index')
     const engine = createNativeEngine()
     const scanner = engine.createScanner([])
