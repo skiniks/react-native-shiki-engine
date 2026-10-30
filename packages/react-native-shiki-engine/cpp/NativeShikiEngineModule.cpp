@@ -1,8 +1,10 @@
 #include "NativeShikiEngineModule.h"
 
+#include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace facebook::react {
@@ -13,8 +15,15 @@ namespace {
   std::unordered_map<double, OnigContext*> g_scanners;
   double g_next_scanner_id = 1;
 
-  thread_local std::string g_last_utf8;
-  thread_local std::vector<int> g_last_b2u;
+  struct InternedString {
+    std::string utf8;
+    std::vector<int> b2u;
+    bool ascii = true;
+  };
+
+  std::mutex g_strings_mutex;
+  std::unordered_map<double, std::shared_ptr<InternedString>> g_strings;
+  double g_next_string_id = 1;
 
   bool is_ascii_only(const std::string& utf8) {
     for (unsigned char c : utf8) {
@@ -83,22 +92,95 @@ namespace {
     return table[byte_offset];
   }
 
+  std::shared_ptr<InternedString> make_interned_string(std::string utf8) {
+    auto interned = std::make_shared<InternedString>();
+    interned->ascii = is_ascii_only(utf8);
+    interned->utf8 = std::move(utf8);
+    if (!interned->ascii) {
+      interned->b2u = build_byte_to_utf16_table(interned->utf8);
+    }
+    return interned;
+  }
+
+  jsi::Array pack_match(jsi::Runtime& rt, const OnigResult& result, bool ascii, const std::vector<int>& b2u) {
+    const int capture_count = result.capture_count;
+    jsi::Array packed(rt, 1 + static_cast<size_t>(capture_count) * 2);
+    packed.setValueAtIndex(rt, 0, result.pattern_index);
+
+    for (int i = 0; i < capture_count; i++) {
+      int start = result.capture_indices[i * 2];
+      int end = result.capture_indices[i * 2 + 1];
+      if (!ascii) {
+        if (start >= 0) {
+          start = byte_to_utf16_offset(b2u, start);
+        }
+        if (end >= 0) {
+          end = byte_to_utf16_offset(b2u, end);
+        }
+      }
+      packed.setValueAtIndex(rt, 1 + i * 2, start);
+      packed.setValueAtIndex(rt, 2 + i * 2, end);
+    }
+    return packed;
+  }
+
+  std::optional<jsi::Array>
+  search_with_string(jsi::Runtime& rt, OnigContext* context, const InternedString& text, double startPosition) {
+    int start_byte = 0;
+    if (text.ascii) {
+      start_byte = static_cast<int>(startPosition);
+      if (start_byte < 0) {
+        start_byte = 0;
+      }
+    } else {
+      start_byte = utf16_to_byte_offset(text.b2u, static_cast<int>(startPosition));
+    }
+
+    OnigResult* result = find_next_match(context, text.utf8.c_str(), start_byte);
+    if (!result) {
+      return std::nullopt;
+    }
+
+    jsi::Array packed = pack_match(rt, *result, text.ascii, text.b2u);
+    free_result(result);
+    return packed;
+  }
+
+  OnigContext* require_scanner(jsi::Runtime& rt, double scannerId) {
+    std::lock_guard<std::mutex> lock(g_scanners_mutex);
+    auto it = g_scanners.find(scannerId);
+    if (it == g_scanners.end()) {
+      throw jsi::JSError(rt, "Invalid scanner ID");
+    }
+    return it->second;
+  }
+
 }  // namespace
 
 NativeShikiEngineModule::NativeShikiEngineModule(std::shared_ptr<CallInvoker> jsInvoker)
   : NativeShikiEngineCxxSpec<NativeShikiEngineModule>(std::move(jsInvoker)) {}
 
 NativeShikiEngineModule::~NativeShikiEngineModule() {
-  std::lock_guard<std::mutex> lock(g_scanners_mutex);
-  for (const double scanner_id : owned_scanner_ids_) {
-    auto it = g_scanners.find(scanner_id);
-    if (it == g_scanners.end()) {
-      continue;
+  {
+    std::lock_guard<std::mutex> lock(g_scanners_mutex);
+    for (const double scanner_id : owned_scanner_ids_) {
+      auto it = g_scanners.find(scanner_id);
+      if (it == g_scanners.end()) {
+        continue;
+      }
+      free_scanner(it->second);
+      g_scanners.erase(it);
     }
-    free_scanner(it->second);
-    g_scanners.erase(it);
+    owned_scanner_ids_.clear();
   }
-  owned_scanner_ids_.clear();
+
+  {
+    std::lock_guard<std::mutex> lock(g_strings_mutex);
+    for (const double string_id : owned_string_ids_) {
+      g_strings.erase(string_id);
+    }
+    owned_string_ids_.clear();
+  }
 }
 
 jsi::Object NativeShikiEngineModule::getConstants(jsi::Runtime& rt) {
@@ -132,70 +214,38 @@ double NativeShikiEngineModule::createScanner(jsi::Runtime& rt, jsi::Array patte
   return scanner_id;
 }
 
-std::optional<jsi::Object>
-NativeShikiEngineModule::findNextMatchSync(jsi::Runtime& rt, double scannerId, jsi::String text, double startPosition) {
-  OnigContext* context = nullptr;
+double NativeShikiEngineModule::internString(jsi::Runtime& rt, jsi::String text) {
+  auto interned = make_interned_string(text.utf8(rt));
+  std::lock_guard<std::mutex> lock(g_strings_mutex);
+  const double string_id = g_next_string_id++;
+  g_strings.emplace(string_id, std::move(interned));
+  owned_string_ids_.insert(string_id);
+  return string_id;
+}
+
+void NativeShikiEngineModule::releaseString(jsi::Runtime& rt, double stringId) {
+  std::lock_guard<std::mutex> lock(g_strings_mutex);
+  if (owned_string_ids_.erase(stringId) == 0) {
+    return;
+  }
+  g_strings.erase(stringId);
+}
+
+std::optional<jsi::Array>
+NativeShikiEngineModule::findNextMatchSync(jsi::Runtime& rt, double scannerId, double stringId, double startPosition) {
+  OnigContext* context = require_scanner(rt, scannerId);
+
+  std::shared_ptr<InternedString> text;
   {
-    std::lock_guard<std::mutex> lock(g_scanners_mutex);
-    auto it = g_scanners.find(scannerId);
-    if (it == g_scanners.end()) {
-      throw jsi::JSError(rt, "Invalid scanner ID");
+    std::lock_guard<std::mutex> lock(g_strings_mutex);
+    auto it = g_strings.find(stringId);
+    if (it == g_strings.end()) {
+      throw jsi::JSError(rt, "Invalid string ID");
     }
-    context = it->second;
+    text = it->second;
   }
 
-  std::string text_str = text.utf8(rt);
-
-  int start_byte = 0;
-  const bool ascii = is_ascii_only(text_str);
-
-  if (ascii) {
-    g_last_utf8.clear();
-    g_last_b2u.clear();
-    start_byte = static_cast<int>(startPosition);
-    if (start_byte < 0) {
-      start_byte = 0;
-    }
-  } else {
-    if (text_str != g_last_utf8) {
-      g_last_utf8 = text_str;
-      g_last_b2u = build_byte_to_utf16_table(text_str);
-    }
-    start_byte = utf16_to_byte_offset(g_last_b2u, static_cast<int>(startPosition));
-  }
-
-  OnigResult* result = find_next_match(context, text_str.c_str(), start_byte);
-  if (!result) {
-    return std::nullopt;
-  }
-
-  jsi::Object match_obj(rt);
-  match_obj.setProperty(rt, "index", result->pattern_index);
-
-  jsi::Array capture_indices(rt, result->capture_count);
-  for (int i = 0; i < result->capture_count; i++) {
-    jsi::Object capture(rt);
-    int start = result->capture_indices[i * 2];
-    int end = result->capture_indices[i * 2 + 1];
-
-    if (!ascii) {
-      if (start >= 0) {
-        start = byte_to_utf16_offset(g_last_b2u, start);
-      }
-      if (end >= 0) {
-        end = byte_to_utf16_offset(g_last_b2u, end);
-      }
-    }
-
-    capture.setProperty(rt, "start", start);
-    capture.setProperty(rt, "end", end);
-    capture.setProperty(rt, "length", end - start);
-    capture_indices.setValueAtIndex(rt, i, std::move(capture));
-  }
-  match_obj.setProperty(rt, "captureIndices", std::move(capture_indices));
-
-  free_result(result);
-  return match_obj;
+  return search_with_string(rt, context, *text, startPosition);
 }
 
 void NativeShikiEngineModule::destroyScanner(jsi::Runtime& rt, double scannerId) {
@@ -221,14 +271,10 @@ void NativeShikiEngineModule::configureCache(jsi::Runtime& rt, double maxEntries
 
 void NativeShikiEngineModule::clearPatternCache(jsi::Runtime& rt) {
   clear_unused_pattern_cache();
-  g_last_utf8.clear();
-  g_last_b2u.clear();
 }
 
 void NativeShikiEngineModule::trimMemory(jsi::Runtime& rt) {
   trim_pattern_cache();
-  g_last_utf8.clear();
-  g_last_b2u.clear();
 }
 
 jsi::Object NativeShikiEngineModule::getCacheStats(jsi::Runtime& rt) {

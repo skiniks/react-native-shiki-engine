@@ -4,18 +4,13 @@ import { TurboModuleRegistry } from 'react-native'
 export interface Spec extends TurboModule {
   readonly getConstants: () => {}
   readonly createScanner: (patterns: readonly string[], maxCacheSize: number) => number
+  readonly internString: (text: string) => number
+  readonly releaseString: (stringId: number) => void
   readonly findNextMatchSync: (
     scannerId: number,
-    text: string,
+    stringId: number,
     startPosition: number,
-  ) => {
-    readonly index: number
-    readonly captureIndices: ReadonlyArray<{
-      readonly start: number
-      readonly end: number
-      readonly length: number
-    }>
-  } | null
+  ) => readonly number[] | null
   readonly destroyScanner: (scannerId: number) => void
   readonly configureCache: (maxEntries: number, maxMemoryBytes: number) => void
   readonly clearPatternCache: () => void

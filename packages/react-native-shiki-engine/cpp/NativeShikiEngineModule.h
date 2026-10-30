@@ -10,8 +10,6 @@
 
 #if __has_include(<react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>)
 #  include <react/renderer/components/NativeShikiEngineSpec/NativeShikiEngineSpecJSI.h>
-#elif __has_include(<React-Codegen/NativeShikiEngineSpecJSI.h>)
-#  include <React-Codegen/NativeShikiEngineSpecJSI.h>
 #elif __has_include(<ReactCodegen/NativeShikiEngineSpecJSI.h>)
 #  include <ReactCodegen/NativeShikiEngineSpecJSI.h>
 #elif __has_include(<NativeShikiEngineSpecJSI.h>)
@@ -33,8 +31,10 @@ class NativeShikiEngineModule : public NativeShikiEngineCxxSpec<NativeShikiEngin
 
   jsi::Object getConstants(jsi::Runtime& rt);
   double createScanner(jsi::Runtime& rt, jsi::Array patterns, double maxCacheSize);
-  std::optional<jsi::Object>
-  findNextMatchSync(jsi::Runtime& rt, double scannerId, jsi::String text, double startPosition);
+  double internString(jsi::Runtime& rt, jsi::String text);
+  void releaseString(jsi::Runtime& rt, double stringId);
+  std::optional<jsi::Array>
+  findNextMatchSync(jsi::Runtime& rt, double scannerId, double stringId, double startPosition);
   void destroyScanner(jsi::Runtime& rt, double scannerId);
   void configureCache(jsi::Runtime& rt, double maxEntries, double maxMemoryBytes);
   void clearPatternCache(jsi::Runtime& rt);
@@ -43,6 +43,7 @@ class NativeShikiEngineModule : public NativeShikiEngineCxxSpec<NativeShikiEngin
 
  private:
   std::unordered_set<double> owned_scanner_ids_;
+  std::unordered_set<double> owned_string_ids_;
 };
 
 }  // namespace facebook::react

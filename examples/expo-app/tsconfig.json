@@ -1,12 +1,12 @@
 {
   "extends": "../../.config/typescript/tsconfig.expo.json",
   "compilerOptions": {
-    "strict": true,
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["../shared/*"]
-    }
+    },
+    "strict": true
   },
   "include": ["**/*.ts", "**/*.tsx", "../shared/**/*.ts", "../shared/**/*.tsx"],
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "android", "ios"]
+  "exclude": ["android", "babel.config.js", "ios", "metro.config.js", "node_modules"]
 }

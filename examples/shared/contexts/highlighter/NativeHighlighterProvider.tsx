@@ -1,6 +1,6 @@
 import type { HighlighterCore } from '@shikijs/core'
 import type { NativeEngineOptions, NativeRegexEngine } from 'react-native-shiki-engine'
-import type { HighlighterContextType } from './context'
+import type { HighlighterContextType, TokenizeOptions } from './context'
 import { createHighlighterCore } from '@shikijs/core'
 import rust from '@shikijs/langs/rust'
 import typescript from '@shikijs/langs/typescript'
@@ -64,7 +64,7 @@ export function NativeHighlighterProvider({
         await initializationPromise
       },
 
-      tokenize: (code: string, options: { lang: string; theme: string }) => {
+      tokenize: (code: string, options: TokenizeOptions) => {
         if (!highlighterInstance)
           throw new Error('Highlighter not initialized. Call initialize() first.')
         return highlighterInstance.codeToTokensBase(code, options)

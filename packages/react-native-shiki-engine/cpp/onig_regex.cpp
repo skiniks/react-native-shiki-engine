@@ -205,11 +205,14 @@ OnigResult* find_next_match(OnigContext* context, const char* text, int start_po
       return nullptr;
     }
 
-    OnigRegion* region = onig_region_new();
-    if (!region) {
-      return nullptr;
+    if (!context->region) {
+      context->region = onig_region_new();
+      if (!context->region) {
+        return nullptr;
+      }
     }
 
+    OnigRegion* region = context->region;
     int best_index = -1;
     int best_start = -1;
     std::vector<int> best_captures;
@@ -251,30 +254,24 @@ OnigResult* find_next_match(OnigContext* context, const char* text, int start_po
       }
     }
 
-    onig_region_free(region, 1);
-
     if (best_index < 0) {
       return nullptr;
     }
 
-    auto* result = new OnigResult();
-    result->pattern_index = best_index;
-    result->match_start = best_captures[0];
-    result->match_end = best_captures[1];
-    result->capture_count = static_cast<int>(best_captures.size() / 2);
-    result->capture_indices = new int[best_captures.size()];
-    std::copy(best_captures.begin(), best_captures.end(), result->capture_indices);
-    return result;
+    context->last_captures = std::move(best_captures);
+    context->last_result.pattern_index = best_index;
+    context->last_result.match_start = context->last_captures[0];
+    context->last_result.match_end = context->last_captures[1];
+    context->last_result.capture_count = static_cast<int>(context->last_captures.size() / 2);
+    context->last_result.capture_indices = context->last_captures.data();
+    return &context->last_result;
   } catch (const std::bad_alloc&) {
     return nullptr;
   }
 }
 
 void free_result(OnigResult* result) {
-  if (result) {
-    delete[] result->capture_indices;
-    delete result;
-  }
+  (void)result;
 }
 
 void free_scanner(OnigContext* context) {
@@ -282,6 +279,12 @@ void free_scanner(OnigContext* context) {
     return;
   }
 
+  if (context->region) {
+    onig_region_free(context->region, 1);
+    context->region = nullptr;
+  }
+  context->last_result.capture_indices = nullptr;
+  context->last_captures.clear();
   context->patterns.clear();
 
   {

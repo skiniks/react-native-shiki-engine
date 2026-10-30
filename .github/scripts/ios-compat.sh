@@ -14,6 +14,10 @@ export NO_FLIPPER=1
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+if [ -z "${USE_FRAMEWORKS:-}" ]; then
+  unset USE_FRAMEWORKS
+fi
+
 # json 3.0 removed the quirks_mode option that ActiveSupport::JSON.decode still
 # passes, which surfaces as: Invalid Podfile file: unknown keyword: quirks_mode.
 patch_gemfile_json_pin() {

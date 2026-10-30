@@ -1,9 +1,9 @@
 #ifndef PLATFORM_MEMORY_HPP
 #define PLATFORM_MEMORY_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <cstdio>
 
 #if defined(__APPLE__)
 #  include <TargetConditionals.h>
@@ -11,6 +11,17 @@
 #  if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
 #    include <os/proc.h>
 #  endif
+#endif
+
+#if defined(__ANDROID__)
+inline std::atomic<size_t>& android_available_memory_cache() {
+  static std::atomic<size_t> cached{0};
+  return cached;
+}
+
+inline void shiki_set_android_available_memory(size_t bytes) {
+  android_available_memory_cache().store(bytes, std::memory_order_relaxed);
+}
 #endif
 
 inline size_t platform_available_memory_bytes() {
@@ -29,20 +40,7 @@ inline size_t platform_available_memory_bytes() {
     }
   }
 #elif defined(__ANDROID__)
-  FILE* fp = fopen("/proc/meminfo", "r");
-  if (fp) {
-    char line[256];
-    size_t available_kb = 0;
-    while (fgets(line, sizeof(line), fp)) {
-      if (sscanf(line, "MemAvailable: %zu kB", &available_kb) == 1) {
-        break;
-      }
-    }
-    fclose(fp);
-    if (available_kb > 0) {
-      return available_kb * 1024;
-    }
-  }
+  return android_available_memory_cache().load(std::memory_order_relaxed);
 #endif
   return 0;
 }

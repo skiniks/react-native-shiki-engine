@@ -1,9 +1,11 @@
-import type { ThemedToken } from '@shikijs/core'
+import type { CodeToTokensBaseOptions, ThemedToken } from '@shikijs/core'
 import { createContext } from 'react'
+
+export type TokenizeOptions = CodeToTokensBaseOptions
 
 export interface HighlighterContextType {
   initialize: () => Promise<void>
-  tokenize: (code: string, options: { lang: string; theme: string }) => ThemedToken[][]
+  tokenize: (code: string, options: TokenizeOptions) => ThemedToken[][]
   dispose: () => void
 }
 
