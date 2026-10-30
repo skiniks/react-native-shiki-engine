@@ -26,14 +26,14 @@ catalogs:
     '@rari/lint': ^0.1.5
     eslint: ^10.13.0
   react:
-    '@react-native/babel-preset': 0.87.0
-    '@react-native/codegen': 0.87.0
-    '@react-native/gradle-plugin': 0.87.0
-    '@react-native/metro-config': 0.87.0
-    expo: ^57.0.16
-    react: 19.2.8
-    react-dom: 19.2.8
-    react-native: 0.87.0
+    '@react-native/babel-preset': 0.88.1
+    '@react-native/codegen': 0.88.1
+    '@react-native/gradle-plugin': 0.88.1
+    '@react-native/metro-config': 0.88.1
+    expo: ^58.0.21
+    react: 19.3.0
+    react-dom: 19.3.0
+    react-native: 0.88.1
     react-native-safe-area-context: ^5.11.0
     react-native-web: ^0.21.4
   react-native-cli:
