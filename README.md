@@ -309,14 +309,14 @@ npx expo install @shikijs/engine-oniguruma
 **Native** — `src/contexts/highlighter/index.tsx`:
 
 ```tsx
-import type { HighlighterContextType } from './context'
 import type { HighlighterCore } from '@shikijs/core'
-import { HighlighterContext } from './context'
+import type { HighlighterContextType } from './context'
 import { createHighlighterCore } from '@shikijs/core'
 import rust from '@shikijs/langs/rust'
 import dracula from '@shikijs/themes/dracula'
 import React from 'react'
 import { createNativeEngine, isNativeEngineAvailable } from 'react-native-shiki-engine'
+import { HighlighterContext } from './context'
 
 let highlighterInstance: HighlighterCore | null = null
 let initializationPromise: Promise<void> | null = null
@@ -360,14 +360,14 @@ export function HighlighterProvider({ children }: { children: React.ReactNode })
 **Web** — `src/contexts/highlighter/index.web.tsx`:
 
 ```tsx
-import type { HighlighterContextType } from './context'
 import type { HighlighterCore } from '@shikijs/core'
-import { HighlighterContext } from './context'
+import type { HighlighterContextType } from './context'
 import { createHighlighterCore } from '@shikijs/core'
 import { createOnigurumaEngine } from '@shikijs/engine-oniguruma'
 import rust from '@shikijs/langs/rust'
 import dracula from '@shikijs/themes/dracula'
 import React from 'react'
+import { HighlighterContext } from './context'
 
 let highlighterInstance: HighlighterCore | null = null
 let initializationPromise: Promise<void> | null = null
