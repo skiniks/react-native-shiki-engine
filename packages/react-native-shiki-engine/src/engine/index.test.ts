@@ -80,6 +80,15 @@ describe('createNativeEngine options', () => {
     expect(mockModule.clearPatternCache).toHaveBeenCalled()
   })
 
+  it('accepts an empty pattern list', async () => {
+    // TextMate can create scanners with no patterns; native create_scanner must allow that.
+    const { createNativeEngine } = await import('./index')
+    const engine = createNativeEngine()
+    const scanner = engine.createScanner([])
+    expect(mockModule.createScanner).toHaveBeenCalledWith([], 1000)
+    expect(scanner.findNextMatchSync('x', 0, 0)).toBeNull()
+  })
+
   it('exposes cache stats, trim, and clear helpers', async () => {
     const { createNativeEngine } = await import('./index')
     const engine = createNativeEngine()
